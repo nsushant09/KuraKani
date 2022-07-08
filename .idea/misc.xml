@@ -4,11 +4,14 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_kurakani_logo.xml" value="0.32" />
+        <entry key="app/src/main/res/drawable/linear_layout_background_register.xml" value="0.546" />
+        <entry key="app/src/main/res/drawable/login_et_field_bg.xml" value="0.546" />
         <entry key="app/src/main/res/drawable/orange_16_bg.xml" value="0.546" />
+        <entry key="app/src/main/res/drawable/register_et_field_bg.xml" value="0.546" />
         <entry key="app/src/main/res/drawable/register_login_et_field_bg.xml" value="0.546" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.48525010688328346" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.5911458333333334" />
-        <entry key="app/src/main/res/layout/activity_register.xml" value="0.5911458333333334" />
+        <entry key="app/src/main/res/layout/activity_register.xml" value="0.45502217610677087" />
       </map>
     </option>
   </component>

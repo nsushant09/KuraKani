@@ -1,10 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimary"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/colorPrimaryVariant"
+    android:orientation="vertical"
     tools:context=".activities.register.RegisterActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="48sp"
+        android:fontFamily="@font/montezregular"
+        android:text="@string/kurakani"
+        android:textColor="@color/neon_orange"
+        android:textSize="64sp" />
+
+    <TextView
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/ptsansregular"
+        android:gravity="center"
+        android:text="@string/sign_up_to_do_some_kura_kani_with_your_friends"
+        android:textColor="?attr/colorSecondary"
+        android:textSize="16sp" />
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:cardCornerRadius="150dp"
+        android:layout_marginTop="64dp"
+        android:layout_gravity="center_horizontal"
+        android:backgroundTint="?attr/colorSecondary"
+        >
+
+        <ImageView
+            android:id="@+id/ivProfileImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:contentDescription="@string/profile_image" />
+
+        <TextView
+            android:id="@+id/tvChoosePhoto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/choose_photo"
+            android:gravity="center"
+            style="@style/UbuntuRegular16Primary"
+            />
+
+    </androidx.cardview.widget.CardView>
+
+    <EditText
+        android:id="@+id/etFirstname"
+        style="@style/UbuntuRegular14Secondary"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/register_et_field_bg"
+        android:hint="@string/first_name"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:padding="16dp"
+        android:textColorHint="?attr/colorSecondary" />
+    <EditText
+        android:id="@+id/etLastname"
+        style="@style/UbuntuRegular14Secondary"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/register_et_field_bg"
+        android:hint="@string/last_name"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:padding="16dp"
+        android:textColorHint="?attr/colorSecondary" />
+    <EditText
+        android:id="@+id/etEmail"
+        style="@style/UbuntuRegular14Secondary"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/register_et_field_bg"
+        android:layout_gravity="center_horizontal"
+        android:hint="@string/email"
+        android:importantForAutofill="no"
+        android:inputType="textEmailAddress"
+        android:padding="16dp"
+        android:textColorHint="?attr/colorSecondary" />
+
+    <EditText
+        android:id="@+id/etPassword"
+        style="@style/UbuntuRegular14Secondary"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/register_et_field_bg"
+        android:hint="@string/password"
+        android:importantForAutofill="no"
+        android:inputType="textPassword"
+        android:padding="16dp"
+        android:textColorHint="?attr/colorSecondary" />
+
+    <Button
+        android:id="@+id/btnSignUp"
+        style="@style/PtSansBold16White"
+        android:layout_width="300dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/orange_16_bg"
+        android:text="@string/sign_up"
+        android:textAllCaps="false" />
+
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/tvLogInInformation"
+            style="@style/UbuntuRegular12SecondaryVariant"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/have_an_account" />
+
+        <TextView
+            android:id="@+id/tvLogIn"
+            style="@style/UbuntuBold12orange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/log_in" />
+
+    </LinearLayout>
+
+</LinearLayout>

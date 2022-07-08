@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="UbuntuRegular16Primary">
+        <item name="fontFamily">@font/ubunturegular</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+</resources>

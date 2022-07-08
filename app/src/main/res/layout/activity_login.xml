@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimary"
+    android:background="?attr/colorPrimaryVariant"
     android:orientation="vertical"
     tools:context=".activities.login.LoginActivity">
 
@@ -35,7 +35,7 @@
         android:inputType="textEmailAddress"
         android:textColorHint="@color/black_variant"
         style="@style/UbuntuRegular16BlackVariant"
-        android:background="@drawable/register_login_et_field_bg"
+        android:background="@drawable/login_et_field_bg"
         android:layout_gravity="center_horizontal"
         android:importantForAutofill="no"
         />
@@ -53,7 +53,7 @@
         android:inputType="textPassword"
         android:textColorHint="@color/black_variant"
         style="@style/UbuntuRegular16BlackVariant"
-        android:background="@drawable/register_login_et_field_bg"
+        android:background="@drawable/login_et_field_bg"
         android:layout_gravity="center_horizontal"
         android:importantForAutofill="no"
         />
