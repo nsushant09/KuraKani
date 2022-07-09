@@ -8,5 +8,6 @@
     <color name = "neon_orange_variant">#ff5f1f</color>
     <color name="light_orange">#ffe5d9</color>
     <color name="grey">#f7f7f7</color>
-    <color name="black_grey">#070707</color>
+    <color name = "dark_grey">#303030</color>
+    <color name="colorOnGrey_grey">#a9a9a9</color>
 </resources>

@@ -20,7 +20,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         firebaseAuth = FirebaseAuth.getInstance()
-        FirebaseAuth.getInstance().signOut()
+//        FirebaseAuth.getInstance().signOut()
         if(firebaseAuth.currentUser != null){
             gotoMainActivity()
         }
@@ -40,8 +40,6 @@ class LoginActivity : AppCompatActivity() {
 
     fun gotoMainActivity(){
         Intent(this, MainActivity::class.java).apply{
-            putExtra("user_id", firebaseAuth.currentUser!!.uid)
-            putExtra("email_id", firebaseAuth.currentUser!!.email)
             startActivity(this)
             finish()
         }

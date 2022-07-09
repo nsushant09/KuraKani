@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/colorPrimaryVariant"
+    tools:context=".activities.main.fragments.ChatFragment">
+
+<!--    Main Linear Layout that acts as the container for whole page -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+<!--        Relative layout that stores UserName, Search Icon and User Profile Image-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="12dp"
+            >
+
+            <TextView
+                android:id="@+id/tvUserName"
+                style="@style/PtSansBold24secondary"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/cardViewUserIcon"
+                android:layout_marginStart="8dp"
+                android:layout_centerVertical="true"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewSearchIcon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="1dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                app:cardBackgroundColor="?attr/colorOnPrimary"
+                app:cardCornerRadius="50dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/search_icon"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/colorOnGrey_grey" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewUserIcon"
+                android:layout_width="48dp"
+                android:layout_marginStart="1dp"
+                android:layout_height="48dp"
+                app:cardBackgroundColor="?attr/colorOnPrimary"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                app:cardCornerRadius="50dp">
+
+                <ImageView
+                    android:id="@+id/ivUserProfilePicture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/profile_image"
+                    android:src="@drawable/ic_user"
+                    />
+
+            </androidx.cardview.widget.CardView>
+
+        </RelativeLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+
+</LinearLayout>

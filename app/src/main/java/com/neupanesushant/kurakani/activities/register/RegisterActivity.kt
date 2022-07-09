@@ -93,13 +93,15 @@ class RegisterActivity : AppCompatActivity() {
                         if (it.isSuccessful) {
                             uploadImageToFirebaseStorage()
                             val firebaseUser: FirebaseUser = it.result!!.user!!
-                            Intent(this@RegisterActivity, MainActivity::class.java).apply {
-                                flags =
-                                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                                intent.putExtra("user_id", firebaseUser.uid)
-                                intent.putExtra("email_id", firebaseUser.email)
-                                startActivity(this)
-                                finish()
+                            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnSuccessListener {
+                                Intent(this@RegisterActivity, MainActivity::class.java).apply {
+                                    flags =
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                                    startActivity(this)
+                                    finish()
+                                }
+                            }.addOnFailureListener{
+                                Toast.makeText(this, "Error : ${it.message}", Toast.LENGTH_LONG).show()
                             }
                         } else {
                             Toast.makeText(this, "Invalid Email Address", Toast.LENGTH_SHORT)
@@ -170,6 +172,7 @@ class RegisterActivity : AppCompatActivity() {
             firebaseAuth.uid!!,
             binding.etFirstname.text.toString(),
             binding.etLastname.text.toString(),
+            "${binding.etFirstname.text.toString()} ${binding.etLastname.text.toString()}",
             profileImageURL
         )
         ref.setValue(user)
