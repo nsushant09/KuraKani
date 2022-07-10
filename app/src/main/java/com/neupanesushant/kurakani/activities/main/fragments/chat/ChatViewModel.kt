@@ -31,12 +31,16 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _isAllUILoaded = MutableLiveData<Boolean>()
     val isAllUILoaded get() = _isAllUILoaded
 
+    private val _isNewMessageUIClicked = MutableLiveData<Boolean>()
+    val isNewMessageUIClicked get() = _isNewMessageUIClicked
+
     init {
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
         firebaseDatabase = FirebaseDatabase.getInstance().getReference("/users/${firebaseAuth.uid}")
         firebaseUser = firebaseAuth.currentUser!!
         _isAllUILoaded.value = false
+        _isNewMessageUIClicked.value = false
 
         getUserFromDatabase()
         getAllUsersFromDatabase()
@@ -54,7 +58,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 .child(firebaseAuth.uid.toString()).get().addOnSuccessListener {
                 _user.value = it.getValue(User::class.java)
             }.addOnFailureListener {
-                Log.i(TAG, "Failure to get user data")
             }
         }
     }
@@ -75,7 +78,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                         if(it!=null){
                             val user : User = it.getValue(User::class.java)!!
                             tempList.add(user)
-                            Log.i(TAG, "The name of the user is : " + user?.fullName)
                         }
                     }
                     _allUsers.value = tempList.toList()
@@ -91,6 +93,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setIsUILoaded(boolean :Boolean){
         _isAllUILoaded.value = boolean
+    }
+
+    fun setNewMessageUIClicked(boolean : Boolean){
+        _isNewMessageUIClicked.value = boolean
     }
 
 

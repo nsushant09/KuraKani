@@ -1,6 +1,8 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chat
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +23,6 @@ class ChatFragment : Fragment() {
     private lateinit var _binding : FragmentChatBinding
     private val binding get() = _binding
     lateinit var chatViewModel : ChatViewModel
-//    private val mainViewModel : MainViewModel by activityViewModels()
     private val searchFragment = SearchFragment()
     private val meFragment  = MeFragment()
 
@@ -39,16 +40,12 @@ class ChatFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.cardViewSearchIcon.setOnClickListener{
-            parentFragmentManager.beginTransaction().apply{
-                replace(R.id.fragment_container_view_tag, searchFragment)
-                isAddToBackStackAllowed
-                addToBackStack(null)
-                commit()
-            }
+            replaceFragment(searchFragment)
         }
 
         chatViewModel.isAllUILoaded.observe(viewLifecycleOwner, Observer{
             if(it){
+                binding.progressBar.visibility = View.GONE
                 binding.layoutChatFragment.visibility = View.VISIBLE
             }
         })
@@ -65,13 +62,25 @@ class ChatFragment : Fragment() {
         })
 
         binding.cardViewUserIcon.setOnClickListener{
-            parentFragmentManager.beginTransaction().apply{
-                replace(R.id.fragment_container_view_tag, meFragment)
-                isAddToBackStackAllowed
-                addToBackStack(null)
-                commit()
+            replaceFragment(meFragment)
+        }
+
+        chatViewModel.isNewMessageUIClicked.observe(viewLifecycleOwner, Observer{
+            if(it){
+                replaceFragment(searchFragment)
+                chatViewModel.setNewMessageUIClicked(false)
             }
+        })
+    }
+
+    fun replaceFragment(fragment : Fragment){
+        parentFragmentManager.beginTransaction().apply{
+            replace(R.id.fragment_container_view_tag, fragment)
+            isAddToBackStackAllowed
+            addToBackStack(null)
+            commit()
         }
     }
+
 
 }

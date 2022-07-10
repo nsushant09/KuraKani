@@ -28,6 +28,9 @@ class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel
         if(position == 0){
             holder.profileImage.setImageResource(R.drawable.ic_pen)
             holder.fullName.text = "New Message"
+            holder.itemView.setOnClickListener{
+                viewModel.setNewMessageUIClicked(true)
+            }
         }else{
             val userObject = list.get(position-1)
 //            Picasso.get().load(userObject.profileImage).error(R.drawable.ic_user).into(holder.profileImage)

@@ -8,8 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.fragments.chat.ChatViewModel
 import com.neupanesushant.kurakani.databinding.FragmentSearchBinding
@@ -34,7 +37,22 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupSearchBar()
+        searchBarAction()
 
+        binding.rvSearchedList.layoutManager = LinearLayoutManager(requireContext())
+        viewModel.searchedList.observe(viewLifecycleOwner, Observer{
+            if(it == null || it.size == 0){
+                binding.tvInfoText.text = "Couldn't find a match"
+                binding.rvSearchedList.visibility = View.GONE
+                binding.tvInfoText.visibility = View.VISIBLE
+            }else{
+                val adapter = SearchedListAdapter(requireContext(), viewModel, it)
+                binding.rvSearchedList.adapter = adapter
+                binding.rvSearchedList.visibility = View.VISIBLE
+                binding.tvInfoText.visibility = View.GONE
+
+            }
+        })
     }
 
     fun setupSearchBar(){
@@ -45,6 +63,16 @@ class SearchFragment : Fragment() {
             binding.etSearchbar.setTextCursorDrawable(0)
         }
         binding.etSearchbar.requestFocus()
+    }
+
+    fun searchBarAction(){
+
+        binding.etSearchbar.addTextChangedListener {
+            if(it != null && it.length != 0){
+                viewModel.filterSearch(it.toString())
+            }
+        }
+
     }
 
 }

@@ -46,7 +46,7 @@ class MeFragment : Fragment() {
 
 
         binding.ivBtnBack.setOnClickListener {
-            parentFragmentManager.beginTransaction()
+            parentFragmentManager.popBackStack()
         }
 
         binding.tvBtnSignOut.setOnClickListener {
