@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".activities.main.fragments.search.SearchFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
+
+        <!--        Relative layout that stores UserName, Search Icon and User Profile Image-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="12dp"
+            >
+
+            <EditText
+                android:id="@+id/etSearchbar"
+                style="@style/UbuntuRegular14Secondary"
+                android:layout_width="300dp"
+                android:layout_height="36dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
+                android:layout_toStartOf="@id/cardViewSearchIcon"
+                android:background="@drawable/search_et_bg"
+                android:hint="Search"
+                android:lines="1"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:paddingHorizontal="16dp"
+                android:textColor="@color/colorOnGrey_grey"
+                android:textColorHint="@color/colorOnGrey_grey" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardViewSearchIcon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                app:cardBackgroundColor="?attr/colorOnPrimary"
+                app:cardCornerRadius="50dp"
+                android:elevation="0dp"
+                app:cardElevation="0dp"
+                >
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/search_icon"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/colorOnGrey_grey" />
+
+            </androidx.cardview.widget.CardView>
+
+
+        </RelativeLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+</LinearLayout>

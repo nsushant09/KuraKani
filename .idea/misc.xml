@@ -4,16 +4,22 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_kurakani_logo.xml" value="0.32" />
+        <entry key="app/src/main/res/drawable/ic_pen.xml" value="0.3455" />
         <entry key="app/src/main/res/drawable/ic_user.xml" value="0.55" />
         <entry key="app/src/main/res/drawable/linear_layout_background_register.xml" value="0.546" />
         <entry key="app/src/main/res/drawable/login_et_field_bg.xml" value="0.546" />
         <entry key="app/src/main/res/drawable/orange_16_bg.xml" value="0.546" />
         <entry key="app/src/main/res/drawable/register_et_field_bg.xml" value="0.546" />
         <entry key="app/src/main/res/drawable/register_login_et_field_bg.xml" value="0.546" />
+        <entry key="app/src/main/res/drawable/search_et_bg.xml" value="0.499" />
+        <entry key="app/src/main/res/layout-v26/story_sized_user_recycler_view_layout.xml" value="0.5901041666666667" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.48525010688328346" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.40853217642805495" />
         <entry key="app/src/main/res/layout/activity_register.xml" value="0.45502217610677087" />
         <entry key="app/src/main/res/layout/fragment_chat.xml" value="0.48525010688328346" />
+        <entry key="app/src/main/res/layout/fragment_me.xml" value="0.48525010688328346" />
+        <entry key="app/src/main/res/layout/fragment_search.xml" value="0.4625908507909363" />
+        <entry key="app/src/main/res/layout/story_sized_user_recycler_view_layout.xml" value="0.4843950406156477" />
       </map>
     </option>
   </component>

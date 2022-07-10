@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.activities.main.fragments
+package com.neupanesushant.kurakani.activities.main.fragments.chat
 
 import android.app.Application
 import android.util.Log
@@ -25,26 +25,30 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _user = MutableLiveData<User?>()
     val user get() = _user
 
-    private val _allUsers = MutableLiveData<List<User?>>()
-    private val allUsers get() = _allUsers
+    private val _allUsers = MutableLiveData<List<User>>()
+    val allUsers get() = _allUsers
+
+    private val _isAllUILoaded = MutableLiveData<Boolean>()
+    val isAllUILoaded get() = _isAllUILoaded
 
     init {
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
         firebaseDatabase = FirebaseDatabase.getInstance().getReference("/users/${firebaseAuth.uid}")
         firebaseUser = firebaseAuth.currentUser!!
+        _isAllUILoaded.value = false
 
         getUserFromDatabase()
         getAllUsersFromDatabase()
     }
 
-    private fun getUserFromDatabase() {
+    fun getUserFromDatabase() {
         uiScope.launch {
             getUserFromDatabaseSuspended()
         }
     }
 
-    suspend fun getUserFromDatabaseSuspended() {
+    private suspend fun getUserFromDatabaseSuspended() {
         withContext(Dispatchers.IO) {
             FirebaseDatabase.getInstance().getReference().child("users")
                 .child(firebaseAuth.uid.toString()).get().addOnSuccessListener {
@@ -55,22 +59,24 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun getAllUsersFromDatabase() {
+    fun getAllUsersFromDatabase() {
         uiScope.launch {
             getAllUsersSuspended()
         }
     }
 
-    suspend fun getAllUsersSuspended() {
+    private suspend fun getAllUsersSuspended() {
         withContext(Dispatchers.IO) {
             val ref = FirebaseDatabase.getInstance().getReference().child("users")
             ref.addListenerForSingleValueEvent(object : ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val tempList = ArrayList<User?>()
+                    val tempList = ArrayList<User>()
                     snapshot.children.forEach {
-                        val user = it.getValue(User::class.java)
-                        tempList.add(user)
-                        Log.i(TAG, "The name of the user is : " + user?.fullName)
+                        if(it!=null){
+                            val user : User = it.getValue(User::class.java)!!
+                            tempList.add(user)
+                            Log.i(TAG, "The name of the user is : " + user?.fullName)
+                        }
                     }
                     _allUsers.value = tempList.toList()
                 }
@@ -82,6 +88,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             })
         }
     }
+
+    fun setIsUILoaded(boolean :Boolean){
+        _isAllUILoaded.value = boolean
+    }
+
 
 
 }

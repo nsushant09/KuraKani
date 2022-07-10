@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MontezRegular32Orange">
+        <item name="fontFamily">@font/montezregular</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@color/neon_orange</item>
+    </style>
+
+</resources>
