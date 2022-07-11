@@ -11,7 +11,7 @@ import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.StorySizedUserRecyclerViewLayoutBinding
 
 
-class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel, val list : List<User>) : RecyclerView.Adapter<StorySizedUserAdapter.ViewHolder>() {
+class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel, val list : List<User>, val onClickOpenChatMessaging : (String) -> Unit ) : RecyclerView.Adapter<StorySizedUserAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding : StorySizedUserRecyclerViewLayoutBinding) : RecyclerView.ViewHolder(binding.root){
         val profileImage = binding.ivUserProfilePicture
@@ -36,6 +36,9 @@ class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel
 //            Picasso.get().load(userObject.profileImage).error(R.drawable.ic_user).into(holder.profileImage)
             Glide.with(context).load(userObject.profileImage).centerCrop().error(R.drawable.ic_user).into(holder.profileImage)
             holder.fullName.text = userObject.fullName
+            holder.itemView.setOnClickListener {
+                onClickOpenChatMessaging(userObject.uid!!)
+            }
         }
     }
 

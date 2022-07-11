@@ -7,7 +7,10 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.storage.FirebaseStorage
+import com.neupanesushant.kurakani.classes.Friend
+import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.User
 import kotlinx.coroutines.*
 
@@ -27,6 +30,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _allUsers = MutableLiveData<List<User>>()
     val allUsers get() = _allUsers
+
 
     private val _isAllUILoaded = MutableLiveData<Boolean>()
     val isAllUILoaded get() = _isAllUILoaded
@@ -91,6 +95,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+
     fun setIsUILoaded(boolean :Boolean){
         _isAllUILoaded.value = boolean
     }
@@ -98,7 +103,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun setNewMessageUIClicked(boolean : Boolean){
         _isNewMessageUIClicked.value = boolean
     }
-
 
 
 }

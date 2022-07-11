@@ -91,18 +91,8 @@ class RegisterActivity : AppCompatActivity() {
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
+                            Toast.makeText(this, "Your account is being created...", Toast.LENGTH_SHORT).show()
                             uploadImageToFirebaseStorage()
-                            val firebaseUser: FirebaseUser = it.result!!.user!!
-                            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnSuccessListener {
-                                Intent(this@RegisterActivity, MainActivity::class.java).apply {
-                                    flags =
-                                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                                    startActivity(this)
-                                    finish()
-                                }
-                            }.addOnFailureListener{
-                                Toast.makeText(this, "Error : ${it.message}", Toast.LENGTH_LONG).show()
-                            }
                         } else {
                             Toast.makeText(this, "Invalid Email Address", Toast.LENGTH_SHORT)
                                 .show()
@@ -173,9 +163,26 @@ class RegisterActivity : AppCompatActivity() {
             binding.etFirstname.text.toString(),
             binding.etLastname.text.toString(),
             "${binding.etFirstname.text.toString()} ${binding.etLastname.text.toString()}",
-            profileImageURL
+            profileImageURL,
         )
-        ref.setValue(user)
+        ref.setValue(user).addOnSuccessListener {
+            logIn()
+        }
+    }
+
+    private fun logIn(){
+        val email = binding.etEmail.text.toString()
+        val password = binding.etPassword.text.toString()
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnSuccessListener {
+            Intent(this@RegisterActivity, MainActivity::class.java).apply {
+                flags =
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(this)
+                finish()
+            }
+        }.addOnFailureListener{
+            Toast.makeText(this, "Error : ${it.message}", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun checkPermissions(): Boolean {

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".activities.main.fragments.chatmessaging.ChatMessagingFragment">
+
+    <RelativeLayout
+        android:id="@+id/rlToolBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="16dp"
+        android:isScrollContainer="false"
+        android:elevation="1dp"
+        android:clipToPadding="false"
+        >
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_baseline_arrow_back_24"
+            app:tint="@color/neon_orange"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/back_button"
+            />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewFriendProfileImage"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/btnBack"
+            android:layout_marginHorizontal="8dp"
+            app:cardBackgroundColor="?attr/colorOnPrimary"
+            >
+
+            <ImageView
+                android:id="@+id/ivFriendProfileImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/profile_image"
+                />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/tvFriendFirstName"
+            style="@style/UbuntuRegular14Secondary"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/cardViewFriendProfileImage"
+            android:maxWidth="200dp"
+            android:maxLines="1" />
+
+        <ImageView
+            android:id="@+id/ivInfo"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_baseline_info_24"
+            app:tint="@color/neon_orange"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/back_button"
+            />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/viewElevate"
+        android:layout_width="match_parent"
+        android:layout_marginTop="14dp"
+        android:layout_height="2dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rlToolBar"
+        android:background="?attr/colorOnPrimary"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChatContent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewElevate"
+        app:layout_constraintBottom_toTopOf="@id/rlTextContainer"
+        android:layout_marginBottom="4dp"
+        android:layout_marginHorizontal="16dp"
+        />
+
+    <RelativeLayout
+        android:id="@+id/rlTextContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginHorizontal="16dp"
+        android:padding="8dp"
+        android:background="@drawable/bg_16dp_radius_coloronprimary"
+        android:layout_marginBottom="8dp"
+        >
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewAddImageIcon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:cardCornerRadius="128dp"
+            app:cardElevation="0dp"
+            android:layout_margin="1dp"
+            app:cardBackgroundColor="@color/neon_orange"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            >
+
+            <ImageView
+                android:id="@+id/ivAddImageIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_baseline_camera_alt_24"
+                android:contentDescription="@string/add_image_icon"
+                app:tint="@color/white" />
+
+        </androidx.cardview.widget.CardView>
+
+        <EditText
+            android:id="@+id/etWriteMessage"
+            style="@style/UbuntuRegular14Secondary"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="16dp"
+            android:layout_toEndOf="@id/cardViewAddImageIcon"
+            android:background="@android:color/transparent"
+            android:hint="@string/message" />
+
+        <ImageView
+            android:id="@+id/ivSelectImage"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/application_icon"
+            android:padding="4dp"
+            android:src="@drawable/ic_image"
+            app:tint="?attr/colorSecondary"
+            />
+
+
+        <TextView
+            android:id="@+id/btnSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/send"
+            android:paddingHorizontal="8dp"
+            android:layout_centerVertical="true"
+            android:textColor="@color/neon_orange"
+            android:fontFamily="@font/montezregular"
+            android:textSize="24sp"
+            android:visibility="gone"
+            />
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

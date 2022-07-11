@@ -24,4 +24,6 @@
     <string name="me">Me</string>
     <string name="sign_out">Sign Out</string>
     <string name="add_image_icon">Add image icon</string>
+    <string name="message">Message...</string>
+    <string name="send">Send</string>
 </resources>

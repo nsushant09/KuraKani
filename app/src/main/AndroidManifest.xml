@@ -20,11 +20,11 @@
         <activity
             android:name=".activities.register.RegisterActivity"
             android:exported="false"
-            android:windowSoftInputMode="stateVisible"/>
+            android:windowSoftInputMode="stateAlwaysVisible|adjustPan"/>
         <activity
             android:name=".activities.login.LoginActivity"
             android:exported="true"
-            android:windowSoftInputMode="stateVisible"
+            android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,7 +35,7 @@
         <activity
             android:name=".activities.main.MainActivity"
             android:exported="false"
-            android:windowSoftInputMode="stateVisible|adjustPan|adjustResize">
+            android:windowSoftInputMode="stateAlwaysVisible|adjustResize">
         </activity>
     </application>
 
