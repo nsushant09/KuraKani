@@ -3,6 +3,7 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -35,6 +36,8 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     private val _chatLog = MutableLiveData<List<Message>>()
     val chatLog get() = _chatLog
 
+
+
     init{
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
@@ -54,7 +57,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     }
     suspend fun addChatToDatabaseSuspended(chatMessage: String){
         withContext(Dispatchers.IO){
-            val message : Message = Message(firebaseAuth.uid, toId, chatMessage, LocalTime.now().toString())
+            val message : Message = Message(firebaseAuth.uid, toId, chatMessage, System.currentTimeMillis()/1000)
             val ref = FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId").push()
             val toRef = FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId").push()
             val latestMessageRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId")

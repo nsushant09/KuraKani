@@ -30,7 +30,7 @@ class MainViewModel() : ViewModel() {
     val friendUser get() = _friendUser
 
     private val _isFriendValueLoaded = MutableLiveData<Boolean>()
-    private val isFriendValueLoaded get() = _isFriendValueLoaded
+    val isFriendValueLoaded get() = _isFriendValueLoaded
 
     init{
         firebaseAuth = FirebaseAuth.getInstance()
@@ -55,6 +55,7 @@ class MainViewModel() : ViewModel() {
     }
 
     fun getFriendUserFromDatabase(uid : String){
+        _isFriendValueLoaded.value = false
         uiScope.launch{
             getFriendUserFromDatabaseSuspended(uid)
         }
@@ -65,6 +66,7 @@ class MainViewModel() : ViewModel() {
             FirebaseDatabase.getInstance().getReference().child("users")
                 .child(uid).get().addOnSuccessListener {
                     _friendUser.value = it.getValue(User::class.java)
+                    _isFriendValueLoaded.value = true
                 }.addOnFailureListener{
                 }
         }

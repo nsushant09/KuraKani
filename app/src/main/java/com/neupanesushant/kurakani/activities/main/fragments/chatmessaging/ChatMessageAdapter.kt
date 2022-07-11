@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
+import com.neupanesushant.kurakani.activities.main.fragments.chat.ChatViewModel
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.databinding.ChatMessageFromLayoutBinding
 import com.neupanesushant.kurakani.databinding.ChatMessageToLayoutBinding
@@ -81,5 +82,7 @@ class ChatMessageAdapter(val context : Context, val viewModel:  MainViewModel, v
             return TO
         }
     }
+
+
 
 }
