@@ -112,7 +112,7 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     fun setLogInClick() {
-        binding.tvLogIn.setOnClickListener {
+        binding.llLogIn.setOnClickListener {
             finish()
         }
     }

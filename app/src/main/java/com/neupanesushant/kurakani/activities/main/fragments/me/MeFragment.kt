@@ -51,7 +51,7 @@ class MeFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.tvBtnSignOut.setOnClickListener {
+        binding.rlSignOut.setOnClickListener {
             btnSignOutAction()
         }
 

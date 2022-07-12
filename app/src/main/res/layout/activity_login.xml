@@ -8,96 +8,110 @@
     android:orientation="vertical"
     tools:context=".activities.login.LoginActivity">
 
-    <ImageView
-        android:id="@+id/ivApplicationLogo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.35"
-        android:src="@drawable/ic_kurakani_logo"
-        android:contentDescription="@string/application_icon"
-        />
-    
-    <EditText
-        android:id="@+id/etEmail"
-        android:layout_width="300dp"
-        android:layout_height="48dp"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivApplicationLogo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.25"
-        android:hint="@string/email"
-        android:inputType="textEmailAddress"
-        android:textColorHint="@color/black_variant"
-        style="@style/UbuntuRegular16BlackVariant"
-        android:background="@drawable/login_et_field_bg"
-        android:layout_gravity="center_horizontal"
-        android:importantForAutofill="no"
-        />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="300dp"
-        android:layout_height="48dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etEmail"
-        android:layout_marginTop="16dp"
-        android:paddingHorizontal="16dp"
-        android:hint="@string/password"
-        android:inputType="textPassword"
-        android:textColorHint="@color/black_variant"
-        style="@style/UbuntuRegular16BlackVariant"
-        android:background="@drawable/login_et_field_bg"
-        android:layout_gravity="center_horizontal"
-        android:importantForAutofill="no"
-        />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/btnLogin"
-        android:layout_width="300dp"
-        android:layout_height="48dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etPassword"
-        android:layout_marginTop="32dp"
-        android:text="@string/login"
-        android:textAllCaps="false"
-        style="@style/PtSansBold16White"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/orange_16_bg"/>
 
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnLogin"
-        android:layout_marginTop="16dp"
-        android:paddingHorizontal="16dp"
-        android:gravity="center"
-        >
-        <TextView
-            android:id="@+id/tvSignUpInformation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/UbuntuRegular12SecondaryVariant"
-            android:text="@string/don_t_have_an_account"
-            />
-        <TextView
-            android:id="@+id/tvSignUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/UbuntuBold12orange"
-            android:text="@string/sign_up"
-            />
+            <ImageView
+                android:id="@+id/ivApplicationLogo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/application_icon"
+                android:src="@drawable/ic_kurakani_logo"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.35" />
 
-    </LinearLayout>
+            <EditText
+                android:id="@+id/etEmail"
+                style="@style/UbuntuRegular16BlackVariant"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/login_et_field_bg"
+                android:hint="@string/email"
+                android:importantForAutofill="no"
+                android:inputType="textEmailAddress"
+                android:paddingHorizontal="16dp"
+                android:textColorHint="@color/black_variant"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivApplicationLogo"
+                app:layout_constraintVertical_bias="0.25" />
+
+            <EditText
+                android:id="@+id/etPassword"
+                style="@style/UbuntuRegular16BlackVariant"
+                android:layout_width="300dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/login_et_field_bg"
+                android:hint="@string/password"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:paddingHorizontal="16dp"
+                android:textColorHint="@color/black_variant"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etEmail" />
+
+            <Button
+                android:id="@+id/btnLogin"
+                style="@style/PtSansBold16White"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/orange_16_bg"
+                android:text="@string/login"
+                android:textAllCaps="false"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/etPassword" />
+
+            <LinearLayout
+                android:id="@+id/llSignUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnLogin">
+
+                <TextView
+                    android:id="@+id/tvSignUpInformation"
+                    style="@style/UbuntuRegular12SecondaryVariant"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/don_t_have_an_account" />
+
+                <TextView
+                    android:id="@+id/tvSignUp"
+                    style="@style/UbuntuBold12orange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sign_up" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.core.widget.NestedScrollView>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

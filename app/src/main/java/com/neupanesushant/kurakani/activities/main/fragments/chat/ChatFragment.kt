@@ -2,9 +2,11 @@ package com.neupanesushant.kurakani.activities.main.fragments.chat
 
 //import com.bumptech.glide.Glide
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -60,6 +62,10 @@ class ChatFragment : Fragment() {
         binding.cardViewUserIcon.setOnClickListener {
             replaceFragment(meFragment)
         }
+        //new message fragment
+        binding.llAddNewTextInfo.setOnClickListener {
+            replaceFragment(searchFragment)
+        }
 
         //show ui
         chatViewModel.isAllUILoaded.observe(viewLifecycleOwner, Observer {
@@ -80,6 +86,8 @@ class ChatFragment : Fragment() {
         //set items in storysized recycler view
         binding.rvStorySizedUser.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rvStorySizedUser.animation =
+            AnimationUtils.loadAnimation(context, R.anim.slide_in_left)
         chatViewModel.allUsers.observe(viewLifecycleOwner, Observer {
             binding.rvStorySizedUser.adapter =
                 StorySizedUserAdapter(requireContext(), chatViewModel, it, onClickOpenChatMessaging)
@@ -95,13 +103,28 @@ class ChatFragment : Fragment() {
 
 
         //set items in latest messages
+        binding.rvLatestMessages.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvStorySizedUser.animation =
+            AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
         chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner, Observer {
-            binding.rvLatestMessages.layoutManager = LinearLayoutManager(requireContext())
-            val adapter =
-                LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
-            binding.rvLatestMessages.adapter = adapter
+            if (it.size == 0) {
+                binding.rvLatestMessages.visibility = View.GONE
+                binding.llAddNewTextInfo.visibility = View.VISIBLE
+            } else {
+                val adapter =
+                    LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
+                binding.rvLatestMessages.adapter = adapter
+                binding.llAddNewTextInfo.visibility = View.GONE
+                binding.rvLatestMessages.visibility = View.VISIBLE
+            }
 
         })
+        val handler = Handler()
+        handler.postDelayed({
+            if (chatViewModel.usersOfLatestMessages.value == null || chatViewModel.usersOfLatestMessages.value?.size == 0) {
+                binding.llAddNewTextInfo.visibility = View.VISIBLE
+            }
+        }, 5000)
 
     }
 

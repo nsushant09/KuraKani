@@ -31,7 +31,7 @@ class LoginActivity : AppCompatActivity() {
 
 
     fun setSignUpClick(){
-        binding.tvSignUp.setOnClickListener {
+        binding.llSignUp.setOnClickListener {
             Intent(this@LoginActivity, RegisterActivity::class.java).apply{
                 startActivity(this)
             }

@@ -97,14 +97,37 @@
         android:gravity="center"
         />
 
-    <TextView
-        android:id="@+id/tvBtnSignOut"
+    <RelativeLayout
+        android:id="@+id/rlSignOut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/sign_out"
-        android:layout_marginTop="8dp"
+        android:layout_marginVertical="8dp"
         android:layout_marginHorizontal="16dp"
-        style="@style/UbuntuMedium24secondary"
-        />
+        android:padding="8dp"
+        >
+
+        <ImageView
+            android:id="@+id/ivSignOut"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_power"
+            app:tint="@color/neon_orange"
+            android:contentDescription="@string/signout"
+            />
+
+        <TextView
+            android:id="@+id/tvBtnSignOut"
+            style="@style/NunitoMedium16secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@id/ivSignOut"
+            android:layout_centerVertical="true"
+            android:text="@string/sign_out" />
+
+
+    </RelativeLayout>
 
 </LinearLayout>

@@ -129,33 +129,62 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                >
+                android:orientation="vertical">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvStorySizedUser"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="24dp"
-                    android:layout_marginStart="16dp"
-                    />
+                    android:layout_marginStart="16dp" />
 
                 <TextView
                     android:id="@+id/tvMessages"
+                    style="@style/UbuntuMedium24secondary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/UbuntuMedium24secondary"
-                    android:text="@string/messages"
                     android:layout_marginHorizontal="16dp"
                     android:layout_marginVertical="4dp"
-                    />
+                    android:text="@string/messages" />
+
+                <LinearLayout
+                    android:id="@+id/llAddNewTextInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginVertical="36dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    >
+
+                    <ImageView
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:contentDescription="@string/new_message"
+                        android:src="@drawable/ic_tab_new"
+                        app:tint="@color/colorOnGrey_grey" />
+
+                    <TextView
+
+                        android:id="@+id/tvNoLatestMessageInfo"
+                        style="@style/MontezRegular32Orange"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingHorizontal="48dp"
+                        android:text="@string/start_writing_sweet_text_to_your_friends"
+                        android:textColor="@color/colorOnGrey_grey" />
+
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvLatestMessages"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone"
                     />
 
             </LinearLayout>

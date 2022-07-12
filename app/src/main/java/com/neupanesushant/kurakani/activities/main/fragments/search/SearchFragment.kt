@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
@@ -52,6 +53,7 @@ class SearchFragment : Fragment() {
         searchBarAction()
 
         binding.rvSearchedList.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvSearchedList.animation = AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
         viewModel.searchedList.observe(viewLifecycleOwner, Observer{
             if(it == null || it.size == 0){
                 binding.tvInfoText.text = "Couldn't find a match"
@@ -62,7 +64,6 @@ class SearchFragment : Fragment() {
                 binding.rvSearchedList.adapter = adapter
                 binding.rvSearchedList.visibility = View.VISIBLE
                 binding.tvInfoText.visibility = View.GONE
-
             }
         })
     }
