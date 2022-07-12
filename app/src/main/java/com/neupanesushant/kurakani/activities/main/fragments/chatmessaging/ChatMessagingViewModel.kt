@@ -33,17 +33,17 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     private var toId = ""
 
 
-    private val _chatLog = MutableLiveData<List<Message>>()
+    private val _chatLog = MutableLiveData<ArrayList<Message>>()
     val chatLog get() = _chatLog
 
-
+    private val tempChatList = ArrayList<Message>()
 
     init{
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
         firebaseUser = firebaseAuth.currentUser!!
         fromId = firebaseAuth.currentUser!!.uid
-        getAllChatFromDatabase()
+        getChatUpdateFromDatabase()
     }
 
     fun setToID(uid : String){
@@ -58,14 +58,10 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     suspend fun addChatToDatabaseSuspended(chatMessage: String){
         withContext(Dispatchers.IO){
             val message : Message = Message(firebaseAuth.uid, toId, chatMessage, System.currentTimeMillis()/1000)
-            val ref = FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId").push()
-            val toRef = FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId").push()
-            val latestMessageRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId")
-            val toLatestMessageRef = FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
-            ref.setValue(message)
-            toRef.setValue(message)
-            latestMessageRef.setValue(message)
-            toLatestMessageRef.setValue(message)
+            FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId").push().setValue(message)
+            FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId").push().setValue(message)
+            FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId").setValue(message)
+            FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId").setValue(message)
         }
     }
 
@@ -77,25 +73,16 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
     private suspend fun getAllChatSuspended() {
         withContext(Dispatchers.IO) {
-            val ref = FirebaseDatabase.getInstance().getReference().child("user-messages").child("$fromId$toId")
-            ref.addListenerForSingleValueEvent(object : ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val tempList = ArrayList<Message>()
-                    snapshot.children.forEach {
-                        if(it!=null){
-                            val message : Message = it.getValue(Message::class.java)!!
-                            tempList.add(message)
-                        }
+            FirebaseDatabase.getInstance().getReference().child("user-messages").child("$fromId$toId").get().addOnSuccessListener {
+                tempChatList.clear()
+                it.children.forEach{
+                    if(it!=null){
+                        val message : Message = it.getValue(Message::class.java)!!
+                        tempChatList.add(0, message)
                     }
-                    tempList.reverse()
-                    _chatLog.value = tempList.toList()
-
                 }
-                override fun onCancelled(error: DatabaseError) {
-                    Log.i(TAG, "Cancelled")
-                }
-
-            })
+                _chatLog.value = tempChatList
+            }
         }
     }
 
@@ -114,9 +101,10 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     private val chatUpdateChildEventListener = object : ChildEventListener{
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             val newMessage = snapshot.getValue(Message::class.java)
-            if(newMessage != null){
+            if(newMessage != null ){
                 getAllChatFromDatabase()
             }
+
         }
 
         override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {

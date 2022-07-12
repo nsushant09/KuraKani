@@ -3,8 +3,11 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
@@ -65,8 +68,14 @@ class ChatMessageAdapter(val context : Context, val viewModel:  MainViewModel, v
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if(list.get(position).fromUid == viewModel.user.value?.uid){
+            if(position == 0){
+                holder.itemView.animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_right)
+            }
             (holder as ViewHolderFrom).bind(position)
         }else{
+            if(position == 0){
+                holder.itemView.animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_left)
+            }
             (holder as ViewHolderTo).bind(position)
         }
     }

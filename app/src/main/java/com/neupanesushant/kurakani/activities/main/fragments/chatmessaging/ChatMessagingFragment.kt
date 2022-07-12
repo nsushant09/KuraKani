@@ -70,17 +70,15 @@ class ChatMessagingFragment : Fragment() {
 
         setupEtMessageAction()
 
-        viewModel.chatLog.observe(viewLifecycleOwner, Observer {
-
-            if (it.size == 0) {
+        viewModel.chatLog.observe(viewLifecycleOwner, Observer{
+            if(it.size == 0){
                 viewModel.getAllChatFromDatabase()
             }
-
             binding.rvChatContent.layoutManager =
                 LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
             binding.rvChatContent.adapter = ChatMessageAdapter(requireContext(), mainViewModel, it)
-
         })
+
     }
 
 
