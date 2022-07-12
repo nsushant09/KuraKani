@@ -32,12 +32,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _isNewMessageUIClicked = MutableLiveData<Boolean>()
     val isNewMessageUIClicked: LiveData<Boolean> get() = _isNewMessageUIClicked
 
-    private val _latestMessages = MutableLiveData<List<Message>>()
-    val latestMessages: LiveData<List<Message>> get() = _latestMessages
+    private val _latestMessages = MutableLiveData<ArrayList<Message>>()
+    val latestMessages: LiveData<ArrayList<Message>> get() = _latestMessages
 
-    private val _usersOfLatestMessages = MutableLiveData<List<User>>()
-    val usersOfLatestMessages: LiveData<List<User>> get() = _usersOfLatestMessages
-
+    private val _usersOfLatestMessages = MutableLiveData<ArrayList<User>>()
+    val usersOfLatestMessages: LiveData<ArrayList<User>> get() = _usersOfLatestMessages
 
 
     private val fromId: String
@@ -94,7 +93,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                         temp.add(message)
                     }
                 }
-                _latestMessages.value = temp.toList()
+                _latestMessages.value = temp
                 getUsersofLatestMessages()
             }
 
@@ -114,7 +113,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 getUserOfLatestMessagesSuspended(it.fromUid!!)
             }
         }
-
+        _isAllUILoaded.value = true
     }
 
     private fun getUserOfLatestMessagesSuspended(uid: String) {
@@ -124,11 +123,33 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 if (user != null) {
                     tempLatestMessageUsers.add(user)
                     _usersOfLatestMessages.value = tempLatestMessageUsers
+                    sortLatestMessages()
                 }
 
             }
     }
 
+    fun sortLatestMessages(){
+        val tempUser : ArrayList<User> = _usersOfLatestMessages.value!!
+        val tempMessage : ArrayList<Message> = _latestMessages.value!!
+        for(i in 0 until tempUser.size - 1){
+            for(j in i until  tempUser.size){
+                if(tempMessage.get(j).timeStamp!! > tempMessage.get(i).timeStamp!!){
+                    val mTemp = tempMessage[i]
+                    tempMessage[i] = tempMessage[j]
+                    tempMessage[j] = mTemp
+
+                    val uTemp = tempUser[i]
+                    tempUser[i] = tempUser[j]
+                    tempUser[j] = uTemp
+                }
+            }
+        }
+
+        _usersOfLatestMessages.value  = tempUser
+        _latestMessages.value = tempMessage
+
+    }
 
     fun setIsUILoaded(boolean: Boolean) {
         _isAllUILoaded.value = boolean

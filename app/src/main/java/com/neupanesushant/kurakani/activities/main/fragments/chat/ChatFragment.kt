@@ -3,6 +3,7 @@ package com.neupanesushant.kurakani.activities.main.fragments.chat
 //import com.bumptech.glide.Glide
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,6 +73,7 @@ class ChatFragment : Fragment() {
             if (it) {
                 binding.progressBar.visibility = View.GONE
                 binding.layoutChatFragment.visibility = View.VISIBLE
+                binding.llAddNewTextInfo.visibility = View.GONE
             }
         })
 
@@ -80,7 +82,6 @@ class ChatFragment : Fragment() {
             binding.tvUserName.text = it?.fullName
             Glide.with(requireContext()).load(it?.profileImage).centerCrop()
                 .error(R.drawable.ic_user).into(binding.ivUserProfilePicture)
-            chatViewModel.setIsUILoaded(true)
         })
 
         //set items in storysized recycler view
@@ -106,7 +107,9 @@ class ChatFragment : Fragment() {
         binding.rvLatestMessages.layoutManager = LinearLayoutManager(requireContext())
         binding.rvStorySizedUser.animation =
             AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
-        chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner, Observer {
+
+        chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner, Observer{
+//            chatViewModel.sortLatestMessages()
             if (it.size == 0) {
                 binding.rvLatestMessages.visibility = View.GONE
                 binding.llAddNewTextInfo.visibility = View.VISIBLE
@@ -118,13 +121,36 @@ class ChatFragment : Fragment() {
                 binding.rvLatestMessages.visibility = View.VISIBLE
             }
 
+
         })
-        val handler = Handler()
-        handler.postDelayed({
-            if (chatViewModel.usersOfLatestMessages.value == null || chatViewModel.usersOfLatestMessages.value?.size == 0) {
-                binding.llAddNewTextInfo.visibility = View.VISIBLE
-            }
-        }, 5000)
+
+//        chatViewModel.sortedLatestMessages.observe(viewLifecycleOwner, Observer {
+//            if (it.size == 0) {
+//                binding.rvLatestMessages.visibility = View.GONE
+//                binding.llAddNewTextInfo.visibility = View.VISIBLE
+//            } else {
+//                val adapter =
+//                    LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
+//                binding.rvLatestMessages.adapter = adapter
+//                binding.llAddNewTextInfo.visibility = View.GONE
+//                binding.rvLatestMessages.visibility = View.VISIBLE
+//            }
+//
+//        })
+
+//        chatViewModel.latestMessageHashMap.observe(viewLifecycleOwner, Observer{
+//            if (it?.size == 0) {
+//                binding.rvLatestMessages.visibility = View.GONE
+//                binding.llAddNewTextInfo.visibility = View.VISIBLE
+//            } else {
+////                chatViewModel.sortLatestMessages()
+//                val adapter =
+//                    LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
+//                binding.rvLatestMessages.adapter = adapter
+//                binding.llAddNewTextInfo.visibility = View.GONE
+//                binding.rvLatestMessages.visibility = View.VISIBLE
+//            }
+//        })
 
     }
 

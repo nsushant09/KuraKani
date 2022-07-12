@@ -19,7 +19,7 @@ class LatestMessagesAdapter(
     val onClickOpenChatMessaging: (String) -> Unit
 ) : RecyclerView.Adapter<LatestMessagesAdapter.ViewHolder>() {
 
-    val messagesList : List<Message>? = viewModel.latestMessages.value
+    var messagesList : List<Message>? = viewModel.latestMessages.value
     val usersList : List<User>? = viewModel.usersOfLatestMessages.value
 
     inner class ViewHolder(binding: LatestChatContentLayoutBinding) :

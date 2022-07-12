@@ -155,7 +155,7 @@
                     android:layout_marginVertical="36dp"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     >
 
                     <ImageView
