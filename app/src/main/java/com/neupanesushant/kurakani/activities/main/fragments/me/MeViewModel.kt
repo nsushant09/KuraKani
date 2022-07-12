@@ -17,9 +17,8 @@ import kotlinx.coroutines.*
 class MeViewModel(application : Application) : AndroidViewModel(application) {
 
     private val TAG = "MeViewModel"
-    private lateinit var firebaseUser: FirebaseUser
-    private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firebaseStorage: FirebaseStorage
+    private val  firebaseAuth: FirebaseAuth
+    private val firebaseStorage: FirebaseStorage
     private lateinit var firebaseDatabase: DatabaseReference
 
     private val viewModelJob = Job()
@@ -32,26 +31,11 @@ class MeViewModel(application : Application) : AndroidViewModel(application) {
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
         firebaseDatabase = FirebaseDatabase.getInstance().getReference("/users/${firebaseAuth.uid}")
-        firebaseUser = firebaseAuth.currentUser!!
 
-        getUserFromDatabase()
     }
 
-    private fun getUserFromDatabase() {
-        uiScope.launch {
-            getUserFromDatabaseSuspended()
-        }
-    }
-
-    suspend fun getUserFromDatabaseSuspended() {
-        withContext(Dispatchers.IO) {
-            FirebaseDatabase.getInstance().getReference().child("users")
-                .child(firebaseAuth.uid.toString()).get().addOnSuccessListener {
-                    _user.value = it.getValue(User::class.java)
-                }.addOnFailureListener {
-                    Log.i(TAG, "Failure to get user data")
-                }
-        }
+    fun setUser(user: User?){
+        _user.value = user
     }
 
     fun addImageToDatabase(fileName : String, profileImageURI : Uri?){

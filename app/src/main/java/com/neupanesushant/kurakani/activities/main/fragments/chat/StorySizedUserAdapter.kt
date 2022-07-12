@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.StorySizedUserRecyclerViewLayoutBinding
+import com.squareup.picasso.Picasso
 
 
 class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel, val list : List<User>, val onClickOpenChatMessaging : (String) -> Unit ) : RecyclerView.Adapter<StorySizedUserAdapter.ViewHolder>() {
@@ -33,7 +34,6 @@ class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel
             }
         }else{
             val userObject = list.get(position-1)
-//            Picasso.get().load(userObject.profileImage).error(R.drawable.ic_user).into(holder.profileImage)
             Glide.with(context).load(userObject.profileImage).centerCrop().error(R.drawable.ic_user).into(holder.profileImage)
             holder.fullName.text = userObject.fullName
             holder.itemView.setOnClickListener {

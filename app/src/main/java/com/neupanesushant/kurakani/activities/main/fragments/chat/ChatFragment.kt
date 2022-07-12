@@ -2,7 +2,6 @@ package com.neupanesushant.kurakani.activities.main.fragments.chat
 
 //import com.bumptech.glide.Glide
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,23 +52,32 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //open search fragment
         binding.cardViewSearchIcon.setOnClickListener {
             replaceFragment(searchFragment)
         }
+        //open me fragment
+        binding.cardViewUserIcon.setOnClickListener {
+            replaceFragment(meFragment)
+        }
 
+        //show ui
         chatViewModel.isAllUILoaded.observe(viewLifecycleOwner, Observer {
             if (it) {
                 binding.progressBar.visibility = View.GONE
                 binding.layoutChatFragment.visibility = View.VISIBLE
             }
         })
-        chatViewModel.user.observe(viewLifecycleOwner, Observer {
+
+        // set profile image and username
+        mainViewModel.user.observe(viewLifecycleOwner, Observer {
             binding.tvUserName.text = it?.fullName
             Glide.with(requireContext()).load(it?.profileImage).centerCrop()
                 .error(R.drawable.ic_user).into(binding.ivUserProfilePicture)
             chatViewModel.setIsUILoaded(true)
         })
 
+        //set items in storysized recycler view
         binding.rvStorySizedUser.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         chatViewModel.allUsers.observe(viewLifecycleOwner, Observer {
@@ -77,10 +85,7 @@ class ChatFragment : Fragment() {
                 StorySizedUserAdapter(requireContext(), chatViewModel, it, onClickOpenChatMessaging)
         })
 
-        binding.cardViewUserIcon.setOnClickListener {
-            replaceFragment(meFragment)
-        }
-
+        //open search to write new messages
         chatViewModel.isNewMessageUIClicked.observe(viewLifecycleOwner, Observer {
             if (it) {
                 replaceFragment(searchFragment)
@@ -89,11 +94,12 @@ class ChatFragment : Fragment() {
         })
 
 
+        //set items in latest messages
         chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner, Observer {
-                binding.rvLatestMessages.layoutManager = LinearLayoutManager(requireContext())
-                val adapter =
-                    LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
-                binding.rvLatestMessages.adapter = adapter
+            binding.rvLatestMessages.layoutManager = LinearLayoutManager(requireContext())
+            val adapter =
+                LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
+            binding.rvLatestMessages.adapter = adapter
 
         })
 

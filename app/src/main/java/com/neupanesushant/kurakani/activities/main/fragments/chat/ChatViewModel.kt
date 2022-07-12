@@ -16,16 +16,11 @@ import kotlinx.coroutines.*
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private val TAG = "ChatViewModel"
-    private lateinit var firebaseUser: FirebaseUser
-    private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firebaseStorage: FirebaseStorage
-    private lateinit var firebaseDatabase: DatabaseReference
+    private val firebaseAuth: FirebaseAuth
+    private val firebaseDatabase: DatabaseReference
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-
-    private val _user = MutableLiveData<User?>()
-    val user: LiveData<User?> get() = _user
 
     private val _allUsers = MutableLiveData<List<User>>()
     val allUsers: LiveData<List<User>> get() = _allUsers
@@ -49,33 +44,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         firebaseAuth = FirebaseAuth.getInstance()
-        firebaseStorage = FirebaseStorage.getInstance()
         firebaseDatabase = FirebaseDatabase.getInstance().getReference("/users/${firebaseAuth.uid}")
-        firebaseUser = firebaseAuth.currentUser!!
         _isAllUILoaded.value = false
         _isNewMessageUIClicked.value = false
-
         fromId = firebaseAuth.currentUser?.uid.toString()
 
-        getUserFromDatabase()
         getLatestMessages()
         getAllUsersFromDatabase()
-    }
-
-    fun getUserFromDatabase() {
-        uiScope.launch {
-            getUserFromDatabaseSuspended()
-        }
-    }
-
-    private suspend fun getUserFromDatabaseSuspended() {
-        withContext(Dispatchers.IO) {
-            FirebaseDatabase.getInstance().getReference().child("users")
-                .child(firebaseAuth.uid.toString()).get().addOnSuccessListener {
-                    _user.value = it.getValue(User::class.java)
-                }.addOnFailureListener {
-                }
-        }
     }
 
     fun getAllUsersFromDatabase() {

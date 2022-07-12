@@ -41,6 +41,7 @@ class ChatMessagingFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        //set friend name and image
         mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner, Observer {
             if (it) {
                 mainViewModel.friendUser.observe(viewLifecycleOwner, Observer {

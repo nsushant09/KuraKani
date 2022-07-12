@@ -1,14 +1,11 @@
 package com.neupanesushant.kurakani.activities.main
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
-import com.neupanesushant.kurakani.classes.Friend
-import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.User
 import kotlinx.coroutines.*
 
