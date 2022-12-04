@@ -20,7 +20,6 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         firebaseAuth = FirebaseAuth.getInstance()
-//        FirebaseAuth.getInstance().signOut()
         if(firebaseAuth.currentUser != null){
             gotoMainActivity()
         }

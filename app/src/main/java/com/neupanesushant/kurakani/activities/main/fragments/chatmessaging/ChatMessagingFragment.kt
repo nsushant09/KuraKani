@@ -1,6 +1,11 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
+import android.app.Activity
+import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +19,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
+import com.neupanesushant.kurakani.classes.Message
+import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
+import java.util.*
 
 
 class ChatMessagingFragment : Fragment() {
@@ -24,6 +32,10 @@ class ChatMessagingFragment : Fragment() {
     private val binding get() = _binding
     private lateinit var viewModel: ChatMessagingViewModel
     private val mainViewModel: MainViewModel by activityViewModels()
+
+    private val IMAGE_SELECTOR_REQUEST_CODE = 981234
+    private var latestChatImageURI: Uri? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,7 +67,7 @@ class ChatMessagingFragment : Fragment() {
         })
 
         binding.ivSelectImage.setOnClickListener {
-            Toast.makeText(context, "This feature will be added soon", Toast.LENGTH_SHORT).show()
+            chooseImage()
         }
 
         binding.etWriteMessage.addTextChangedListener {
@@ -71,21 +83,49 @@ class ChatMessagingFragment : Fragment() {
         setupEtMessageAction()
 
         viewModel.chatLog.observe(viewLifecycleOwner, Observer{
-            if(it.size == 0){
-                viewModel.getAllChatFromDatabase()
-            }
-            binding.rvChatContent.layoutManager =
-                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
-            binding.rvChatContent.adapter = ChatMessageAdapter(requireContext(), mainViewModel, it)
+            setChatData(it)
         })
 
     }
 
 
+    private fun setChatData(messageList : ArrayList<Message>){
+        if(messageList.size == 0){
+            viewModel.getAllChatFromDatabase()
+        }
+        binding.rvChatContent.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
+        binding.rvChatContent.adapter = ChatMessageAdapter(requireContext(), mainViewModel, messageList)
+    }
+
+    private fun chooseImage() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, IMAGE_SELECTOR_REQUEST_CODE)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == IMAGE_SELECTOR_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            latestChatImageURI = data.data!!
+            val bitmap =
+                MediaStore.Images.Media.getBitmap(activity?.contentResolver, latestChatImageURI)
+            addLatestChatImage()
+        }
+    }
+
+    fun addLatestChatImage(){
+        if (latestChatImageURI == null) return
+        val fileName = UUID.randomUUID().toString()
+        viewModel.addImageToDatabase(fileName, latestChatImageURI)
+    }
+
     fun setupEtMessageAction() {
         binding.btnSend.setOnClickListener {
             if (binding.etWriteMessage != null && binding.etWriteMessage.text.length != 0) {
-                viewModel.addChatToDatabase(binding.etWriteMessage.text.toString())
+                viewModel.addChatToDatabase(binding.etWriteMessage.text.toString(), MessageType.TEXT)
                 viewModel.getChatUpdateFromDatabase()
                 binding.etWriteMessage.text.clear()
             }

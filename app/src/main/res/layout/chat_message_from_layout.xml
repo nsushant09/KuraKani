@@ -11,23 +11,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardViewProfileImage"
+        <ImageView
+            android:id="@+id/ivProfileImage"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_alignParentEnd="true"
+
             android:layout_marginHorizontal="8dp"
-            app:cardBackgroundColor="?attr/colorOnPrimary"
-            app:cardCornerRadius="36dp"
-            app:cardElevation="0dp">
+            android:contentDescription="@string/profile_image" />
 
-            <ImageView
-                android:id="@+id/ivProfileImage"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/profile_image" />
-
-        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/tvMessageBody"
@@ -35,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginHorizontal="8dp"
-            android:layout_toStartOf="@id/cardViewProfileImage"
+            android:layout_toStartOf="@id/ivProfileImage"
             android:background="@drawable/from_chat_message_bg"
             android:fontFamily="@font/sourcesansproregular"
             android:gravity="start"

@@ -6,10 +6,12 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.classes.Message
+import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.LatestChatContentLayoutBinding
 
@@ -47,9 +49,24 @@ class LatestMessagesAdapter(
         holder.itemView.setOnClickListener{
             onClickOpenChatMessaging(userObject?.uid.toString())
         }
-        Glide.with(context).load(userObject?.profileImage).centerCrop().error(R.drawable.ic_user).into(holder.profileImage)
+        Glide.with(context).load(userObject?.profileImage).apply(RequestOptions().circleCrop()).error(R.drawable.ic_user).into(holder.profileImage)
         holder.userName.text = userObject?.fullName
-        holder.latestMessage.text = messageObject?.messageBody
+
+        if(messageObject?.toUid == userObject?.uid){
+            if(messageObject?.messageType == MessageType.TEXT){
+                holder.latestMessage.text = messageObject?.messageBody
+            }
+            if(messageObject?.messageType == MessageType.IMAGE){
+                holder.latestMessage.text = "You sent a image"
+            }
+        }else{
+            if(messageObject?.messageType == MessageType.TEXT){
+                holder.latestMessage.text = messageObject?.messageBody
+            }
+            if(messageObject?.messageType == MessageType.IMAGE){
+                holder.latestMessage.text = userObject?.firstName + " sent a image"
+            }
+        }
 
     }
 

@@ -1,6 +1,7 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -12,6 +13,7 @@ import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.classes.Message
+import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.classes.User
 import kotlinx.coroutines.*
 import java.sql.Time
@@ -50,14 +52,14 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         toId = uid
     }
 
-    fun addChatToDatabase(chatMessage : String){
+    fun addChatToDatabase(chatMessage : String, messageType : MessageType){
         uiScope.launch{
-            addChatToDatabaseSuspended(chatMessage)
+            addChatToDatabaseSuspended(chatMessage, messageType)
         }
     }
-    suspend fun addChatToDatabaseSuspended(chatMessage: String){
+    suspend fun addChatToDatabaseSuspended(chatMessage: String, messageType: MessageType){
         withContext(Dispatchers.IO){
-            val message : Message = Message(firebaseAuth.uid, toId, chatMessage, System.currentTimeMillis()/1000)
+            val message : Message = Message(firebaseAuth.uid, toId, messageType,chatMessage, System.currentTimeMillis()/1000)
             FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId").push().setValue(message)
             FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId").push().setValue(message)
             FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId").setValue(message)
@@ -95,6 +97,16 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     suspend fun getChatUpdateFromDatabaseSuspended(){
         withContext(Dispatchers.IO){
             FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId").addChildEventListener(chatUpdateChildEventListener)
+        }
+    }
+
+    fun addImageToDatabase(fileName : String, profileImageURI : Uri?){
+        val ref = firebaseStorage.getReference("/images/$fileName")
+        ref.putFile(profileImageURI!!).addOnSuccessListener {
+            ref.downloadUrl.addOnSuccessListener {
+                addChatToDatabase(it.toString(), MessageType.IMAGE)
+                getChatUpdateFromDatabase()
+            }
         }
     }
 

@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.login.LoginActivity
@@ -59,7 +60,8 @@ class MeFragment : Fragment() {
         mainViewModel.user.observe(viewLifecycleOwner, Observer {
             viewModel.setUser(it)
             binding.tvUserName.text = it?.fullName
-            Glide.with(requireContext()).load(it?.profileImage).centerCrop()
+            Glide.with(requireContext()).load(it?.profileImage)
+                .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(binding.ivUserProfilePicture)
         })
 
@@ -95,8 +97,6 @@ class MeFragment : Fragment() {
         val fileName = UUID.randomUUID().toString()
         viewModel.addImageToDatabase(fileName, profileImageURI)
         mainViewModel.getUserFromDatabase()
-
-
     }
 
     fun btnSignOutAction() {

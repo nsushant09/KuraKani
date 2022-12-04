@@ -21,6 +21,8 @@
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.48525010688328346" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.40853217642805495" />
         <entry key="app/src/main/res/layout/activity_register.xml" value="0.45502217610677087" />
+        <entry key="app/src/main/res/layout/chat_image_from_layout.xml" value="0.4843950406156477" />
+        <entry key="app/src/main/res/layout/chat_image_to_layout.xml" value="0.4843950406156477" />
         <entry key="app/src/main/res/layout/chat_message_from_layout.xml" value="0.42967079948696024" />
         <entry key="app/src/main/res/layout/chat_message_to.xml" value="0.42967079948696024" />
         <entry key="app/src/main/res/layout/chat_message_to_layout.xml" value="0.430525865754596" />
@@ -30,6 +32,7 @@
         <entry key="app/src/main/res/layout/fragment_search.xml" value="0.4625908507909363" />
         <entry key="app/src/main/res/layout/latest_chat_content_layout.xml" value="0.4843950406156477" />
         <entry key="app/src/main/res/layout/searched_list_recycler_view_layotu.xml" value="0.42967079948696024" />
+        <entry key="app/src/main/res/layout/searched_list_recycler_view_layout.xml" value="0.48525010688328346" />
         <entry key="app/src/main/res/layout/story_sized_user_recycler_view_layout.xml" value="0.4843950406156477" />
       </map>
     </option>

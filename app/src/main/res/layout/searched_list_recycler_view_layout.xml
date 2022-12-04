@@ -5,23 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="64dp">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        app:cardCornerRadius="48dp"
-        app:cardElevation="0dp"
-        app:cardBackgroundColor="?attr/colorOnPrimary"
-        android:layout_gravity="center_vertical"
-        >
-
         <ImageView
             android:id="@+id/ivUserProfilePicture"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:contentDescription="@string/profile_image"
-            />
 
-    </androidx.cardview.widget.CardView>
+            android:layout_gravity="center_vertical"
+            />
 
     <TextView
         android:id="@+id/tvUserFullName"

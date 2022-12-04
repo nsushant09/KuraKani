@@ -109,7 +109,6 @@ class ChatFragment : Fragment() {
             AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
 
         chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner, Observer{
-//            chatViewModel.sortLatestMessages()
             if (it.size == 0) {
                 binding.rvLatestMessages.visibility = View.GONE
                 binding.llAddNewTextInfo.visibility = View.VISIBLE
@@ -123,34 +122,6 @@ class ChatFragment : Fragment() {
 
 
         })
-
-//        chatViewModel.sortedLatestMessages.observe(viewLifecycleOwner, Observer {
-//            if (it.size == 0) {
-//                binding.rvLatestMessages.visibility = View.GONE
-//                binding.llAddNewTextInfo.visibility = View.VISIBLE
-//            } else {
-//                val adapter =
-//                    LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
-//                binding.rvLatestMessages.adapter = adapter
-//                binding.llAddNewTextInfo.visibility = View.GONE
-//                binding.rvLatestMessages.visibility = View.VISIBLE
-//            }
-//
-//        })
-
-//        chatViewModel.latestMessageHashMap.observe(viewLifecycleOwner, Observer{
-//            if (it?.size == 0) {
-//                binding.rvLatestMessages.visibility = View.GONE
-//                binding.llAddNewTextInfo.visibility = View.VISIBLE
-//            } else {
-////                chatViewModel.sortLatestMessages()
-//                val adapter =
-//                    LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
-//                binding.rvLatestMessages.adapter = adapter
-//                binding.llAddNewTextInfo.visibility = View.GONE
-//                binding.rvLatestMessages.visibility = View.VISIBLE
-//            }
-//        })
 
     }
 

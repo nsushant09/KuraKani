@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.SearchedListRecyclerViewLayoutBinding
@@ -25,7 +26,7 @@ class SearchedListAdapter(val context : Context, val viewModel: SearchViewModel,
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val userObject = list.get(position)
-        Glide.with(context).load(userObject.profileImage).centerCrop().error(R.drawable.ic_user).into(holder.profileImage)
+        Glide.with(context).load(userObject.profileImage).apply(RequestOptions().circleCrop()).error(R.drawable.ic_user).into(holder.profileImage)
         holder.fullName.text = userObject.fullName
         holder.itemView.setOnClickListener{
             onClickOpenChatMessaging(userObject.uid!!)

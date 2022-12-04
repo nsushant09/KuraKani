@@ -104,14 +104,14 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    fun chooseImage() {
+    private fun chooseImage() {
         Log.i(TAG, "GRANTED PERMISSION")
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, IMAGE_SELECTOR_REQUEST_CODE)
     }
 
-    fun setLogInClick() {
+    private fun setLogInClick() {
         binding.llLogIn.setOnClickListener {
             finish()
         }
