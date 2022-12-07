@@ -19,6 +19,7 @@ import kotlinx.coroutines.*
 import java.sql.Time
 import java.time.LocalTime
 import java.util.*
+import java.util.Map
 import kotlin.collections.ArrayList
 
 class ChatMessagingViewModel(application: Application) : AndroidViewModel(application) {
@@ -39,6 +40,10 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     val chatLog get() = _chatLog
 
     private val tempChatList = ArrayList<Message>()
+
+    private val _sentImagesList = MutableLiveData<kotlin.collections.LinkedHashMap<String, Uri?>>()
+    private val sentImagesList get() = _sentImagesList
+    private var sentImageUploadCounter = 0
 
     init{
         firebaseAuth = FirebaseAuth.getInstance()
@@ -94,20 +99,36 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    suspend fun getChatUpdateFromDatabaseSuspended(){
+    private suspend fun getChatUpdateFromDatabaseSuspended(){
         withContext(Dispatchers.IO){
             FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId").addChildEventListener(chatUpdateChildEventListener)
+            FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId").addChildEventListener(chatUpdateChildEventListener)
         }
     }
 
-    fun addImageToDatabase(fileName : String, profileImageURI : Uri?){
-        val ref = firebaseStorage.getReference("/images/$fileName")
-        ref.putFile(profileImageURI!!).addOnSuccessListener {
-            ref.downloadUrl.addOnSuccessListener {
-                addChatToDatabase(it.toString(), MessageType.IMAGE)
-                getChatUpdateFromDatabase()
+    fun addImagesToDatabase(imageList : kotlin.collections.LinkedHashMap<String, Uri?>){
+        sentImageUploadCounter = 0
+        _sentImagesList.value = imageList
+        if(sentImagesList.value != null){
+            addSingleImageToDatabase(sentImageUploadCounter)
+        }
+
+    }
+
+    fun addSingleImageToDatabase(index : Int){
+        val keys = sentImagesList.value!!.keys
+        if(index < keys.size){
+            val currentKey = keys.elementAt(index)
+            val ref = firebaseStorage.getReference("/images/${currentKey}")
+            ref.putFile(sentImagesList.value!!.get(currentKey)!!).addOnSuccessListener {
+                addSingleImageToDatabase(index + 1)
+                ref.downloadUrl.addOnSuccessListener{
+                    addChatToDatabase(it.toString(), MessageType.IMAGE)
+                    getChatUpdateFromDatabase()
+                }
             }
         }
+
     }
 
     private val chatUpdateChildEventListener = object : ChildEventListener{
