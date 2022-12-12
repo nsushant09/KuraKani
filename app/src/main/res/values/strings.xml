@@ -29,4 +29,7 @@
     <string name="signout">SignOut</string>
     <string name="new_message">New Message</string>
     <string name="start_writing_sweet_text_to_your_friends">Start Writing Sweet text to Your Friends</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancle">Cancle</string>
+    <string name="action_save">Save</string>
 </resources>

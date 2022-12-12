@@ -1,12 +1,22 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.app.Activity
+import android.app.DownloadManager
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.content.getSystemService
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,7 +29,9 @@ import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
+import java.net.HttpURLConnection
 import java.net.URI
+import java.net.URL
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
@@ -33,8 +45,22 @@ class ChatMessagingFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val IMAGE_SELECTOR_REQUEST_CODE = 981234
-    private var latestChatImageURI: Uri? = null
 
+    private val performDelete : (Message) -> Unit = {message ->
+        binding.tvSave.isVisible = message.messageType == MessageType.IMAGE
+        makeLongActionContainerVisible()
+        binding.tvDelete.setOnClickListener {
+//            makeTextContainerVisible()
+            viewModel.deleteChatFromDatabase(message.timeStamp!!.toString())
+        }
+        binding.tvCancle.setOnClickListener{
+            makeTextContainerVisible()
+        }
+        binding.tvSave.setOnClickListener {
+            downloadImage(message.messageBody!!)
+        }
+
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -85,9 +111,26 @@ class ChatMessagingFragment : Fragment() {
             setChatData(it)
         })
 
+        setupView()
+    }
+
+    private fun setupView(){
+        makeTextContainerVisible()
     }
 
 
+    private fun makeTextContainerVisible(){
+        binding.apply{
+            rlTextContainer.visibility = View.VISIBLE
+            rlLongActionsContainer.visibility = View.INVISIBLE
+        }
+    }
+    private fun makeLongActionContainerVisible(){
+        binding.apply{
+            rlTextContainer.visibility = View.INVISIBLE
+            rlLongActionsContainer.visibility = View.VISIBLE
+        }
+    }
     private fun setChatData(messageList: ArrayList<Message>) {
         if (messageList.size == 0) {
             viewModel.getAllChatFromDatabase()
@@ -95,7 +138,7 @@ class ChatMessagingFragment : Fragment() {
         binding.rvChatContent.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         binding.rvChatContent.adapter =
-            ChatMessageAdapter(requireContext(), mainViewModel, messageList)
+            ChatMessageAdapter(requireContext(), mainViewModel, messageList, performDelete)
     }
 
     private fun chooseImage() {
@@ -137,5 +180,47 @@ class ChatMessagingFragment : Fragment() {
         }
     }
 
+    private fun downloadImage(imageUrl : String){
 
+        // First, get the URL of the image you want to download
+
+// Create an HttpURLConnection to download the image
+        val url = URL(imageUrl)
+        val connection = url.openConnection() as HttpURLConnection
+
+// Download the image
+        val runnable = Runnable{
+            val inputStream = connection.inputStream
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+
+// Close the input stream
+            inputStream.close()
+
+// Save the downloaded image to the device's gallery
+            MediaStore.Images.Media.insertImage(
+                requireContext().contentResolver,
+                bitmap,
+                "Image",
+                "Image downloaded from the internet"
+            )
+
+        }
+
+        val thread = Thread(runnable)
+        thread.start()
+        var error = false
+
+        thread.setUncaughtExceptionHandler{thread1 , throwable ->
+            Toast.makeText(requireContext(), "Error while saving Image", Toast.LENGTH_SHORT).show()
+            error = true
+            thread1.stop()
+        }
+
+        while(true){
+            if(!thread.isAlive && !error){
+                Toast.makeText(requireContext(), "Image saved", Toast.LENGTH_SHORT).show()
+                break;
+            }
+        }
+    }
 }

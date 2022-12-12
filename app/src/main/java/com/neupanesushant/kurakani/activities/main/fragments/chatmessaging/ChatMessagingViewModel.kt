@@ -25,9 +25,9 @@ import kotlin.collections.ArrayList
 class ChatMessagingViewModel(application: Application) : AndroidViewModel(application) {
 
     private val TAG = "ChatMessagingViewModel"
-    private lateinit var firebaseUser: FirebaseUser
-    private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firebaseStorage: FirebaseStorage
+    private var firebaseUser: FirebaseUser
+    private var firebaseAuth: FirebaseAuth
+    private var firebaseStorage: FirebaseStorage
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -57,6 +57,18 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         toId = uid
     }
 
+    fun deleteChatFromDatabase(timeStamp : String){
+        uiScope.launch{
+            deleteChatFromDatabaseSuspended(timeStamp)
+        }
+    }
+
+    suspend fun deleteChatFromDatabaseSuspended(timeStamp : String){
+        withContext(Dispatchers.IO){
+            FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId").removeValue()
+        }
+    }
+
     fun addChatToDatabase(chatMessage : String, messageType : MessageType){
         uiScope.launch{
             addChatToDatabaseSuspended(chatMessage, messageType)
@@ -64,9 +76,10 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     }
     suspend fun addChatToDatabaseSuspended(chatMessage: String, messageType: MessageType){
         withContext(Dispatchers.IO){
-            val message : Message = Message(firebaseAuth.uid, toId, messageType,chatMessage, System.currentTimeMillis()/1000)
-            FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId").push().setValue(message)
-            FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId").push().setValue(message)
+            val timeStamp = System.currentTimeMillis() / 100
+            val message : Message = Message(firebaseAuth.uid, toId, messageType,chatMessage, timeStamp)
+            FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId").setValue(message)
+            FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId/$toId$timeStamp$fromId").setValue(message)
             FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId").setValue(message)
             FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId").setValue(message)
         }
@@ -80,7 +93,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
     private suspend fun getAllChatSuspended() {
         withContext(Dispatchers.IO) {
-            FirebaseDatabase.getInstance().getReference().child("user-messages").child("$fromId$toId").get().addOnSuccessListener {
+            FirebaseDatabase.getInstance().reference.child("user-messages").child("$fromId$toId").get().addOnSuccessListener {
                 tempChatList.clear()
                 it.children.forEach{
                     if(it!=null){
@@ -115,7 +128,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
     }
 
-    fun addSingleImageToDatabase(index : Int){
+    private fun addSingleImageToDatabase(index : Int){
         val keys = sentImagesList.value!!.keys
         if(index < keys.size){
             val currentKey = keys.elementAt(index)
@@ -141,11 +154,11 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         }
 
         override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-            Log.i(TAG, "Child Changed")
+            getAllChatFromDatabase()
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
-            Log.i(TAG, "Child removed")
+            getAllChatFromDatabase()
         }
 
         override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {

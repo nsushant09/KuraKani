@@ -2,12 +2,14 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.RoundedCorner
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
@@ -21,7 +23,8 @@ import com.neupanesushant.kurakani.databinding.ChatMessageToLayoutBinding
 class ChatMessageAdapter(
     val context: Context,
     val viewModel: MainViewModel,
-    val list: List<Message>
+    val list: List<Message>,
+    val performDelete : (Message) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val FROM_TEXT = 10
@@ -45,6 +48,11 @@ class ChatMessageAdapter(
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
             messageBody.text = list.get(position).messageBody
+
+            itemView.setOnLongClickListener {
+                performDelete(list[position])
+                true
+            }
         }
     }
 
@@ -64,6 +72,11 @@ class ChatMessageAdapter(
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
             messageBody.text = list.get(position).messageBody
+
+            itemView.setOnLongClickListener {
+                performDelete(list[position])
+                true
+            }
         }
 
     }
@@ -86,9 +99,14 @@ class ChatMessageAdapter(
             Glide.with(context)
                 .asBitmap()
                 .load(list.get(position).messageBody)
-                .apply(RequestOptions().override(768))
+                .apply(RequestOptions().override(480))
+                .apply(RequestOptions().transform(RoundedCorners(32)))
                 .into(messageBody)
 
+            itemView.setOnLongClickListener {
+                performDelete(list[position])
+                true
+            }
         }
 
     }
@@ -111,8 +129,13 @@ class ChatMessageAdapter(
             Glide.with(context)
                 .asBitmap()
                 .load(list.get(position).messageBody)
-                .apply(RequestOptions().override(768))
+                .apply(RequestOptions().override(480))
+                .apply(RequestOptions().transform(RoundedCorners(32)))
                 .into(messageBody)
+            itemView.setOnLongClickListener {
+                performDelete(list[position])
+                true
+            }
         }
 
 
@@ -190,18 +213,18 @@ class ChatMessageAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (list.get(position).fromUid == viewModel.user.value?.uid) {
-            if(list.get(position).messageType == MessageType.TEXT){
+        if (list[position].fromUid == viewModel.user.value?.uid) {
+            if(list[position].messageType == MessageType.TEXT){
                 return FROM_TEXT
             }
-            if(list.get(position).messageType == MessageType.IMAGE){
+            if(list[position].messageType == MessageType.IMAGE){
                 return FROM_IMAGE
             }
         } else {
-            if(list.get(position).messageType == MessageType.TEXT){
+            if(list[position].messageType == MessageType.TEXT){
                 return TO_TEXT
             }
-            if(list.get(position).messageType == MessageType.IMAGE){
+            if(list[position].messageType == MessageType.IMAGE){
                 return TO_IMAGE
             }
         }
