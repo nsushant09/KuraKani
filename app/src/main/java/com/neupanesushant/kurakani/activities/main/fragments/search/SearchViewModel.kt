@@ -22,9 +22,9 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     val allUser get() = _allUsers
 
     private val _searchedList = MutableLiveData<List<User>>()
-     val searchedList get() = _searchedList
+    val searchedList get() = _searchedList
 
-    init{
+    init {
         getAllUsersFromDatabase()
     }
 
@@ -42,7 +42,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                     val tempList = ArrayList<User>()
                     snapshot.children.forEach {
                         val user = it.getValue(User::class.java)
-                        if(it!=null){
+                        if (it != null) {
                             tempList.add(user!!)
                         }
                         Log.i(TAG, "The name of the user is : " + user?.fullName)
@@ -59,10 +59,10 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun filterSearch(searchedText : String){
+    fun filterSearch(searchedText: String) {
         val tempList = ArrayList<User>()
-        _allUsers.value?.forEach{
-            if(isStringInName(it.fullName, searchedText)){
+        _allUsers.value?.forEach {
+            if (isStringInName(it.fullName, searchedText)) {
                 tempList.add(it)
             }
             _searchedList.value = tempList
@@ -70,19 +70,19 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     }
 
-    fun isStringInName(name : String?, target : String) : Boolean{
+    fun isStringInName(name: String?, target: String): Boolean {
         val lengthOfTarget = target.length
         var lengthOfName = name?.length
-        if(lengthOfName == null){
+        if (lengthOfName == null) {
             lengthOfName = 0
         }
         val loopSize = lengthOfName - lengthOfTarget
-        for(i in 0 until loopSize + 1){
+        for (i in 0 until loopSize + 1) {
             try {
                 if (name?.substring(i, lengthOfTarget + i).equals(target, true)) {
                     return true
                 }
-            }catch (e : Exception){
+            } catch (e: Exception) {
                 continue
             }
         }

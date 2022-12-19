@@ -162,10 +162,11 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
 
-            if(!runFromOnce){
-                FirebaseDatabase.getInstance().reference.child("user-messages").child("$fromId$toId")
+            if (!runFromOnce) {
+                FirebaseDatabase.getInstance().reference.child("user-messages")
+                    .child("$fromId$toId")
                     .get().addOnSuccessListener {
-                        it.children.last().getValue(Message::class.java)?.let{
+                        it.children.last().getValue(Message::class.java)?.let {
                             tempChatList.add(0, it)
                             _chatLog.value = tempChatList
                         }
@@ -181,7 +182,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
-            if(!runFromOnce){
+            if (!runFromOnce) {
                 getAllChatFromDatabase()
                 runFromOnce = true
             }
@@ -197,11 +198,10 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
     private val toChildEventListener = object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-            if(!runToOnce){
+            if (!runToOnce) {
                 getAllChatFromDatabase()
                 runToOnce = true
             }
-//            getAllChatFromDatabase()
         }
 
         override fun onChildChanged(
@@ -211,7 +211,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
-            if(!runToOnce){
+            if (!runToOnce) {
                 getAllChatFromDatabase()
                 runToOnce = true
             }

@@ -4,7 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.neupanesushant.kurakani.classes.User
 import kotlinx.coroutines.*
@@ -29,7 +30,7 @@ class MainViewModel() : ViewModel() {
     private val _isFriendValueLoaded = MutableLiveData<Boolean>()
     val isFriendValueLoaded get() = _isFriendValueLoaded
 
-    init{
+    init {
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseDatabase = FirebaseDatabase.getInstance().getReference("/users/${firebaseAuth.uid}")
         getUserFromDatabase()
@@ -51,29 +52,29 @@ class MainViewModel() : ViewModel() {
         }
     }
 
-    fun getFriendUserFromDatabase(uid : String){
+    fun getFriendUserFromDatabase(uid: String) {
         _isFriendValueLoaded.value = false
-        uiScope.launch{
+        uiScope.launch {
             getFriendUserFromDatabaseSuspended(uid)
         }
     }
 
-    private suspend fun getFriendUserFromDatabaseSuspended(uid : String) {
-        withContext(Dispatchers.IO){
+    private suspend fun getFriendUserFromDatabaseSuspended(uid: String) {
+        withContext(Dispatchers.IO) {
             FirebaseDatabase.getInstance().getReference().child("users")
                 .child(uid).get().addOnSuccessListener {
                     _friendUser.value = it.getValue(User::class.java)
                     _isFriendValueLoaded.value = true
-                }.addOnFailureListener{
+                }.addOnFailureListener {
                 }
         }
     }
 
-    fun nullFriendUser(){
+    fun nullFriendUser() {
         _friendUser.value = null
     }
 
-    fun updateUser(user : User) {
+    fun updateUser(user: User) {
         firebaseDatabase.setValue(user)
     }
 }

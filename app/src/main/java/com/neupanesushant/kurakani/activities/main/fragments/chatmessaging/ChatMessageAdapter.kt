@@ -2,7 +2,6 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.RoundedCorner
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
@@ -24,7 +23,7 @@ class ChatMessageAdapter(
     val context: Context,
     val viewModel: MainViewModel,
     val list: List<Message>,
-    val performDelete : (Message) -> Unit
+    val performDelete: (Message) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val FROM_TEXT = 10
@@ -81,7 +80,8 @@ class ChatMessageAdapter(
 
     }
 
-    private inner class ViewHolderFromImage(binding : ChatImageFromLayoutBinding) : RecyclerView.ViewHolder(binding.root){
+    private inner class ViewHolderFromImage(binding: ChatImageFromLayoutBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         var profileImage: ImageView
         var messageBody: ImageView
@@ -111,7 +111,8 @@ class ChatMessageAdapter(
 
     }
 
-    private inner class ViewHolderToImage(binding : ChatImageToLayoutBinding) : RecyclerView.ViewHolder(binding.root){
+    private inner class ViewHolderToImage(binding: ChatImageToLayoutBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         var profileImage: ImageView
         var messageBody: ImageView
@@ -150,7 +151,7 @@ class ChatMessageAdapter(
                     false
                 )
             )
-        }else if(viewType == FROM_IMAGE){
+        } else if (viewType == FROM_IMAGE) {
             ViewHolderFromImage(
                 ChatImageFromLayoutBinding.inflate(
                     LayoutInflater.from(parent.context),
@@ -158,7 +159,7 @@ class ChatMessageAdapter(
                     false
                 )
             )
-        }else if(viewType == TO_IMAGE){
+        } else if (viewType == TO_IMAGE) {
             ViewHolderToImage(
                 ChatImageToLayoutBinding.inflate(
                     LayoutInflater.from(parent.context),
@@ -181,7 +182,7 @@ class ChatMessageAdapter(
 
         if (list.get(position).fromUid == viewModel.user.value?.uid) {
 
-            if(position == 0) {
+            if (position == 0) {
                 holder.itemView.animation =
                     AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
             }
@@ -193,7 +194,7 @@ class ChatMessageAdapter(
                 (holder as ViewHolderFromImage).bind(position)
             }
         } else {
-            if(position == 0) {
+            if (position == 0) {
                 holder.itemView.animation =
                     AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
             }
@@ -212,17 +213,17 @@ class ChatMessageAdapter(
 
     override fun getItemViewType(position: Int): Int {
         if (list[position].fromUid == viewModel.user.value?.uid) {
-            if(list[position].messageType == MessageType.TEXT){
+            if (list[position].messageType == MessageType.TEXT) {
                 return FROM_TEXT
             }
-            if(list[position].messageType == MessageType.IMAGE){
+            if (list[position].messageType == MessageType.IMAGE) {
                 return FROM_IMAGE
             }
         } else {
-            if(list[position].messageType == MessageType.TEXT){
+            if (list[position].messageType == MessageType.TEXT) {
                 return TO_TEXT
             }
-            if(list[position].messageType == MessageType.IMAGE){
+            if (list[position].messageType == MessageType.IMAGE) {
                 return TO_IMAGE
             }
         }

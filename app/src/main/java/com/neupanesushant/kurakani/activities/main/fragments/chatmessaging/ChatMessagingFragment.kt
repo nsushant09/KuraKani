@@ -38,14 +38,12 @@ import java.util.*
 
 class ChatMessagingFragment : Fragment() {
 
-    private val TAG = "ChatMessagingFragment"
     private lateinit var _binding: FragmentChatMessagingBinding
     private val binding get() = _binding
     private lateinit var viewModel: ChatMessagingViewModel
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val CHANNEL_ID = "channelID"
-    private lateinit var notificationIntent: PendingIntent
     private lateinit var builder: NotificationCompat.Builder
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
@@ -75,7 +73,6 @@ class ChatMessagingFragment : Fragment() {
     ): View? {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
         viewModel = ViewModelProvider(this).get(ChatMessagingViewModel::class.java)
-        // Inflate the layout for this fragment
         return binding.root
     }
 
@@ -135,7 +132,10 @@ class ChatMessagingFragment : Fragment() {
             rlTextContainer.visibility = View.VISIBLE
             rlLongActionsContainer.visibility = View.INVISIBLE
         }
-        binding.rlTextContainer.animation = AnimationUtils.loadAnimation(requireContext(), androidx.appcompat.R.anim.abc_slide_in_bottom)
+        binding.rlTextContainer.animation = AnimationUtils.loadAnimation(
+            requireContext(),
+            androidx.appcompat.R.anim.abc_slide_in_bottom
+        )
     }
 
     private fun makeLongActionContainerVisible() {
@@ -143,7 +143,10 @@ class ChatMessagingFragment : Fragment() {
             rlTextContainer.visibility = View.INVISIBLE
             rlLongActionsContainer.visibility = View.VISIBLE
         }
-        binding.rlLongActionsContainer.animation = AnimationUtils.loadAnimation(requireContext(), androidx.appcompat.R.anim.abc_slide_in_bottom)
+        binding.rlLongActionsContainer.animation = AnimationUtils.loadAnimation(
+            requireContext(),
+            androidx.appcompat.R.anim.abc_slide_in_bottom
+        )
     }
 
     private fun setChatData(messageList: ArrayList<Message>) {
@@ -231,6 +234,7 @@ class ChatMessagingFragment : Fragment() {
         }
 
     }
+
     private suspend fun downloadImageSuspened(imageUrl: URL, connection: HttpURLConnection) {
         withContext(Dispatchers.IO) {
 

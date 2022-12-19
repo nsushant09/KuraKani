@@ -6,9 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
-import com.google.firebase.storage.FirebaseStorage
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.User
 import kotlinx.coroutines.*
@@ -129,12 +127,12 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
-    fun sortLatestMessages(){
-        val tempUser : ArrayList<User> = _usersOfLatestMessages.value!!
-        val tempMessage : ArrayList<Message> = _latestMessages.value!!
-        for(i in 0 until tempUser.size - 1){
-            for(j in i until  tempUser.size){
-                if(tempMessage.get(j).timeStamp!! > tempMessage.get(i).timeStamp!!){
+    fun sortLatestMessages() {
+        val tempUser: ArrayList<User> = _usersOfLatestMessages.value!!
+        val tempMessage: ArrayList<Message> = _latestMessages.value!!
+        for (i in 0 until tempUser.size - 1) {
+            for (j in i until tempUser.size) {
+                if (tempMessage.get(j).timeStamp!! > tempMessage.get(i).timeStamp!!) {
                     val mTemp = tempMessage[i]
                     tempMessage[i] = tempMessage[j]
                     tempMessage[j] = mTemp
@@ -146,7 +144,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        _usersOfLatestMessages.value  = tempUser
+        _usersOfLatestMessages.value = tempUser
         _latestMessages.value = tempMessage
 
     }

@@ -33,7 +33,7 @@ class MeFragment : Fragment() {
     private val IMAGE_SELECTOR_REQUEST_CODE = 111223344
 
     private var profileImageURI: Uri? = null
-    private val mainViewModel : MainViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

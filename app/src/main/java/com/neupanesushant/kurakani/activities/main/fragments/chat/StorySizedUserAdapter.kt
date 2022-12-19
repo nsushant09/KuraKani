@@ -1,7 +1,6 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chat
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -10,10 +9,10 @@ import com.bumptech.glide.request.RequestOptions
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.StorySizedUserRecyclerViewLayoutBinding
-import com.squareup.picasso.Picasso
 
 
-class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel, val list : List<User>, val onClickOpenChatMessaging : (String) -> Unit ) : RecyclerView.Adapter<StorySizedUserAdapter.ViewHolder>() {
+class StorySizedUserAdapter(val context : Context, val viewModel : ChatViewModel,
+                            val list: List<User>, val onClickOpenChatMessaging : (String) -> Unit ) : RecyclerView.Adapter<StorySizedUserAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding : StorySizedUserRecyclerViewLayoutBinding) : RecyclerView.ViewHolder(binding.root){
         val profileImage = binding.ivUserProfilePicture

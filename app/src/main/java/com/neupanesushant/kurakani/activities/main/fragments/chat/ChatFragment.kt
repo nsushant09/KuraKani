@@ -2,8 +2,6 @@ package com.neupanesushant.kurakani.activities.main.fragments.chat
 
 //import com.bumptech.glide.Glide
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -108,7 +106,7 @@ class ChatFragment : Fragment() {
         binding.rvStorySizedUser.animation =
             AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
 
-        chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner, Observer{
+        chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner, Observer {
             if (it.size == 0) {
                 binding.rvLatestMessages.visibility = View.GONE
                 binding.llAddNewTextInfo.visibility = View.VISIBLE
