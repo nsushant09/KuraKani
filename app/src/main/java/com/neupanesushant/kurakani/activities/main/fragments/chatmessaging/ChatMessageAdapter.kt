@@ -181,11 +181,10 @@ class ChatMessageAdapter(
 
         if (list.get(position).fromUid == viewModel.user.value?.uid) {
 
-            if (position == 0) {
+            if(position == 0) {
                 holder.itemView.animation =
-                    AnimationUtils.loadAnimation(context, R.anim.slide_in_right)
+                    AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
             }
-
             if (list.get(position).messageType == MessageType.TEXT) {
                 (holder as ViewHolderFromText).bind(position)
             }
@@ -194,10 +193,9 @@ class ChatMessageAdapter(
                 (holder as ViewHolderFromImage).bind(position)
             }
         } else {
-
-            if (position == 0) {
+            if(position == 0) {
                 holder.itemView.animation =
-                    AnimationUtils.loadAnimation(context, R.anim.slide_in_left)
+                    AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
             }
             if (list.get(position).messageType == MessageType.TEXT) {
                 (holder as ViewHolderToText).bind(position)

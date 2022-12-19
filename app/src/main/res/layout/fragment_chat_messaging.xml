@@ -104,44 +104,45 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginHorizontal="16dp"
         android:padding="8dp"
-        android:layout_marginBottom="8dp"
         android:orientation="horizontal"
-        android:background="@drawable/bg_16dp_radius_coloronprimary"
+        android:background="@drawable/bg_16dp_top_coloronprimary"
         android:gravity="center"
         >
 
-        <TextView
-            android:id="@+id/tvSave"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSave"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:text="@string/action_save"
             android:layout_marginHorizontal="16dp"
-            android:textSize="14sp" />
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="@string/action_save"
+            android:textColor="?attr/colorOnSecondary"
+            android:textSize="14sp"
+            app:cornerRadius="32dp" />
 
-        <TextView
-            android:id="@+id/tvDelete"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDelete"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
+            android:textColor="?attr/colorOnSecondary"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             android:text="@string/action_delete"
             android:layout_marginHorizontal="16dp"
             android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/tvCancle"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:text="@string/action_cancle"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="@string/action_cancel"
             android:layout_marginHorizontal="16dp"
             android:textColor="@color/neon_orange"
             android:textSize="14sp" />

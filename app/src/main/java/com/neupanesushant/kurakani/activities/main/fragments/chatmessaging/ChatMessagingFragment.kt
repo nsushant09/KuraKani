@@ -1,21 +1,22 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.app.Activity
-import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.view.animation.AnimationUtils
 import androidx.core.app.NotificationCompat
-import androidx.core.content.getSystemService
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -29,11 +30,10 @@ import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
+import kotlinx.coroutines.*
 import java.net.HttpURLConnection
-import java.net.URI
 import java.net.URL
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 
 class ChatMessagingFragment : Fragment() {
@@ -44,23 +44,31 @@ class ChatMessagingFragment : Fragment() {
     private lateinit var viewModel: ChatMessagingViewModel
     private val mainViewModel: MainViewModel by activityViewModels()
 
+    private val CHANNEL_ID = "channelID"
+    private lateinit var notificationIntent: PendingIntent
+    private lateinit var builder: NotificationCompat.Builder
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+
     private val IMAGE_SELECTOR_REQUEST_CODE = 981234
 
-    private val performDelete : (Message) -> Unit = {message ->
-        binding.tvSave.isVisible = message.messageType == MessageType.IMAGE
+    private val performDelete: (Message) -> Unit = { message ->
+        binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
         makeLongActionContainerVisible()
-        binding.tvDelete.setOnClickListener {
-//            makeTextContainerVisible()
+        binding.btnDelete.setOnClickListener {
+            makeTextContainerVisible()
             viewModel.deleteChatFromDatabase(message.timeStamp!!.toString())
         }
-        binding.tvCancle.setOnClickListener{
+        binding.btnCancel.setOnClickListener {
             makeTextContainerVisible()
         }
-        binding.tvSave.setOnClickListener {
+        binding.btnSave.setOnClickListener {
+            makeTextContainerVisible()
             downloadImage(message.messageBody!!)
         }
 
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -114,27 +122,31 @@ class ChatMessagingFragment : Fragment() {
         setupView()
     }
 
-    private fun setupView(){
+    private fun setupView() {
         makeTextContainerVisible()
+
+        createNotificationChannel()
+        setupNotification()
     }
 
 
-    private fun makeTextContainerVisible(){
-        binding.apply{
+    private fun makeTextContainerVisible() {
+        binding.apply {
             rlTextContainer.visibility = View.VISIBLE
             rlLongActionsContainer.visibility = View.INVISIBLE
         }
+        binding.rlTextContainer.animation = AnimationUtils.loadAnimation(requireContext(), androidx.appcompat.R.anim.abc_slide_in_bottom)
     }
-    private fun makeLongActionContainerVisible(){
-        binding.apply{
+
+    private fun makeLongActionContainerVisible() {
+        binding.apply {
             rlTextContainer.visibility = View.INVISIBLE
             rlLongActionsContainer.visibility = View.VISIBLE
         }
+        binding.rlLongActionsContainer.animation = AnimationUtils.loadAnimation(requireContext(), androidx.appcompat.R.anim.abc_slide_in_bottom)
     }
+
     private fun setChatData(messageList: ArrayList<Message>) {
-        if (messageList.size == 0) {
-            viewModel.getAllChatFromDatabase()
-        }
         binding.rvChatContent.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         binding.rvChatContent.adapter =
@@ -157,7 +169,7 @@ class ChatMessagingFragment : Fragment() {
 
         if (requestCode == IMAGE_SELECTOR_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
 
-            val tempImageMap : LinkedHashMap<String, Uri?> = LinkedHashMap()
+            val tempImageMap: LinkedHashMap<String, Uri?> = LinkedHashMap()
             if (data.clipData != null) {
                 for (i in 0 until data.clipData!!.itemCount) {
                     tempImageMap[UUID.randomUUID().toString()] = data.clipData!!.getItemAt(i).uri
@@ -174,29 +186,57 @@ class ChatMessagingFragment : Fragment() {
                     binding.etWriteMessage.text.toString(),
                     MessageType.TEXT
                 )
-                viewModel.getChatUpdateFromDatabase()
                 binding.etWriteMessage.text.clear()
             }
         }
     }
 
-    private fun downloadImage(imageUrl : String){
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "channelName"
+            val description = "channelDescription"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                this.description = description
+            }
+            // register the channel with the system
+            val notificationManager: NotificationManager =
+                requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 
-        // First, get the URL of the image you want to download
+    private fun setupNotification() {
+        builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_kurakani_logo)
+            .setContentTitle("Download")
+            .setContentText("Image saved")
+            .setOnlyAlertOnce(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+    }
+
+    private fun downloadImage(imageUrl: String) {
 
 // Create an HttpURLConnection to download the image
         val url = URL(imageUrl)
         val connection = url.openConnection() as HttpURLConnection
 
-// Download the image
-        val runnable = Runnable{
+        uiScope.launch {
+            downloadImageSuspened(url, connection)
+        }
+
+        with(NotificationManagerCompat.from(requireContext())) {
+            notify(1, builder.build())
+        }
+
+    }
+    private suspend fun downloadImageSuspened(imageUrl: URL, connection: HttpURLConnection) {
+        withContext(Dispatchers.IO) {
+
             val inputStream = connection.inputStream
             val bitmap = BitmapFactory.decodeStream(inputStream)
-
-// Close the input stream
             inputStream.close()
-
-// Save the downloaded image to the device's gallery
             MediaStore.Images.Media.insertImage(
                 requireContext().contentResolver,
                 bitmap,
@@ -205,22 +245,6 @@ class ChatMessagingFragment : Fragment() {
             )
 
         }
-
-        val thread = Thread(runnable)
-        thread.start()
-        var error = false
-
-        thread.setUncaughtExceptionHandler{thread1 , throwable ->
-            Toast.makeText(requireContext(), "Error while saving Image", Toast.LENGTH_SHORT).show()
-            error = true
-            thread1.stop()
-        }
-
-        while(true){
-            if(!thread.isAlive && !error){
-                Toast.makeText(requireContext(), "Image saved", Toast.LENGTH_SHORT).show()
-                break;
-            }
-        }
     }
 }
+
