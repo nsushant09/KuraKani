@@ -3,7 +3,6 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -17,11 +16,11 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -52,6 +51,8 @@ class ChatMessagingFragment : Fragment() {
 
     private val performDelete: (Message) -> Unit = { message ->
         binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
+        binding.btnShare.isVisible = message.messageType == MessageType.IMAGE
+
         makeLongActionContainerVisible()
         binding.btnDelete.setOnClickListener {
             makeTextContainerVisible()
@@ -64,15 +65,19 @@ class ChatMessagingFragment : Fragment() {
             makeTextContainerVisible()
             downloadImage(message.messageBody!!)
         }
+        binding.btnShare.setOnClickListener {
+            makeTextContainerVisible()
+            shareImage(Uri.parse(message.messageBody!!))
+        }
 
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
-        viewModel = ViewModelProvider(this).get(ChatMessagingViewModel::class.java)
+        viewModel = ViewModelProvider(this)[ChatMessagingViewModel::class.java]
         return binding.root
     }
 
@@ -84,24 +89,24 @@ class ChatMessagingFragment : Fragment() {
         }
 
         //set friend name and image
-        mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner, Observer {
+        mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner) {
             if (it) {
-                mainViewModel.friendUser.observe(viewLifecycleOwner, Observer {
+                mainViewModel.friendUser.observe(viewLifecycleOwner) {
                     viewModel.setToID(it?.uid!!)
                     viewModel.getAllChatFromDatabase()
-                    Glide.with(requireContext()).load(it?.profileImage).centerCrop()
+                    Glide.with(requireContext()).load(it.profileImage).centerCrop()
                         .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-                    binding.tvFriendFirstName.text = it?.firstName
-                })
+                    binding.tvFriendFirstName.text = it.firstName
+                }
             }
-        })
+        }
 
         binding.ivSelectImage.setOnClickListener {
             chooseImage()
         }
 
         binding.etWriteMessage.addTextChangedListener {
-            if (it == null || it.length == 0) {
+            if (it == null || it.isEmpty()) {
                 binding.btnSend.visibility = View.GONE
                 binding.ivSelectImage.visibility = View.VISIBLE
             } else {
@@ -112,9 +117,9 @@ class ChatMessagingFragment : Fragment() {
 
         setupEtMessageAction()
 
-        viewModel.chatLog.observe(viewLifecycleOwner, Observer {
+        viewModel.chatLog.observe(viewLifecycleOwner) {
             setChatData(it)
-        })
+        }
 
         setupView()
     }
@@ -182,9 +187,9 @@ class ChatMessagingFragment : Fragment() {
         }
     }
 
-    fun setupEtMessageAction() {
+    private fun setupEtMessageAction() {
         binding.btnSend.setOnClickListener {
-            if (binding.etWriteMessage != null && binding.etWriteMessage.text.length != 0) {
+            if (binding.etWriteMessage.text.isNotEmpty()) {
                 viewModel.addChatToDatabase(
                     binding.etWriteMessage.text.toString(),
                     MessageType.TEXT
@@ -226,7 +231,7 @@ class ChatMessagingFragment : Fragment() {
         val connection = url.openConnection() as HttpURLConnection
 
         uiScope.launch {
-            downloadImageSuspened(url, connection)
+            downloadImageSuspened(connection)
         }
 
         with(NotificationManagerCompat.from(requireContext())) {
@@ -235,7 +240,7 @@ class ChatMessagingFragment : Fragment() {
 
     }
 
-    private suspend fun downloadImageSuspened(imageUrl: URL, connection: HttpURLConnection) {
+    private suspend fun downloadImageSuspened(connection: HttpURLConnection) {
         withContext(Dispatchers.IO) {
 
             val inputStream = connection.inputStream
@@ -246,9 +251,21 @@ class ChatMessagingFragment : Fragment() {
                 bitmap,
                 "Image",
                 "Image downloaded from the internet"
-            )
+            ).toUri()
 
         }
     }
+
+    private fun shareImage(imageUri : Uri){
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "image/*"
+        intent.putExtra(
+            Intent.EXTRA_STREAM,
+            imageUri
+        )
+        val chooser = Intent.createChooser(intent, "Send Image Via...")
+        startActivity(chooser)
+    }
+
 }
 

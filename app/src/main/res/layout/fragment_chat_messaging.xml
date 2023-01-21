@@ -115,9 +115,9 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
+            android:layout_weight="1"
             android:text="@string/action_save"
             android:textColor="?attr/colorOnSecondary"
             android:textSize="14sp"
@@ -129,21 +129,33 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="?attr/colorOnSecondary"
+            android:layout_weight="1"
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="@string/action_delete"
-            android:layout_marginHorizontal="16dp"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShare"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/colorOnSecondary"
+            android:layout_weight="1"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="@string/action_share"
             android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
             style="@style/Widget.Material3.Button.TextButton"
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="@string/action_cancel"
-            android:layout_marginHorizontal="16dp"
             android:textColor="@color/neon_orange"
             android:textSize="14sp" />
 
