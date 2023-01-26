@@ -17,7 +17,6 @@ import kotlinx.coroutines.*
 
 class ChatMessagingViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val TAG = "ChatMessagingViewModel"
     private var firebaseUser: FirebaseUser
     private var firebaseAuth: FirebaseAuth
     private var firebaseStorage: FirebaseStorage
@@ -59,7 +58,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    suspend fun deleteChatFromDatabaseSuspended(timeStamp: String) {
+    private suspend fun deleteChatFromDatabaseSuspended(timeStamp: String) {
         withContext(Dispatchers.IO) {
             FirebaseDatabase.getInstance()
                 .getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId").removeValue()
@@ -74,7 +73,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    suspend fun addChatToDatabaseSuspended(chatMessage: String, messageType: MessageType) {
+    private suspend fun addChatToDatabaseSuspended(chatMessage: String, messageType: MessageType) {
         withContext(Dispatchers.IO) {
             val timeStamp = System.currentTimeMillis() / 100
             val message: Message =

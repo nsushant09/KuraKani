@@ -17,6 +17,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KuraKani"
         tools:targetApi="31">
+
+        <provider
+            android:authorities="com.neupanesushant.kurakani.provider"
+            android:name="androidx.core.content.FileProvider"
+            android:grantUriPermissions="true"
+            android:exported="false"
+            >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"
+                />
+        </provider>
+
         <activity
             android:name=".activities.register.RegisterActivity"
             android:exported="false"

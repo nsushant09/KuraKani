@@ -5,18 +5,20 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toUri
+import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -30,8 +32,13 @@ import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import kotlinx.coroutines.*
+import java.io.File
+import java.io.FileOutputStream
+import java.lang.ArithmeticException
+import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -63,11 +70,11 @@ class ChatMessagingFragment : Fragment() {
         }
         binding.btnSave.setOnClickListener {
             makeTextContainerVisible()
-            downloadImage(message.messageBody!!)
+            downloadImage(message.messageBody!!, false)
         }
         binding.btnShare.setOnClickListener {
             makeTextContainerVisible()
-            shareImage(Uri.parse(message.messageBody!!))
+            downloadImage(message.messageBody!!, true)
         }
 
     }
@@ -91,12 +98,12 @@ class ChatMessagingFragment : Fragment() {
         //set friend name and image
         mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner) {
             if (it) {
-                mainViewModel.friendUser.observe(viewLifecycleOwner) {
-                    viewModel.setToID(it?.uid!!)
+                mainViewModel.friendUser.observe(viewLifecycleOwner) { user ->
+                    viewModel.setToID(user?.uid!!)
                     viewModel.getAllChatFromDatabase()
-                    Glide.with(requireContext()).load(it.profileImage).centerCrop()
+                    Glide.with(requireContext()).load(user.profileImage).centerCrop()
                         .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-                    binding.tvFriendFirstName.text = it.firstName
+                    binding.tvFriendFirstName.text = user.firstName
                 }
             }
         }
@@ -224,18 +231,16 @@ class ChatMessagingFragment : Fragment() {
             .setAutoCancel(true)
     }
 
-    private fun downloadImage(imageUrl: String) {
+    private fun downloadImage(imageUrl: String, isSharing: Boolean) {
 
-// Create an HttpURLConnection to download the image
         val url = URL(imageUrl)
         val connection = url.openConnection() as HttpURLConnection
 
         uiScope.launch {
-            downloadImageSuspened(connection)
-        }
-
-        with(NotificationManagerCompat.from(requireContext())) {
-            notify(1, builder.build())
+            if (isSharing)
+                shareImage(connection)
+            else
+                downloadImageSuspened(connection)
         }
 
     }
@@ -245,26 +250,49 @@ class ChatMessagingFragment : Fragment() {
 
             val inputStream = connection.inputStream
             val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream.close()
+            kotlin.runCatching {
+                inputStream.close()
+            }
             MediaStore.Images.Media.insertImage(
                 requireContext().contentResolver,
                 bitmap,
                 "Image",
                 "Image downloaded from the internet"
-            ).toUri()
+            )
 
+            with(NotificationManagerCompat.from(requireContext())) {
+                notify(1, builder.build())
+            }
         }
     }
 
-    private fun shareImage(imageUri : Uri){
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "image/*"
-        intent.putExtra(
-            Intent.EXTRA_STREAM,
-            imageUri
-        )
-        val chooser = Intent.createChooser(intent, "Send Image Via...")
-        startActivity(chooser)
+    private suspend fun shareImage(connection: HttpURLConnection) {
+
+        withContext(Dispatchers.IO) {
+            val inputStream = connection.inputStream
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+
+            val tempFile = File(context!!.cacheDir, LocalDateTime.now().toString() + ".jpeg")
+            try {
+                kotlin.runCatching {
+                    inputStream.close()
+                    val fos = FileOutputStream(tempFile)
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                    fos.close()
+                }
+
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.setDataAndType(
+                    FileProvider.getUriForFile(context!!, context!!.applicationContext.packageName + ".provider", tempFile),
+                    "image/jpeg"
+                )
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                val chooser = Intent.createChooser(intent, "Send Image Via...")
+                startActivity(chooser)
+            } catch (e: Exception) {
+                Log.i("TAG", e.printStackTrace().toString())
+            }
+        }
     }
 
 }
