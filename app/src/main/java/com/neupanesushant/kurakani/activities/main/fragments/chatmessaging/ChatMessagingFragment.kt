@@ -28,6 +28,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
+import com.neupanesushant.kurakani.activities.services.DownloadService
+import com.neupanesushant.kurakani.activities.services.NotificationService
+import com.neupanesushant.kurakani.activities.services.ShareService
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
@@ -49,12 +52,13 @@ class ChatMessagingFragment : Fragment() {
     private lateinit var viewModel: ChatMessagingViewModel
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private val CHANNEL_ID = "channelID"
-    private lateinit var builder: NotificationCompat.Builder
     private val job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     private val IMAGE_SELECTOR_REQUEST_CODE = 981234
+
+    private lateinit var downloadService: DownloadService
+    private lateinit var shareService: ShareService
 
     private val performDelete: (Message) -> Unit = { message ->
         binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
@@ -70,11 +74,11 @@ class ChatMessagingFragment : Fragment() {
         }
         binding.btnSave.setOnClickListener {
             makeTextContainerVisible()
-            downloadImage(message.messageBody!!, false)
+            downloadService.downloadImage(message.messageBody!!)
         }
         binding.btnShare.setOnClickListener {
             makeTextContainerVisible()
-            downloadImage(message.messageBody!!, true)
+            shareService.shareImage(message.messageBody!!)
         }
 
     }
@@ -85,6 +89,8 @@ class ChatMessagingFragment : Fragment() {
     ): View {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
         viewModel = ViewModelProvider(this)[ChatMessagingViewModel::class.java]
+        downloadService = DownloadService(requireContext());
+        shareService = ShareService(requireContext());
         return binding.root
     }
 
@@ -133,9 +139,6 @@ class ChatMessagingFragment : Fragment() {
 
     private fun setupView() {
         makeTextContainerVisible()
-
-        createNotificationChannel()
-        setupNotification()
     }
 
 
@@ -202,95 +205,6 @@ class ChatMessagingFragment : Fragment() {
                     MessageType.TEXT
                 )
                 binding.etWriteMessage.text.clear()
-            }
-        }
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "channelName"
-            val description = "channelDescription"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                this.description = description
-            }
-            // register the channel with the system
-            val notificationManager: NotificationManager =
-                requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    private fun setupNotification() {
-        builder = NotificationCompat.Builder(requireContext(), CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_kurakani_logo)
-            .setContentTitle("Download")
-            .setContentText("Image saved")
-            .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-    }
-
-    private fun downloadImage(imageUrl: String, isSharing: Boolean) {
-
-        val url = URL(imageUrl)
-        val connection = url.openConnection() as HttpURLConnection
-
-        uiScope.launch {
-            if (isSharing)
-                shareImage(connection)
-            else
-                downloadImageSuspened(connection)
-        }
-
-    }
-
-    private suspend fun downloadImageSuspened(connection: HttpURLConnection) {
-        withContext(Dispatchers.IO) {
-
-            val inputStream = connection.inputStream
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            kotlin.runCatching {
-                inputStream.close()
-            }
-            MediaStore.Images.Media.insertImage(
-                requireContext().contentResolver,
-                bitmap,
-                "Image",
-                "Image downloaded from the internet"
-            )
-
-            with(NotificationManagerCompat.from(requireContext())) {
-                notify(1, builder.build())
-            }
-        }
-    }
-
-    private suspend fun shareImage(connection: HttpURLConnection) {
-
-        withContext(Dispatchers.IO) {
-            val inputStream = connection.inputStream
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-
-            val tempFile = File(context!!.cacheDir, LocalDateTime.now().toString() + ".jpeg")
-            try {
-                kotlin.runCatching {
-                    inputStream.close()
-                    val fos = FileOutputStream(tempFile)
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-                    fos.close()
-                }
-
-                val intent = Intent(Intent.ACTION_SEND)
-                intent.setDataAndType(
-                    FileProvider.getUriForFile(context!!, context!!.applicationContext.packageName + ".provider", tempFile),
-                    "image/jpeg"
-                )
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                val chooser = Intent.createChooser(intent, "Send Image Via...")
-                startActivity(chooser)
-            } catch (e: Exception) {
-                Log.i("TAG", e.printStackTrace().toString())
             }
         }
     }

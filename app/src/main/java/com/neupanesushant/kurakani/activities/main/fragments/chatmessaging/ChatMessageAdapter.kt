@@ -26,10 +26,10 @@ class ChatMessageAdapter(
     val performDelete: (Message) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    internal val FROM_TEXT = 10
-    internal val FROM_IMAGE = 11
-    internal val TO_TEXT = 20
-    internal val TO_IMAGE = 21
+    private val FROM_TEXT = 10
+    private val FROM_IMAGE = 11
+    private val TO_TEXT = 20
+    private val TO_IMAGE = 21
 
     private inner class ViewHolderFromText(binding: ChatMessageFromLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {

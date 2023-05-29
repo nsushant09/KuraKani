@@ -67,8 +67,6 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         withContext(Dispatchers.IO) {
             FirebaseDatabase.getInstance()
                 .getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId").removeValue()
-        }.addOnSuccessListener {
-            getChatUpdateFromDatabase()
         }
     }
 
@@ -140,7 +138,6 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
             val message = snapshot.getValue(Message::class.java)
             message?.let {
-
                 tempChatList.add(0, it)
                 _chatLog.value = tempChatList
             }
@@ -150,7 +147,9 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
-            getAllChatFromDatabase()
+            tempChatList.remove(snapshot.getValue(Message::class.java));
+            _chatLog.value = tempChatList
+//            getAllChatFromDatabase()
         }
 
         override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
