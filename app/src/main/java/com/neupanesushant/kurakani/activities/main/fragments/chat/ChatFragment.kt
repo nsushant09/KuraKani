@@ -1,6 +1,5 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chat
 
-//import com.bumptech.glide.Glide
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,7 +29,7 @@ class ChatFragment : Fragment() {
     private val chatMessagingFragment = ChatMessagingFragment()
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    val onClickOpenChatMessaging: (uid: String) -> Unit = {
+    private val onClickOpenChatMessaging: (uid: String) -> Unit = {
         mainViewModel.getFriendUserFromDatabase(it)
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatMessagingFragment)

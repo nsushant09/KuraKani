@@ -7,12 +7,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.parameter.parametersOf
 import java.net.HttpURLConnection
 import java.net.URL
 
-class DownloadService(private val context : Context) {
+class DownloadService(private val context : Context) : KoinComponent{
 
-    private val imageNotificationService = NotificationService(context, NotificationService.NotificationType.IMAGE);
+    private val imageNotificationService : NotificationService by inject{ parametersOf(NotificationService.NotificationType.IMAGE) };
     private val coroutineScope = CoroutineScope(Dispatchers.IO);
 
     fun downloadImage(imageUrl: String) {

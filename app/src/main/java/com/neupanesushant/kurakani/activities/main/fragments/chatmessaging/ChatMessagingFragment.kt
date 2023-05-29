@@ -35,13 +35,7 @@ import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import kotlinx.coroutines.*
-import java.io.File
-import java.io.FileOutputStream
-import java.lang.ArithmeticException
-import java.lang.Exception
-import java.net.HttpURLConnection
-import java.net.URL
-import java.time.LocalDateTime
+import org.koin.android.ext.android.inject
 import java.util.*
 
 
@@ -57,8 +51,8 @@ class ChatMessagingFragment : Fragment() {
 
     private val IMAGE_SELECTOR_REQUEST_CODE = 981234
 
-    private lateinit var downloadService: DownloadService
-    private lateinit var shareService: ShareService
+    private val downloadService : DownloadService by inject()
+    private val shareService : ShareService by inject()
 
     private val performDelete: (Message) -> Unit = { message ->
         binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
@@ -89,8 +83,6 @@ class ChatMessagingFragment : Fragment() {
     ): View {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
         viewModel = ViewModelProvider(this)[ChatMessagingViewModel::class.java]
-        downloadService = DownloadService(requireContext());
-        shareService = ShareService(requireContext());
         return binding.root
     }
 
