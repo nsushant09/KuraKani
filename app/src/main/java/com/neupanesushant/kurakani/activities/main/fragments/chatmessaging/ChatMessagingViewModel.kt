@@ -52,6 +52,11 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         toId = uid
     }
 
+    private fun resetFlags() {
+        runToOnce = false;
+        runFromOnce = false;
+    }
+
     fun deleteChatFromDatabase(timeStamp: String) {
         uiScope.launch {
             deleteChatFromDatabaseSuspended(timeStamp)
@@ -76,49 +81,25 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     private suspend fun addChatToDatabaseSuspended(chatMessage: String, messageType: MessageType) {
         withContext(Dispatchers.IO) {
             val timeStamp = System.currentTimeMillis() / 100
-            val message: Message =
-                Message(firebaseAuth.uid, toId, messageType, chatMessage, timeStamp)
-            FirebaseDatabase.getInstance()
-                .getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId")
-                .setValue(message)
-            FirebaseDatabase.getInstance()
-                .getReference("/user-messages/$toId$fromId/$toId$timeStamp$fromId")
-                .setValue(message)
-            FirebaseDatabase.getInstance().getReference("/latest-messages/$fromId/$toId")
-                .setValue(message)
-            FirebaseDatabase.getInstance().getReference("/latest-messages/$toId/$fromId")
-                .setValue(message)
-        }.addOnSuccessListener {
-            getChatUpdateFromDatabase()
-        }
-    }
+            val message = Message(firebaseAuth.uid, toId, messageType, chatMessage, timeStamp)
+            val fromMessagePath = "/user-messages/$fromId$toId/$fromId$timeStamp$toId"
+            val toMessagePath = "/user-messages/$toId$fromId/$toId$timeStamp$fromId"
+            val latestMessagePathFrom = "/latest-messages/$fromId/$toId"
+            val latestMessagePathTo = "/latest-messages/$toId/$fromId"
 
-    fun getAllChatFromDatabase() {
+            val updates = mapOf(
+                fromMessagePath to message,
+                toMessagePath to message,
+                latestMessagePathFrom to message,
+                latestMessagePathTo to message
+            )
 
-        uiScope.launch {
-            getAllChatSuspended()
-        }
-    }
-
-    private suspend fun getAllChatSuspended() {
-        withContext(Dispatchers.IO) {
-            FirebaseDatabase.getInstance().reference.child("user-messages").child("$fromId$toId")
-                .get().addOnSuccessListener {
-                    tempChatList.clear()
-                    it.children.forEach {
-                        if (it != null) {
-                            val message: Message = it.getValue(Message::class.java)!!
-                            tempChatList.add(0, message)
-                        }
-                    }
-                    _chatLog.value = tempChatList
-                }
+            resetFlags()
+            FirebaseDatabase.getInstance().reference.updateChildren(updates)
         }
     }
 
     fun getChatUpdateFromDatabase() {
-        runFromOnce = false
-        runToOnce = false
         uiScope.launch {
             getChatUpdateSupended()
         }
@@ -127,9 +108,7 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     private suspend fun getChatUpdateSupended() {
         withContext(Dispatchers.IO) {
             FirebaseDatabase.getInstance().getReference("/user-messages/$fromId$toId")
-                .addChildEventListener(fromChildEventListener)
-            FirebaseDatabase.getInstance().getReference("/user-messages/$toId$fromId")
-                .addChildEventListener(toChildEventListener)
+                .addChildEventListener(chatChildEventListener)
         }
     }
 
@@ -157,34 +136,21 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
     }
 
-    private val fromChildEventListener = object : ChildEventListener {
-
+    private val chatChildEventListener = object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            val message = snapshot.getValue(Message::class.java)
+            message?.let {
 
-            if (!runFromOnce) {
-                FirebaseDatabase.getInstance().reference.child("user-messages")
-                    .child("$fromId$toId")
-                    .get().addOnSuccessListener {
-                        it.children.last().getValue(Message::class.java)?.let {
-                            tempChatList.add(0, it)
-                            _chatLog.value = tempChatList
-                        }
-                    }
-                runFromOnce = true
+                tempChatList.add(0, it)
+                _chatLog.value = tempChatList
             }
         }
 
-        override fun onChildChanged(
-            snapshot: DataSnapshot,
-            previousChildName: String?
-        ) {
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
         }
 
         override fun onChildRemoved(snapshot: DataSnapshot) {
-            if (!runFromOnce) {
-                getAllChatFromDatabase()
-                runFromOnce = true
-            }
+            getAllChatFromDatabase()
         }
 
         override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
@@ -192,36 +158,15 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
         override fun onCancelled(error: DatabaseError) {
         }
-
     }
 
-    private val toChildEventListener = object : ChildEventListener {
-        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-            if (!runToOnce) {
-                getAllChatFromDatabase()
-                runToOnce = true
-            }
-        }
-
-        override fun onChildChanged(
-            snapshot: DataSnapshot,
-            previousChildName: String?
-        ) {
-        }
-
-        override fun onChildRemoved(snapshot: DataSnapshot) {
-            if (!runToOnce) {
-                getAllChatFromDatabase()
-                runToOnce = true
-            }
-        }
-
-        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-        }
-
-        override fun onCancelled(error: DatabaseError) {
-        }
-
+    fun getAllChatFromDatabase() {
+        tempChatList.clear()
+        getChatUpdateFromDatabase()
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
 }
