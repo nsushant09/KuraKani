@@ -219,19 +219,16 @@ class ChatMessagingFragment : Fragment() {
         }
 
         if (requestCode == CAMERA_IMAGE_CAPTURE_CODE && resultCode == Activity.RESULT_OK) {
-            ioScope.launch {
-                val file = File(requireContext().cacheDir, cameraService.getLastCapturedFileName())
-                val uri = FileProvider.getUriForFile(
-                    requireContext(),
-                    requireContext().applicationContext.packageName + ".provider",
-                    file
-                )
-                val tempImageMap: LinkedHashMap<String, Uri?> = LinkedHashMap()
-                tempImageMap[UUID.randomUUID().toString()] = uri
-                viewModel.addImagesToDatabase(tempImageMap)
-            }.invokeOnCompletion {
-                cameraService.removeLastCapturedFile()
-            }
+            val file = File(requireContext().cacheDir, cameraService.getLastCapturedFileName())
+            val uri = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().applicationContext.packageName + ".provider",
+                file
+            )
+            val tempImageMap: LinkedHashMap<String, Uri?> = LinkedHashMap()
+            tempImageMap[UUID.randomUUID().toString()] = uri
+            viewModel.addImagesToDatabase(tempImageMap)
+            cameraService.removeLastCapturedFile()
         }
 
     }
