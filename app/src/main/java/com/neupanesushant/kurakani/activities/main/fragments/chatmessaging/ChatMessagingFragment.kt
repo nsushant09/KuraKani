@@ -1,36 +1,22 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
-import android.Manifest
 import android.app.Activity
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.google.gson.JsonObject
+import com.neupanesushant.kurakani.MyApplication
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.activities.services.*
@@ -38,7 +24,9 @@ import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import kotlinx.coroutines.*
+import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 import java.io.File
 import java.util.*
 import kotlin.collections.LinkedHashMap
@@ -48,7 +36,6 @@ class ChatMessagingFragment : Fragment() {
 
     private lateinit var _binding: FragmentChatMessagingBinding
     private val binding get() = _binding
-    private lateinit var viewModel: ChatMessagingViewModel
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val job = Job()
@@ -57,6 +44,7 @@ class ChatMessagingFragment : Fragment() {
     private val downloadService: DownloadService by inject()
     private val shareService: ShareService by inject()
     private val cameraService: CameraService by inject()
+    private lateinit var viewModel: ChatMessagingViewModel
 
     private val performDelete: (Message) -> Unit = { message ->
         binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
@@ -65,7 +53,7 @@ class ChatMessagingFragment : Fragment() {
         makeLongActionContainerVisible()
         binding.btnDelete.setOnClickListener {
             makeTextContainerVisible()
-            viewModel.deleteChatFromDatabase(message.timeStamp!!.toString())
+            viewModel.deleteMessage(message.timeStamp!!.toString())
         }
         binding.btnCancel.setOnClickListener {
             makeTextContainerVisible()
@@ -86,13 +74,11 @@ class ChatMessagingFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
-        viewModel = ViewModelProvider(this)[ChatMessagingViewModel::class.java]
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupView()
         setupEventListener()
         setupObserver()
@@ -123,10 +109,7 @@ class ChatMessagingFragment : Fragment() {
 
         binding.btnSend.setOnClickListener {
             if (binding.etWriteMessage.text.isNotEmpty()) {
-                viewModel.addChatToDatabase(
-                    binding.etWriteMessage.text.toString(),
-                    MessageType.TEXT
-                )
+                viewModel.sendTextMessage(binding.etWriteMessage.text.toString())
                 binding.etWriteMessage.text.clear()
             }
         }
@@ -148,17 +131,24 @@ class ChatMessagingFragment : Fragment() {
         mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner) {
             if (it) {
                 mainViewModel.friendUser.observe(viewLifecycleOwner) { user ->
-                    viewModel.setToID(user?.uid!!)
-                    viewModel.getAllChatFromDatabase()
-                    Glide.with(requireContext()).load(user.profileImage).centerCrop()
+
+                    val koinApplication = requireActivity().application as MyApplication
+                    viewModel = koinApplication.getKoin().get { parametersOf(user?.uid) }
+                    viewModel.getAllMessages()
+                    Glide.with(requireContext()).load(user?.profileImage).centerCrop()
                         .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-                    binding.tvFriendFirstName.text = user.firstName
+                    binding.tvFriendFirstName.text = user?.firstName
+                    setChatLogObserver()
                 }
             }
         }
+    }
 
+    private fun setChatLogObserver() {
         viewModel.chatLog.observe(viewLifecycleOwner) {
-            setChatData(it)
+            if (it.isNotEmpty()) {
+                setChatData(it as ArrayList<Message>)
+            }
         }
     }
 
@@ -228,7 +218,6 @@ class ChatMessagingFragment : Fragment() {
             val tempImageMap: LinkedHashMap<String, Uri?> = LinkedHashMap()
             tempImageMap[UUID.randomUUID().toString()] = uri
             viewModel.addImagesToDatabase(tempImageMap)
-            cameraService.removeLastCapturedFile()
         }
 
     }
