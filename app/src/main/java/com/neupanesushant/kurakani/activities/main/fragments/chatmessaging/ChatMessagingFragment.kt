@@ -1,21 +1,25 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
+import android.Manifest
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
@@ -26,17 +30,18 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.gson.JsonObject
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
-import com.neupanesushant.kurakani.activities.services.DownloadService
-import com.neupanesushant.kurakani.activities.services.NotificationService
-import com.neupanesushant.kurakani.activities.services.ShareService
+import com.neupanesushant.kurakani.activities.services.*
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
+import java.io.File
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 
 class ChatMessagingFragment : Fragment() {
@@ -47,12 +52,11 @@ class ChatMessagingFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val job = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+    private val ioScope = CoroutineScope(job + Dispatchers.IO)
 
-    private val IMAGE_SELECTOR_REQUEST_CODE = 981234
-
-    private val downloadService : DownloadService by inject()
-    private val shareService : ShareService by inject()
+    private val downloadService: DownloadService by inject()
+    private val shareService: ShareService by inject()
+    private val cameraService: CameraService by inject()
 
     private val performDelete: (Message) -> Unit = { message ->
         binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
@@ -89,21 +93,18 @@ class ChatMessagingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupView()
+        setupEventListener()
+        setupObserver()
+    }
+
+    private fun setupView() {
+        makeTextContainerVisible()
+    }
+
+    private fun setupEventListener() {
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
-        }
-
-        //set friend name and image
-        mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner) {
-            if (it) {
-                mainViewModel.friendUser.observe(viewLifecycleOwner) { user ->
-                    viewModel.setToID(user?.uid!!)
-                    viewModel.getAllChatFromDatabase()
-                    Glide.with(requireContext()).load(user.profileImage).centerCrop()
-                        .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-                    binding.tvFriendFirstName.text = user.firstName
-                }
-            }
         }
 
         binding.ivSelectImage.setOnClickListener {
@@ -120,17 +121,45 @@ class ChatMessagingFragment : Fragment() {
             }
         }
 
-        setupEtMessageAction()
+        binding.btnSend.setOnClickListener {
+            if (binding.etWriteMessage.text.isNotEmpty()) {
+                viewModel.addChatToDatabase(
+                    binding.etWriteMessage.text.toString(),
+                    MessageType.TEXT
+                )
+                binding.etWriteMessage.text.clear()
+            }
+        }
+
+        binding.cardViewAddImageIcon.setOnClickListener {
+            if (PermissionManager.hasCameraPermission(requireContext())) {
+                startActivityForResult(
+                    cameraService.getCaptureImageIntent(),
+                    CAMERA_IMAGE_CAPTURE_CODE
+                )
+            } else {
+                PermissionManager.requestCameraPermission(requireActivity());
+            }
+        }
+    }
+
+    private fun setupObserver() {
+        //set friend name and image
+        mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner) {
+            if (it) {
+                mainViewModel.friendUser.observe(viewLifecycleOwner) { user ->
+                    viewModel.setToID(user?.uid!!)
+                    viewModel.getAllChatFromDatabase()
+                    Glide.with(requireContext()).load(user.profileImage).centerCrop()
+                        .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
+                    binding.tvFriendFirstName.text = user.firstName
+                }
+            }
+        }
 
         viewModel.chatLog.observe(viewLifecycleOwner) {
             setChatData(it)
         }
-
-        setupView()
-    }
-
-    private fun setupView() {
-        makeTextContainerVisible()
     }
 
 
@@ -173,6 +202,7 @@ class ChatMessagingFragment : Fragment() {
         )
     }
 
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -187,17 +217,34 @@ class ChatMessagingFragment : Fragment() {
                 viewModel.addImagesToDatabase(tempImageMap)
             }
         }
+
+        if (requestCode == CAMERA_IMAGE_CAPTURE_CODE && resultCode == Activity.RESULT_OK) {
+            ioScope.launch {
+                val file = File(requireContext().cacheDir, cameraService.getLastCapturedFileName())
+                val uri = FileProvider.getUriForFile(
+                    requireContext(),
+                    requireContext().applicationContext.packageName + ".provider",
+                    file
+                )
+                val tempImageMap: LinkedHashMap<String, Uri?> = LinkedHashMap()
+                tempImageMap[UUID.randomUUID().toString()] = uri
+                viewModel.addImagesToDatabase(tempImageMap)
+            }.invokeOnCompletion {
+                cameraService.removeLastCapturedFile()
+            }
+        }
+
     }
 
-    private fun setupEtMessageAction() {
-        binding.btnSend.setOnClickListener {
-            if (binding.etWriteMessage.text.isNotEmpty()) {
-                viewModel.addChatToDatabase(
-                    binding.etWriteMessage.text.toString(),
-                    MessageType.TEXT
-                )
-                binding.etWriteMessage.text.clear()
-            }
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startActivityForResult(cameraService.getCaptureImageIntent(), CAMERA_IMAGE_CAPTURE_CODE)
         }
     }
 

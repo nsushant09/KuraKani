@@ -1,8 +1,6 @@
 package com.neupanesushant.kurakani.koinmodules
 
-import com.neupanesushant.kurakani.activities.services.DownloadService
-import com.neupanesushant.kurakani.activities.services.NotificationService
-import com.neupanesushant.kurakani.activities.services.ShareService
+import com.neupanesushant.kurakani.activities.services.*
 import org.koin.dsl.module
 
 val appModule = module{
@@ -14,8 +12,11 @@ val appModule = module{
         ShareService(get())
     }
 
+    single{
+        CameraService(get())
+    }
+
     single{(notificationType : NotificationService.NotificationType)->
         NotificationService(get(), notificationType)
     }
-
 }

@@ -2,6 +2,7 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.app.Application
 import android.net.Uri
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
@@ -37,9 +38,6 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     private val sentImagesList get() = _sentImagesList
     private var sentImageUploadCounter = 0
 
-    private var runFromOnce = false
-    private var runToOnce = false
-
     init {
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
@@ -50,11 +48,6 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
 
     fun setToID(uid: String) {
         toId = uid
-    }
-
-    private fun resetFlags() {
-        runToOnce = false;
-        runFromOnce = false;
     }
 
     fun deleteChatFromDatabase(timeStamp: String) {
@@ -77,9 +70,10 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
     }
 
     private suspend fun addChatToDatabaseSuspended(chatMessage: String, messageType: MessageType) {
+        val timeStamp = System.currentTimeMillis() / 100
+        val message = Message(firebaseAuth.uid, toId, messageType, chatMessage, timeStamp)
+
         withContext(Dispatchers.IO) {
-            val timeStamp = System.currentTimeMillis() / 100
-            val message = Message(firebaseAuth.uid, toId, messageType, chatMessage, timeStamp)
             val fromMessagePath = "/user-messages/$fromId$toId/$fromId$timeStamp$toId"
             val toMessagePath = "/user-messages/$toId$fromId/$toId$timeStamp$fromId"
             val latestMessagePathFrom = "/latest-messages/$fromId/$toId"
@@ -92,12 +86,11 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
                 latestMessagePathTo to message
             )
 
-            resetFlags()
             FirebaseDatabase.getInstance().reference.updateChildren(updates)
         }
     }
 
-    fun getChatUpdateFromDatabase() {
+    private fun getChatUpdateFromDatabase() {
         uiScope.launch {
             getChatUpdateSupended()
         }
@@ -149,13 +142,13 @@ class ChatMessagingViewModel(application: Application) : AndroidViewModel(applic
         override fun onChildRemoved(snapshot: DataSnapshot) {
             tempChatList.remove(snapshot.getValue(Message::class.java));
             _chatLog.value = tempChatList
-//            getAllChatFromDatabase()
         }
 
         override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
         }
 
         override fun onCancelled(error: DatabaseError) {
+            Toast.makeText(application.applicationContext, "Could not send message", Toast.LENGTH_SHORT).show()
         }
     }
 

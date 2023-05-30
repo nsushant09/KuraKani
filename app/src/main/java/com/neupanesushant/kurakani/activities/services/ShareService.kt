@@ -36,7 +36,7 @@ class ShareService(private val context: Context?) {
             val inputStream = connection.inputStream
             val bitmap = BitmapFactory.decodeStream(inputStream)
 
-            val tempFile = File(context!!.cacheDir, LocalDateTime.now().toString() + ".jpeg")
+            val tempFile = File(context!!.cacheDir, System.currentTimeMillis().toString() + ".jpeg")
             try {
                 kotlin.runCatching {
                     inputStream.close()
