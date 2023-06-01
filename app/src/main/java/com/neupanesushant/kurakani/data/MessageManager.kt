@@ -1,7 +1,6 @@
-package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
+package com.neupanesushant.kurakani.data
 
 import android.net.Uri
-import android.util.Log
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -9,12 +8,11 @@ import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import okhttp3.Dispatcher
 
-class MessageManager(private val toId: String) : MessageRepo {
-
+class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance {
 
     val messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
+
 
     interface MessageCallback {
         fun onImageSentSuccessfully();
@@ -36,7 +34,7 @@ class MessageManager(private val toId: String) : MessageRepo {
         imageWithKey: Pair<String, Uri>,
         callback: MessageCallback
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
+        withContext(Dispatchers.IO){
             val timeStamp = System.currentTimeMillis() / 100
             val ref = firebaseStorage.getReference("/images/${imageWithKey.first}")
 
@@ -49,10 +47,13 @@ class MessageManager(private val toId: String) : MessageRepo {
                         downloadUrl.toString(),
                         timeStamp
                     )
-                    CoroutineScope(Dispatchers.IO).launch {
+
+                    val sendMessageJob = CoroutineScope(Dispatchers.IO)
+                    sendMessageJob.launch{
                         sendMessage(message, timeStamp)
                     }.invokeOnCompletion {
                         callback.onImageSentSuccessfully()
+                        sendMessageJob.cancel()
                     }
                 }
             }

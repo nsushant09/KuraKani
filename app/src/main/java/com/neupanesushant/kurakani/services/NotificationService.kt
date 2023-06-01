@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.activities.services
+package com.neupanesushant.kurakani.services
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

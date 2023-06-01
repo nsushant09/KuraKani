@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.activities.services
+package com.neupanesushant.kurakani.services
 
 import android.Manifest
 import android.app.Activity

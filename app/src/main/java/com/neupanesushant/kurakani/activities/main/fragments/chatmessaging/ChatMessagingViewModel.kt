@@ -6,8 +6,9 @@ import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.activities.services.CameraService
+import com.neupanesushant.kurakani.services.CameraService
 import com.neupanesushant.kurakani.classes.Message
+import com.neupanesushant.kurakani.data.MessageManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.java.KoinJavaComponent.get
@@ -19,7 +20,7 @@ class ChatMessagingViewModel(
     ViewModel() {
 
     private val viewModelJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.IO + viewModelJob)
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     private val cameraService : CameraService = get(CameraService::class.java)
 

@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.activities.services
+package com.neupanesushant.kurakani.services
 
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -15,7 +15,9 @@ import java.net.URL
 
 class DownloadService(private val context : Context) : KoinComponent{
 
-    private val imageNotificationService : NotificationService by inject{ parametersOf(NotificationService.NotificationType.IMAGE) };
+    private val imageNotificationService : NotificationService by inject{ parametersOf(
+        NotificationService.NotificationType.IMAGE
+    ) };
     private val coroutineScope = CoroutineScope(Dispatchers.IO);
 
     fun downloadImage(imageUrl: String) {

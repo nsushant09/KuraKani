@@ -19,10 +19,10 @@ import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.MyApplication
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
-import com.neupanesushant.kurakani.activities.services.*
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
+import com.neupanesushant.kurakani.services.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject

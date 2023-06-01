@@ -1,9 +1,12 @@
 package com.neupanesushant.kurakani.koinmodules
 
-import android.os.Message
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.ChatMessagingViewModel
-import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.MessageManager
+import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.activities.services.*
+import com.neupanesushant.kurakani.services.CameraService
+import com.neupanesushant.kurakani.services.DownloadService
+import com.neupanesushant.kurakani.services.NotificationService
+import com.neupanesushant.kurakani.services.ShareService
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.parameter.parametersOf

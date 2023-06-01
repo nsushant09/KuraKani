@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.activities.services
+package com.neupanesushant.kurakani.services
 
 const val CAMERA_PERMISSION_CODE  = 1;
 
