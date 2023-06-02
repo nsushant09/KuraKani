@@ -31,8 +31,4 @@ class CameraService(private val context: Context) {
             file.delete()
     }
 
-    companion object {
-        const val FILE_NAME_KEY = "CAMERA_SERVICE_FILE_NAME_KEY";
-    }
-
 }

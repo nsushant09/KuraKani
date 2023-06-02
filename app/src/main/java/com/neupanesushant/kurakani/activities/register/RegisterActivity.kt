@@ -9,43 +9,48 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
 import com.neupanesushant.kurakani.activities.main.MainActivity
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.data.FirebaseInstance
+import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.databinding.ActivityRegisterBinding
+import com.neupanesushant.kurakani.services.IMAGE_SELECTOR_REQUEST_CODE
+import com.neupanesushant.kurakani.services.PermissionManager
+import com.neupanesushant.kurakani.services.READ_EXTERNAL_STORAGE_PERMISSION_CODE
+import com.neupanesushant.kurakani.services.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.internal.Util
+import org.koin.android.ext.android.inject
 import java.util.*
 
-class RegisterActivity : AppCompatActivity() {
+class RegisterActivity : AppCompatActivity(), FirebaseInstance {
     private lateinit var binding: ActivityRegisterBinding
-    private val TAG: String = "RegisterActivity"
-    private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firebaseStorage: FirebaseStorage
-    private lateinit var firebaseDatabase: FirebaseDatabase
-    private var profileImageURI: Uri? = null
-    private var profileImageURL: String = ""
-    private var isImageAlsoUplaoded = false
 
-    private val IMAGE_SELECTOR_REQUEST_CODE = 111223344
+    private var profileImageURI: Uri? = null
+    private val registerAndLogin : RegisterAndLogin by inject()
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        firebaseAuth = FirebaseAuth.getInstance()
-        firebaseStorage = FirebaseStorage.getInstance()
-        firebaseDatabase = FirebaseDatabase.getInstance()
-        setLogInClick()
 
+        setupView()
+        setupEventListener()
+        setupObserver()
+    }
+
+    private fun setupView() {
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun setupEventListener() {
         binding.btnSignUp.setOnClickListener {
             createNewUser()
         }
@@ -53,6 +58,14 @@ class RegisterActivity : AppCompatActivity() {
         binding.tvChoosePhoto.setOnClickListener {
             chooseImage()
         }
+
+        binding.llLogIn.setOnClickListener {
+            finish()
+        }
+    }
+
+    private fun setupObserver() {
+
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -60,60 +73,55 @@ class RegisterActivity : AppCompatActivity() {
         val email = binding.etEmail.text.toString()
         val password = binding.etPassword.text.toString()
         val firstName = binding.etFirstname.text.toString()
-        val lastName = binding.etLastname.text.toString()
 
         when {
             TextUtils.isEmpty(email.trim { it <= ' ' }) -> {
-                Toast.makeText(this@RegisterActivity, "Please enter email ", Toast.LENGTH_SHORT)
-                    .show()
+                Utils.showToast(this@RegisterActivity, "Please enter email ")
             }
 
             TextUtils.isEmpty(firstName.trim { it <= ' ' }) -> {
-                Toast.makeText(this@RegisterActivity, "Please enter password", Toast.LENGTH_SHORT)
-                    .show()
+                Utils.showToast(this@RegisterActivity, "Please enter firstname")
             }
 
             TextUtils.isEmpty(password.trim { it <= ' ' }) -> {
-                Toast.makeText(this@RegisterActivity, "Please enter password", Toast.LENGTH_SHORT)
-                    .show()
+                Utils.showToast(this@RegisterActivity, "Please enter password")
             }
 
             password.length < 8 -> {
-                Toast.makeText(
+                Utils.showToast(
                     this,
-                    "You password should contain at least 8 letters",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    "You password should contain at least 8 letters"
+                )
             }
 
 
             else -> {
-                firebaseAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            Toast.makeText(this, "Your account is being created...", Toast.LENGTH_SHORT).show()
-                            uploadImageToFirebaseStorage()
-                        } else {
-                            Toast.makeText(this, "Invalid Email Address", Toast.LENGTH_SHORT)
-                                .show()
-                        }
 
-                    }
+                CoroutineScope(Dispatchers.Main).launch {
+                    registerAndLogin.createNewUser(
+                        email,
+                        password,
+                        object : RegisterAndLogin.Callback {
+                            override fun onSuccess() {
+                                saveUserToFirebaseDatabase()
+                            }
 
+                            override fun onFailure(failureReason: String) {
+                                Utils.showToast(this@RegisterActivity, failureReason)
+                            }
+                        })
+                }
             }
         }
     }
 
     private fun chooseImage() {
-        Log.i(TAG, "GRANTED PERMISSION")
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, IMAGE_SELECTOR_REQUEST_CODE)
-    }
-
-    private fun setLogInClick() {
-        binding.llLogIn.setOnClickListener {
-            finish()
+        if (PermissionManager.hasReadExternalStoragePermission(this)) {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            startActivityForResult(intent, IMAGE_SELECTOR_REQUEST_CODE)
+        } else {
+            PermissionManager.requestReadExternalStoragePermission(this)
         }
     }
 
@@ -133,72 +141,47 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    fun uploadImageToFirebaseStorage() {
-        if (checkPermissions()) {
-            if (profileImageURI == null) {
-                saveUserToFirebaseDatabase()
-                return
-            }
-            isImageAlsoUplaoded = true
-            val fileName = UUID.randomUUID().toString()
-            val ref = firebaseStorage.getReference("/images/$fileName")
-            ref.putFile(profileImageURI!!).addOnSuccessListener {
-                ref.downloadUrl.addOnSuccessListener {
-                    profileImageURL = it.toString()
-                    saveUserToFirebaseDatabase()
-                }
-            }.addOnFailureListener {
-                Toast.makeText(baseContext, "Could not upload Image ", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            requestPermissions()
-        }
-    }
-
     private fun saveUserToFirebaseDatabase() {
-        val ref = firebaseDatabase.getReference("/users/${firebaseAuth.uid}")
-        val user: User = User(
-            firebaseAuth.uid!!,
-            binding.etFirstname.text.toString(),
-            binding.etLastname.text.toString(),
-            "${binding.etFirstname.text.toString()} ${binding.etLastname.text.toString()}",
-            profileImageURL,
-        )
-        ref.setValue(user).addOnSuccessListener {
-            logIn()
+        CoroutineScope(Dispatchers.Main).launch {
+            registerAndLogin.addUser(
+                binding.etFirstname.text.toString(),
+                binding.etLastname.text.toString(),
+                profileImageURI,
+                object : RegisterAndLogin.Callback {
+                    override fun onSuccess() {
+                        logIn()
+                    }
+
+                    override fun onFailure(failureReason: String) {
+                        Toast.makeText(this@RegisterActivity, failureReason, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                }
+            )
         }
     }
 
-    private fun logIn(){
+    private fun logIn() {
         val email = binding.etEmail.text.toString()
         val password = binding.etPassword.text.toString()
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnSuccessListener {
-            Intent(this@RegisterActivity, MainActivity::class.java).apply {
-                flags =
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(this)
-                finish()
-            }
-        }.addOnFailureListener{
-            Toast.makeText(this, "Error : ${it.message}", Toast.LENGTH_LONG).show()
-        }
-    }
 
-    private fun checkPermissions(): Boolean {
-        if (ContextCompat.checkSelfPermission(
-                applicationContext,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            return true
-        }
-        return false
-    }
+        CoroutineScope(Dispatchers.Main).launch {
+            registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
+                override fun onSuccess() {
+                    Intent(this@RegisterActivity, MainActivity::class.java).apply {
+                        flags =
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(this)
+                        finish()
+                    }
+                }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun requestPermissions() {
-        requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 11)
+                override fun onFailure(failureReason: String) {
+                    Utils.showToast(this@RegisterActivity, failureReason)
+                }
+            })
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -208,9 +191,9 @@ class RegisterActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 11) {
+        if (requestCode == READ_EXTERNAL_STORAGE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                uploadImageToFirebaseStorage()
+                chooseImage()
             } else {
                 Toast.makeText(applicationContext, "Denied", Toast.LENGTH_SHORT).show()
             }

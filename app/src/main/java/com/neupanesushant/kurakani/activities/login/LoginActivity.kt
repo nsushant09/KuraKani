@@ -5,73 +5,88 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
-import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainActivity
 import com.neupanesushant.kurakani.activities.register.RegisterActivity
+import com.neupanesushant.kurakani.data.FirebaseInstance
+import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.databinding.ActivityLoginBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
-class LoginActivity : AppCompatActivity() {
-    private lateinit var binding : ActivityLoginBinding
-    private lateinit var firebaseAuth : FirebaseAuth
+class LoginActivity : AppCompatActivity(), FirebaseInstance {
+    private lateinit var binding: ActivityLoginBinding
+    private val registerAndLogin : RegisterAndLogin by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        firebaseAuth = FirebaseAuth.getInstance()
-        if(firebaseAuth.currentUser != null){
+        if (firebaseAuth.currentUser != null) {
             gotoMainActivity()
         }
 
-        validateLogin()
-        setSignUpClick()
+        setupView()
+        setupEventListener()
+        setupObserver()
     }
 
+    private fun setupView() {
+    }
 
-    fun setSignUpClick(){
+    private fun setupObserver() {
+    }
+
+    private fun setupEventListener() {
         binding.llSignUp.setOnClickListener {
-            Intent(this@LoginActivity, RegisterActivity::class.java).apply{
+            Intent(this@LoginActivity, RegisterActivity::class.java).apply {
                 startActivity(this)
             }
         }
-    }
 
-    fun gotoMainActivity(){
-        Intent(this, MainActivity::class.java).apply{
-            startActivity(this)
-            finish()
-        }
-    }
-
-    fun validateLogin(){
         binding.btnLogin.setOnClickListener {
 
-            when{
-                TextUtils.isEmpty(binding.etEmail.text.toString().trim {it <= ' '}) -> {
+            when {
+                TextUtils.isEmpty(binding.etEmail.text.toString().trim { it <= ' ' }) -> {
                     Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
-                TextUtils.isEmpty(binding.etPassword.text.toString().trim{it <= ' '}) -> {
+                TextUtils.isEmpty(binding.etPassword.text.toString().trim { it <= ' ' }) -> {
                     Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
                 else -> {
                     val email: String = binding.etEmail.text.toString()
-                    val password : String = binding.etPassword.text.toString()
+                    val password: String = binding.etPassword.text.toString()
 
-                    firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener{
-                        if(it.isSuccessful){
-                            gotoMainActivity()
-                        }else{
-                            Toast.makeText(this, it.exception!!.message.toString(), Toast.LENGTH_LONG).show()
-                        }
+                    CoroutineScope(Dispatchers.Main).launch {
+                        registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
+                            override fun onSuccess() {
+                                gotoMainActivity()
+                            }
+
+                            override fun onFailure(failureReason: String) {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    failureReason ?: "Could not login",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                        })
                     }
                 }
             }
+        }
+    }
 
+    private fun gotoMainActivity() {
+        Intent(this, MainActivity::class.java).apply {
+            startActivity(this)
+            finish()
         }
     }
 }

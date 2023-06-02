@@ -2,6 +2,7 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.app.Application
 import android.net.Uri
+import android.widget.Toast
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,12 +23,12 @@ class ChatMessagingViewModel(
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    private val cameraService : CameraService = get(CameraService::class.java)
+    private val cameraService: CameraService = get(CameraService::class.java)
 
     private val _chatLog = MutableLiveData<List<Message>>()
     val chatLog get() = _chatLog
 
-    private val _sentImagesList = MutableLiveData<kotlin.collections.LinkedHashMap<String, Uri?>>()
+    private val _sentImagesList = MutableLiveData<java.util.ArrayList<Uri>>()
     private val sentImagesList get() = _sentImagesList
     private var sentImageUploadCounter = 0
 
@@ -52,7 +53,7 @@ class ChatMessagingViewModel(
         }
     }
 
-    fun addImagesToDatabase(imageList: kotlin.collections.LinkedHashMap<String, Uri?>) {
+    fun addImagesToDatabase(imageList: ArrayList<Uri>) {
         sentImageUploadCounter = 0
         _sentImagesList.value = imageList
         if (sentImagesList.value != null) {
@@ -63,18 +64,17 @@ class ChatMessagingViewModel(
 
     private fun addSingleImageToDatabase(index: Int) {
         uiScope.launch {
-            val keys = sentImagesList.value!!.keys
-            if (index < keys.size) {
-                val currentKey = keys.elementAt(index)
+            if (index < sentImagesList.value!!.size) {
                 messageManager.sendImageMessage(
-                    Pair(
-                        currentKey,
-                        sentImagesList.value!![currentKey]!!
-                    ),
+                    sentImagesList.value!![index],
                     object : MessageManager.MessageCallback {
-                        override fun onImageSentSuccessfully() {
+
+                        override fun onMessageSent() {
                             cameraService.removeLastCapturedFile()
                             addSingleImageToDatabase(index + 1)
+                        }
+
+                        override fun onMessageDeclined() {
                         }
                     }
                 )

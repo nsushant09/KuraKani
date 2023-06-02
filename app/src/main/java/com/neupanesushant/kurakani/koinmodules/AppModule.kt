@@ -2,7 +2,7 @@ package com.neupanesushant.kurakani.koinmodules
 
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.ChatMessagingViewModel
 import com.neupanesushant.kurakani.data.MessageManager
-import com.neupanesushant.kurakani.activities.services.*
+import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.services.CameraService
 import com.neupanesushant.kurakani.services.DownloadService
 import com.neupanesushant.kurakani.services.NotificationService
@@ -27,6 +27,10 @@ val appModule = module{
 
     single{(notificationType : NotificationService.NotificationType)->
         NotificationService(get(), notificationType)
+    }
+
+    single{
+        RegisterAndLogin()
     }
 
     factory<MessageManager>{

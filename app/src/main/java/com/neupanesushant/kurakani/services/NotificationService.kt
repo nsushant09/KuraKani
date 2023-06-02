@@ -10,7 +10,7 @@ import com.neupanesushant.kurakani.R
 
 class NotificationService(private val context: Context, private val notificationType: NotificationType) {
 
-    private val CHANNEL_ID = "channelID"
+    private val IMAGE_DOWNLOAD_CHANNEL_ID = "IMAGE_DOWNLOAD_CHANNEL_ID"
     private lateinit var builder: NotificationCompat.Builder
 
     init{
@@ -23,10 +23,10 @@ class NotificationService(private val context: Context, private val notification
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "channelName"
-            val description = "channelDescription"
+            val name = "Image download channel"
+            val description = "This channel is used to display notification for image downloads"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            val channel = NotificationChannel(IMAGE_DOWNLOAD_CHANNEL_ID, name, importance).apply {
                 this.description = description
             }
             // register the channel with the system
@@ -37,7 +37,7 @@ class NotificationService(private val context: Context, private val notification
     }
 
     private fun setupImageNotification() {
-        builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        builder = NotificationCompat.Builder(context, IMAGE_DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_kurakani_logo)
             .setContentTitle("Download")
             .setContentText("Image saved")

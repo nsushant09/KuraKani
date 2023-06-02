@@ -8,14 +8,19 @@ import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance {
+class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, KoinComponent {
 
+    private val registerAndLogin : RegisterAndLogin by inject()
     val messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
 
 
     interface MessageCallback {
-        fun onImageSentSuccessfully();
+        fun onMessageSent();
+        fun onMessageDeclined();
+
     }
 
     override suspend fun sendTextMessage(chatMessage: String) {
@@ -31,15 +36,13 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance {
     }
 
     override suspend fun sendImageMessage(
-        imageWithKey: Pair<String, Uri>,
+        image: Uri,
         callback: MessageCallback
     ) {
-        withContext(Dispatchers.IO){
+        withContext(Dispatchers.IO) {
             val timeStamp = System.currentTimeMillis() / 100
-            val ref = firebaseStorage.getReference("/images/${imageWithKey.first}")
-
-            ref.putFile(imageWithKey.second).addOnSuccessListener {
-                ref.downloadUrl.addOnSuccessListener { downloadUrl ->
+            registerAndLogin.addImageToDatabase(image, object : RegisterAndLogin.ImageCallback {
+                override fun onImageAdded(downloadUrl: String) {
                     val message = Message(
                         firebaseAuth.uid,
                         toId,
@@ -49,17 +52,19 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance {
                     )
 
                     val sendMessageJob = CoroutineScope(Dispatchers.IO)
-                    sendMessageJob.launch{
+                    sendMessageJob.launch {
                         sendMessage(message, timeStamp)
                     }.invokeOnCompletion {
-                        callback.onImageSentSuccessfully()
+                        callback.onMessageSent()
                         sendMessageJob.cancel()
                     }
                 }
-            }
+
+                override fun onImageDeclined() {
+                }
+            })
         }
     }
-
 
     override suspend fun sendMessage(message: Message, timeStamp: Long) {
 

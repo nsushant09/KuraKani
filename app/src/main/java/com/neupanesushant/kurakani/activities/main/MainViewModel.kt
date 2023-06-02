@@ -12,10 +12,7 @@ import kotlinx.coroutines.*
 
 class MainViewModel() : ViewModel() {
 
-    private val TAG = "MainViewModel"
-    private lateinit var firebaseUser: FirebaseUser
     private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firebaseStorage: FirebaseStorage
     private lateinit var firebaseDatabase: DatabaseReference
 
     private val viewModelJob = Job()

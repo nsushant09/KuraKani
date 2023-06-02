@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat
 
 
 object PermissionManager {
@@ -17,11 +19,22 @@ object PermissionManager {
 
     fun requestCameraPermission(activity: Activity) {
         val permissions = arrayOf(Manifest.permission.CAMERA)
-        ActivityCompat.requestPermissions(
+        requestPermissions(
             activity,
             permissions,
             CAMERA_PERMISSION_CODE
         )
+    }
+
+    fun hasReadExternalStoragePermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun requestReadExternalStoragePermission(activity: Activity) {
+        requestPermissions(activity, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), READ_EXTERNAL_STORAGE_PERMISSION_CODE)
     }
 
 }

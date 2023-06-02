@@ -29,6 +29,7 @@ import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
 
 
@@ -39,7 +40,6 @@ class ChatMessagingFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private val job = Job()
-    private val ioScope = CoroutineScope(job + Dispatchers.IO)
 
     private val downloadService: DownloadService by inject()
     private val shareService: ShareService by inject()
@@ -199,12 +199,12 @@ class ChatMessagingFragment : Fragment() {
 
         if (requestCode == IMAGE_SELECTOR_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
 
-            val tempImageMap: LinkedHashMap<String, Uri?> = LinkedHashMap()
+            val tempImages: ArrayList<Uri> = arrayListOf()
             if (data.clipData != null) {
                 for (i in 0 until data.clipData!!.itemCount) {
-                    tempImageMap[UUID.randomUUID().toString()] = data.clipData!!.getItemAt(i).uri
+                    tempImages.add(data.clipData!!.getItemAt(i).uri)
                 }
-                viewModel.addImagesToDatabase(tempImageMap)
+                viewModel.addImagesToDatabase(tempImages)
             }
         }
 
@@ -215,9 +215,9 @@ class ChatMessagingFragment : Fragment() {
                 requireContext().applicationContext.packageName + ".provider",
                 file
             )
-            val tempImageMap: LinkedHashMap<String, Uri?> = LinkedHashMap()
-            tempImageMap[UUID.randomUUID().toString()] = uri
-            viewModel.addImagesToDatabase(tempImageMap)
+            val tempImages: ArrayList<Uri> = arrayListOf()
+            tempImages.add(uri)
+            viewModel.addImagesToDatabase(tempImages)
         }
 
     }
