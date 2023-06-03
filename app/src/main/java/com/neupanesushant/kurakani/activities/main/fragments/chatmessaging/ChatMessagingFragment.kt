@@ -21,6 +21,7 @@ import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
+import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import com.neupanesushant.kurakani.services.*
 import kotlinx.coroutines.*
@@ -33,18 +34,21 @@ import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
 
 
-class ChatMessagingFragment : Fragment() {
+class ChatMessagingFragment(private val user: User, private val friendUID: String) : Fragment() {
+
+    companion object {
+        fun getInstance(user: User, friendUID: String): ChatMessagingFragment {
+            return ChatMessagingFragment(user, friendUID);
+        }
+    }
 
     private lateinit var _binding: FragmentChatMessagingBinding
     private val binding get() = _binding
-    private val mainViewModel: MainViewModel by activityViewModels()
-
-    private val job = Job()
 
     private val downloadService: DownloadService by inject()
     private val shareService: ShareService by inject()
     private val cameraService: CameraService by inject()
-    private lateinit var viewModel: ChatMessagingViewModel
+    private val viewModel: ChatMessagingViewModel by inject { parametersOf(friendUID) }
 
     private val performDelete: (Message) -> Unit = { message ->
         binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
@@ -74,6 +78,8 @@ class ChatMessagingFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
+        viewModel.getFriendUserDetails(friendUID)
+        viewModel.setUser(user)
         return binding.root
     }
 
@@ -128,18 +134,13 @@ class ChatMessagingFragment : Fragment() {
 
     private fun setupObserver() {
         //set friend name and image
-        mainViewModel.isFriendValueLoaded.observe(viewLifecycleOwner) {
-            if (it) {
-                mainViewModel.friendUser.observe(viewLifecycleOwner) { user ->
-
-                    val koinApplication = requireActivity().application as MyApplication
-                    viewModel = koinApplication.getKoin().get { parametersOf(user?.uid) }
-                    viewModel.getAllMessages()
-                    Glide.with(requireContext()).load(user?.profileImage).centerCrop()
-                        .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-                    binding.tvFriendFirstName.text = user?.firstName
-                    setChatLogObserver()
-                }
+        viewModel.friendUser.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                viewModel.getAllMessages()
+                Glide.with(requireContext()).load(user.profileImage).centerCrop()
+                    .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
+                binding.tvFriendFirstName.text = user.firstName
+                setChatLogObserver()
             }
         }
     }
@@ -179,7 +180,7 @@ class ChatMessagingFragment : Fragment() {
         binding.rvChatContent.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         binding.rvChatContent.adapter =
-            ChatMessageAdapter(requireContext(), mainViewModel, messageList, performDelete)
+            ChatMessageAdapter(requireContext(), viewModel, messageList, performDelete)
     }
 
     private fun chooseImage() {

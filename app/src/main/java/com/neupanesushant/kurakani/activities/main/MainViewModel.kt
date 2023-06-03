@@ -8,12 +8,13 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.data.FirebaseInstance
+import com.neupanesushant.kurakani.data.UserManager
 import kotlinx.coroutines.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class MainViewModel() : ViewModel() {
-
-    private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firebaseDatabase: DatabaseReference
+class MainViewModel() : ViewModel(), KoinComponent, FirebaseInstance {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -21,57 +22,18 @@ class MainViewModel() : ViewModel() {
     private val _user = MutableLiveData<User?>()
     val user get() = _user
 
-    private val _friendUser = MutableLiveData<User?>()
-    val friendUser get() = _friendUser
-
-    private val _isFriendValueLoaded = MutableLiveData<Boolean>()
-    val isFriendValueLoaded get() = _isFriendValueLoaded
+    private val userManager: UserManager by inject()
 
     init {
-        firebaseAuth = FirebaseAuth.getInstance()
-        firebaseDatabase = FirebaseDatabase.getInstance().getReference("/users/${firebaseAuth.uid}")
         getUserFromDatabase()
     }
 
     fun getUserFromDatabase() {
         uiScope.launch {
-            getUserFromDatabaseSuspended()
+            userManager.getSelectedUser(firebaseAuth.uid!!) { user ->
+                _user.postValue(user)
+            }
         }
     }
 
-    private suspend fun getUserFromDatabaseSuspended() {
-        withContext(Dispatchers.IO) {
-            FirebaseDatabase.getInstance().getReference().child("users")
-                .child(firebaseAuth.uid.toString()).get().addOnSuccessListener {
-                    _user.value = it.getValue(User::class.java)
-                }.addOnFailureListener {
-                }
-        }
-    }
-
-    fun getFriendUserFromDatabase(uid: String) {
-        _isFriendValueLoaded.value = false
-        uiScope.launch {
-            getFriendUserFromDatabaseSuspended(uid)
-        }
-    }
-
-    private suspend fun getFriendUserFromDatabaseSuspended(uid: String) {
-        withContext(Dispatchers.IO) {
-            FirebaseDatabase.getInstance().getReference().child("users")
-                .child(uid).get().addOnSuccessListener {
-                    _friendUser.value = it.getValue(User::class.java)
-                    _isFriendValueLoaded.value = true
-                }.addOnFailureListener {
-                }
-        }
-    }
-
-    fun nullFriendUser() {
-        _friendUser.value = null
-    }
-
-    fun updateUser(user: User) {
-        firebaseDatabase.setValue(user)
-    }
 }

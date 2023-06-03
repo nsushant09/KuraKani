@@ -17,20 +17,19 @@ import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.ChatM
 import com.neupanesushant.kurakani.activities.main.fragments.me.MeFragment
 import com.neupanesushant.kurakani.activities.main.fragments.search.SearchFragment
 import com.neupanesushant.kurakani.databinding.FragmentChatBinding
+import org.koin.android.ext.android.inject
 
 class ChatFragment : Fragment() {
 
-    private val TAG = "ChatFragment"
     private lateinit var _binding: FragmentChatBinding
     private val binding get() = _binding
-    lateinit var chatViewModel: ChatViewModel
     private val searchFragment = SearchFragment()
     private val meFragment = MeFragment()
-    private val chatMessagingFragment = ChatMessagingFragment()
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val chatViewModel : ChatViewModel by inject()
 
-    private val onClickOpenChatMessaging: (uid: String) -> Unit = {
-        mainViewModel.getFriendUserFromDatabase(it)
+    private val onClickOpenChatMessaging: (uid: String) -> Unit = { uid ->
+        val chatMessagingFragment = ChatMessagingFragment.getInstance(mainViewModel.user.value!!, uid)
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatMessagingFragment)
             isAddToBackStackAllowed
@@ -44,8 +43,6 @@ class ChatFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentChatBinding.inflate(layoutInflater)
-        chatViewModel = ViewModelProvider(this).get(ChatViewModel::class.java)
-        // Inflate the layout for this fragment
         return binding.root
     }
 

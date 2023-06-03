@@ -21,7 +21,7 @@ import com.neupanesushant.kurakani.databinding.ChatMessageToLayoutBinding
 
 class ChatMessageAdapter(
     val context: Context,
-    val viewModel: MainViewModel,
+    val viewModel: ChatMessagingViewModel,
     val list: List<Message>,
     val performDelete: (Message) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

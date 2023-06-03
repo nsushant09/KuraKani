@@ -18,6 +18,7 @@ import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.ChatMessagingFragment
 import com.neupanesushant.kurakani.databinding.FragmentSearchBinding
+import org.koin.android.ext.android.inject
 
 
 class SearchFragment : Fragment() {
@@ -25,10 +26,11 @@ class SearchFragment : Fragment() {
     private lateinit var _binding: FragmentSearchBinding
     private val binding get() = _binding
     private lateinit var viewModel: SearchViewModel
-    private val mainViewModel: MainViewModel by activityViewModels()
-    private val chatMessagingFragment = ChatMessagingFragment()
-    val onClickOpenChatMessaging: (uid: String) -> Unit = {
-        mainViewModel.getFriendUserFromDatabase(it)
+    private val mainViewModel: MainViewModel by inject()
+
+    private val onClickOpenChatMessaging: (uid: String) -> Unit = { uid ->
+        val chatMessagingFragment =
+            ChatMessagingFragment.getInstance(mainViewModel.user.value!!, uid)
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatMessagingFragment)
             commit()

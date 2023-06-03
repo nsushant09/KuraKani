@@ -4,6 +4,7 @@ import android.net.Uri
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import kotlinx.coroutines.*
@@ -13,8 +14,10 @@ import org.koin.core.component.inject
 
 class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, KoinComponent {
 
-    private val registerAndLogin : RegisterAndLogin by inject()
+    private val registerAndLogin: RegisterAndLogin by inject()
+
     val messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
+    val latestMessages: MutableStateFlow<ArrayList<Message>> = MutableStateFlow(arrayListOf())
 
 
     interface MessageCallback {
@@ -96,6 +99,28 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, 
         withContext(Dispatchers.IO) {
             firebaseDatabase.getReference("/user-messages/$fromId$toId")
                 .addChildEventListener(chatChildEventListener)
+        }
+    }
+
+    override suspend fun getLatestMessage() {
+        withContext(Dispatchers.IO) {
+            firebaseDatabase.reference.child("latest-messages")
+                .child(fromId)
+                .addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val tempList = ArrayList<Message>()
+                        snapshot.children.forEach {
+                            it.getValue(Message::class.java)?.let { message ->
+                                tempList.add(message)
+                            }
+                        }
+                        latestMessages.value = tempList
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+
+                })
         }
     }
 

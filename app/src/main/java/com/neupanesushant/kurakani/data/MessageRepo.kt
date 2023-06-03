@@ -12,4 +12,6 @@ interface MessageRepo {
     suspend fun getAllMessage()
     suspend fun getMessageUpdate()
 
+    suspend fun getLatestMessage()
+
 }
