@@ -25,8 +25,8 @@ class SearchFragment : Fragment() {
 
     private lateinit var _binding: FragmentSearchBinding
     private val binding get() = _binding
-    private lateinit var viewModel: SearchViewModel
     private val mainViewModel: MainViewModel by inject()
+    private val viewModel : SearchViewModel by inject()
 
     private val onClickOpenChatMessaging: (uid: String) -> Unit = { uid ->
         val chatMessagingFragment =
@@ -43,7 +43,6 @@ class SearchFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         _binding = FragmentSearchBinding.inflate(layoutInflater)
-        viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
         return binding.root
     }
 
@@ -70,7 +69,7 @@ class SearchFragment : Fragment() {
         })
     }
 
-    fun setupSearchBar() {
+    private fun setupSearchBar() {
         val imm: InputMethodManager =
             activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showSoftInput(binding.etSearchbar, InputMethodManager.SHOW_IMPLICIT)
@@ -80,7 +79,7 @@ class SearchFragment : Fragment() {
         binding.etSearchbar.requestFocus()
     }
 
-    fun searchBarAction() {
+    private fun searchBarAction() {
 
         binding.etSearchbar.addTextChangedListener {
             if (it != null && it.length != 0) {

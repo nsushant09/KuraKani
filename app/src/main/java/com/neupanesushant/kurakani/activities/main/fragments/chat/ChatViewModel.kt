@@ -88,15 +88,21 @@ class ChatViewModel(private val application: Application) : ViewModel(), Firebas
                     tempUsersOfLatestMessage.add(user)
                     if (tempUsersOfLatestMessage.size == _latestMessages.value!!.size) {
                         _usersOfLatestMessages.value = tempUsersOfLatestMessage
-                        sortLatestMessages()
                     }
                 }
             }
+
+            if (_latestMessages.value?.size == 0) {
+                _usersOfLatestMessages.value = arrayListOf()
+            }
+            sortLatestMessages()
         }
 
     }
 
     private fun sortLatestMessages() {
+
+
         val tempUser: ArrayList<User> = _usersOfLatestMessages.value!!
         val tempMessage: ArrayList<Message> = _latestMessages.value!!
         for (i in 0 until tempUser.size - 1) {

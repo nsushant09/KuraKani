@@ -3,6 +3,7 @@ package com.neupanesushant.kurakani.koinmodules
 import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.activities.main.fragments.chat.ChatViewModel
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.ChatMessagingViewModel
+import com.neupanesushant.kurakani.activities.main.fragments.search.SearchViewModel
 import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.data.UserManager
@@ -54,5 +55,9 @@ val appModule = module {
 
     viewModel {
         ChatViewModel(androidApplication())
+    }
+
+    viewModel {
+        SearchViewModel(androidApplication())
     }
 }
