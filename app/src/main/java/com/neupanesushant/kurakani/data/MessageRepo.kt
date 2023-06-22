@@ -2,6 +2,7 @@ package com.neupanesushant.kurakani.data
 
 import android.net.Uri
 import com.neupanesushant.kurakani.classes.Message
+import kotlinx.coroutines.flow.Flow
 
 interface MessageRepo {
     suspend fun sendTextMessage(chatMessage : String)

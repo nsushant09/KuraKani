@@ -9,11 +9,14 @@ import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, KoinComponent {
 
+    private val job = Job()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
     private val registerAndLogin: RegisterAndLogin by inject()
 
     val messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
@@ -42,7 +45,7 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, 
         image: Uri,
         callback: MessageCallback
     ) {
-        withContext(Dispatchers.IO) {
+        scope.launch {
             val timeStamp = System.currentTimeMillis() / 100
             registerAndLogin.addImageToDatabase(image, object : RegisterAndLogin.ImageCallback {
                 override fun onImageAdded(downloadUrl: String) {
@@ -71,7 +74,7 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, 
 
     override suspend fun sendMessage(message: Message, timeStamp: Long) {
 
-        withContext(Dispatchers.IO) {
+        scope.launch {
             val fromMessagePath = "/user-messages/$fromId$toId/$fromId$timeStamp$toId"
             val toMessagePath = "/user-messages/$toId$fromId/$toId$timeStamp$fromId"
             val latestMessagePathFrom = "/latest-messages/$fromId/$toId"
@@ -89,21 +92,21 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, 
     }
 
     override suspend fun deleteMessage(timeStamp: String) {
-        withContext(Dispatchers.IO) {
+        scope.launch {
             firebaseDatabase.getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId")
                 .removeValue()
         }
     }
 
     override suspend fun getMessageUpdate() {
-        withContext(Dispatchers.IO) {
+        scope.launch {
             firebaseDatabase.getReference("/user-messages/$fromId$toId")
                 .addChildEventListener(chatChildEventListener)
         }
     }
 
     override suspend fun getLatestMessage() {
-        withContext(Dispatchers.IO) {
+        scope.launch {
             firebaseDatabase.reference.child("latest-messages")
                 .child(fromId)
                 .addValueEventListener(object : ValueEventListener {

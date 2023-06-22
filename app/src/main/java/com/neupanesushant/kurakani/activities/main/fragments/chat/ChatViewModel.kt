@@ -1,17 +1,22 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chat
 
 import android.app.Application
-import android.util.Log
-import androidx.lifecycle.*
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.data.FirebaseInstance
 import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.UserManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
@@ -29,9 +34,6 @@ class ChatViewModel(private val application: Application) : ViewModel(), Firebas
     private val _isAllUILoaded = MutableLiveData<Boolean>()
     val isAllUILoaded: LiveData<Boolean> get() = _isAllUILoaded
 
-    private val _isNewMessageUIClicked = MutableLiveData<Boolean>()
-    val isNewMessageUIClicked: LiveData<Boolean> get() = _isNewMessageUIClicked
-
     private val _latestMessages = MutableLiveData<ArrayList<Message>>()
     val latestMessages: LiveData<ArrayList<Message>> get() = _latestMessages
 
@@ -41,12 +43,18 @@ class ChatViewModel(private val application: Application) : ViewModel(), Firebas
     private val userManager: UserManager by inject()
     private val messageManager: MessageManager by inject { parametersOf("") }
 
+    private val _userOfLatestMessageLoaded = MutableLiveData<Boolean>()
+    private val _allUsersLoaded = MutableLiveData<Boolean>()
+
 
     init {
         _isAllUILoaded.value = false
-        _isNewMessageUIClicked.value = false
+        _allUsersLoaded.value = false
+        _userOfLatestMessageLoaded.value = false
 
+        getAllUsersFromDatabase()
         getLatestMessages()
+
         viewModelScope.launch {
             messageManager.latestMessages.collectLatest {
                 _latestMessages.postValue(it)
@@ -54,11 +62,18 @@ class ChatViewModel(private val application: Application) : ViewModel(), Firebas
             }
         }
 
-        getAllUsersFromDatabase()
         viewModelScope.launch {
             userManager.allUsers.collectLatest {
                 _allUsers.postValue(it)
+                _allUsersLoaded.value = true
+                validateUILoaded()
             }
+        }
+    }
+
+    private fun validateUILoaded() {
+        if (_userOfLatestMessageLoaded.value!! && _allUsersLoaded.value!!) {
+            setIsUILoaded(true)
         }
     }
 
@@ -107,7 +122,7 @@ class ChatViewModel(private val application: Application) : ViewModel(), Firebas
         val tempMessage: ArrayList<Message> = _latestMessages.value!!
         for (i in 0 until tempUser.size - 1) {
             for (j in i until tempUser.size) {
-                if (tempMessage.get(j).timeStamp!! > tempMessage.get(i).timeStamp!!) {
+                if (tempMessage[j].timeStamp!! > tempMessage[i].timeStamp!!) {
                     val mTemp = tempMessage[i]
                     tempMessage[i] = tempMessage[j]
                     tempMessage[j] = mTemp
@@ -121,15 +136,12 @@ class ChatViewModel(private val application: Application) : ViewModel(), Firebas
 
         _usersOfLatestMessages.value = tempUser
         _latestMessages.value = tempMessage
-        _isAllUILoaded.value = true
+        _userOfLatestMessageLoaded.value = true
+        validateUILoaded()
     }
 
     fun setIsUILoaded(boolean: Boolean) {
         _isAllUILoaded.value = boolean
-    }
-
-    fun setNewMessageUIClicked(boolean: Boolean) {
-        _isNewMessageUIClicked.value = boolean
     }
 
 
