@@ -1,7 +1,10 @@
 package com.neupanesushant.kurakani.services
 
+import android.app.DownloadManager
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Environment
 import android.provider.MediaStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,37 +16,33 @@ import org.koin.core.parameter.parametersOf
 import java.net.HttpURLConnection
 import java.net.URL
 
-class DownloadService(private val context : Context) : KoinComponent{
+class DownloadService(private val context: Context) : KoinComponent {
 
-    private val imageNotificationService : NotificationService by inject{ parametersOf(
-        NotificationService.NotificationType.IMAGE
-    ) };
     private val coroutineScope = CoroutineScope(Dispatchers.IO);
-
     fun downloadImage(imageUrl: String) {
-        val url = URL(imageUrl)
-        val connection = url.openConnection() as HttpURLConnection
         coroutineScope.launch {
-            downloadImage(connection)
+            downloadImageUsingManager(imageUrl)
         }
     }
 
-    private suspend fun downloadImage(connection: HttpURLConnection) {
+    private suspend fun downloadImageUsingManager(imageUrl: String) {
         withContext(Dispatchers.IO) {
-
-            val inputStream = connection.inputStream
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            kotlin.runCatching {
-                inputStream.close()
-            }
-            MediaStore.Images.Media.insertImage(
-                context.contentResolver,
-                bitmap,
-                "Image",
-                "Image downloaded from the internet"
+            val downloadManager =
+                context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val uri = Uri.parse(imageUrl)
+            val timestamp = System.currentTimeMillis()
+            val request = DownloadManager.Request(uri)
+            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
+            request.setAllowedOverRoaming(false)
+            request.setTitle("Downloading Image")
+            request.setDescription("Image Download")
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            request.setDestinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS,
+                "$timestamp.jpg"
             )
 
-            imageNotificationService.sendNotification();
+            downloadManager.enqueue(request)
         }
     }
 }
