@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-class LoginActivity : AppCompatActivity(), FirebaseInstance {
+class LoginActivity : AppCompatActivity(){
     private lateinit var binding: ActivityLoginBinding
     private val registerAndLogin : RegisterAndLogin by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +23,7 @@ class LoginActivity : AppCompatActivity(), FirebaseInstance {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (firebaseAuth.currentUser != null) {
+        if (FirebaseInstance.firebaseAuth.currentUser != null) {
             gotoMainActivity()
         }
 

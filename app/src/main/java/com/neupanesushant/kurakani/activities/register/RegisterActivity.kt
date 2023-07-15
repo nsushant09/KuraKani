@@ -28,7 +28,7 @@ import okhttp3.internal.Util
 import org.koin.android.ext.android.inject
 import java.util.*
 
-class RegisterActivity : AppCompatActivity(), FirebaseInstance {
+class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
 
     private var profileImageURI: Uri? = null

@@ -21,7 +21,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class ChatViewModel(private val application: Application) : ViewModel(), FirebaseInstance,
+class ChatViewModel(private val application: Application) : ViewModel(),
     KoinComponent {
 
 
@@ -94,7 +94,7 @@ class ChatViewModel(private val application: Application) : ViewModel(), Firebas
         uiScope.launch {
             _latestMessages.value?.forEach {
 
-                val uid = if (it.fromUid == fromId) {
+                val uid = if (it.fromUid == FirebaseInstance.fromId) {
                     it.toUid ?: ""
                 } else {
                     it.fromUid ?: ""

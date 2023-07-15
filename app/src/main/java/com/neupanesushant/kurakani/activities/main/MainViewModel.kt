@@ -14,7 +14,7 @@ import kotlinx.coroutines.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class MainViewModel() : ViewModel(), KoinComponent, FirebaseInstance {
+class MainViewModel() : ViewModel(), KoinComponent {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -30,7 +30,7 @@ class MainViewModel() : ViewModel(), KoinComponent, FirebaseInstance {
 
     fun getUserFromDatabase() {
         uiScope.launch {
-            userManager.getSelectedUser(firebaseAuth.uid!!) { user ->
+            userManager.getSelectedUser(FirebaseInstance.firebaseAuth.uid!!) { user ->
                 _user.postValue(user)
             }
         }

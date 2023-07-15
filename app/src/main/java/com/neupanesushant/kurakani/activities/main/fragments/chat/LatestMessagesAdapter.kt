@@ -1,5 +1,6 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chat
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -15,12 +16,12 @@ import com.neupanesushant.kurakani.databinding.LatestChatContentLayoutBinding
 
 class LatestMessagesAdapter(
     val context: Context,
-    val viewModel: ChatViewModel,
+    viewModel: ChatViewModel,
     val onClickOpenChatMessaging: (String) -> Unit
 ) : RecyclerView.Adapter<LatestMessagesAdapter.ViewHolder>() {
 
-    var messagesList: List<Message>? = viewModel.latestMessages.value
-    val usersList: List<User>? = viewModel.usersOfLatestMessages.value
+    private var messagesList: List<Message>? = viewModel.latestMessages.value
+    private val usersList: List<User>? = viewModel.usersOfLatestMessages.value
 
     inner class ViewHolder(binding: LatestChatContentLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -39,6 +40,7 @@ class LatestMessagesAdapter(
         )
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val messageObject = messagesList?.get(position)
         val userObject = usersList?.get(position)
@@ -54,14 +56,14 @@ class LatestMessagesAdapter(
 
         if (messageObject?.toUid == userObject?.uid) {
             if (messageObject?.messageType == MessageType.TEXT) {
-                holder.latestMessage.text = messageObject?.messageBody
+                holder.latestMessage.text = messageObject.messageBody
             }
             if (messageObject?.messageType == MessageType.IMAGE) {
                 holder.latestMessage.text = "You sent a image"
             }
         } else {
             if (messageObject?.messageType == MessageType.TEXT) {
-                holder.latestMessage.text = messageObject?.messageBody
+                holder.latestMessage.text = messageObject.messageBody
             }
             if (messageObject?.messageType == MessageType.IMAGE) {
                 holder.latestMessage.text = userObject?.firstName + " sent a image"
@@ -71,10 +73,10 @@ class LatestMessagesAdapter(
     }
 
     override fun getItemCount(): Int {
-        if (usersList == null || usersList.size == 0) {
-            return 0
+        return if (usersList == null || usersList.isEmpty()) {
+            0
         } else {
-            return usersList.size
+            usersList.size
         }
     }
 

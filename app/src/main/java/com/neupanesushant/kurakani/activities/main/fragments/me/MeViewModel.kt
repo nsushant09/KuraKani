@@ -9,16 +9,12 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.data.FirebaseInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
 class MeViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val TAG = "MeViewModel"
-    private val firebaseAuth: FirebaseAuth
-    private val firebaseStorage: FirebaseStorage
-    private lateinit var firebaseDatabase: DatabaseReference
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -26,19 +22,12 @@ class MeViewModel(application: Application) : AndroidViewModel(application) {
     private val _user = MutableLiveData<User?>()
     val user get() = _user
 
-    init {
-        firebaseAuth = FirebaseAuth.getInstance()
-        firebaseStorage = FirebaseStorage.getInstance()
-        firebaseDatabase = FirebaseDatabase.getInstance().getReference("/users/${firebaseAuth.uid}")
-
-    }
-
     fun setUser(user: User?) {
         _user.value = user
     }
 
     fun addImageToDatabase(fileName: String, profileImageURI: Uri?) {
-        val ref = firebaseStorage.getReference("/images/$fileName")
+        val ref = FirebaseInstance.firebaseStorage.getReference("/images/$fileName")
         ref.putFile(profileImageURI!!).addOnSuccessListener {
             ref.downloadUrl.addOnSuccessListener {
                 updateUser(
@@ -56,6 +45,7 @@ class MeViewModel(application: Application) : AndroidViewModel(application) {
 
 
     fun updateUser(user: User) {
-        firebaseDatabase.setValue(user)
+        FirebaseInstance.firebaseDatabase.getReference("/users/${FirebaseInstance.firebaseAuth.uid}")
+            .setValue(user)
     }
 }

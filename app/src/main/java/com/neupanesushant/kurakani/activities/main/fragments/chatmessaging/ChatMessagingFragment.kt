@@ -136,7 +136,6 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         //set friend name and image
         viewModel.friendUser.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                viewModel.getAllMessages()
                 Glide.with(requireContext()).load(user.profileImage).centerCrop()
                     .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
                 binding.tvFriendFirstName.text = user.firstName
@@ -205,7 +204,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
                 for (i in 0 until data.clipData!!.itemCount) {
                     tempImages.add(data.clipData!!.getItemAt(i).uri)
                 }
-                viewModel.addImagesToDatabase(tempImages)
+                viewModel.sendImagesMessage(tempImages)
             }
         }
 
@@ -218,7 +217,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
             )
             val tempImages: ArrayList<Uri> = arrayListOf()
             tempImages.add(uri)
-            viewModel.addImagesToDatabase(tempImages)
+            viewModel.sendImagesMessage(tempImages)
         }
 
     }

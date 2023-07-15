@@ -7,72 +7,45 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
+import com.neupanesushant.kurakani.data.messagedeliverpolicy.ImageDeliverPolicy
+import com.neupanesushant.kurakani.data.messagedeliverpolicy.MessageDeliverPolicy
+import com.neupanesushant.kurakani.data.messagedeliverpolicy.TextDeliverPolicy
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, KoinComponent {
+class MessageManager : MessageRepo, KoinComponent {
 
+    val toId: String
+    private val fromId = FirebaseInstance.fromId
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)
-    private val registerAndLogin: RegisterAndLogin by inject()
 
     val messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
     val latestMessages: MutableStateFlow<ArrayList<Message>> = MutableStateFlow(arrayListOf())
 
 
-    interface MessageCallback {
-        fun onMessageSent();
-        fun onMessageDeclined();
-
-    }
-
-    override suspend fun sendTextMessage(chatMessage: String) {
-        val timeStamp = System.currentTimeMillis() / 100
-        val message = Message(
-            firebaseAuth.uid,
-            toId,
-            MessageType.TEXT,
-            chatMessage,
-            timeStamp
-        )
-        sendMessage(message, timeStamp)
-    }
-
-    override suspend fun sendImageMessage(
-        image: Uri,
-        callback: MessageCallback
-    ) {
+    constructor(toId: String) {
+        this.toId = toId
         scope.launch {
-            val timeStamp = System.currentTimeMillis() / 100
-            registerAndLogin.addImageToDatabase(image, object : RegisterAndLogin.ImageCallback {
-                override fun onImageAdded(downloadUrl: String) {
-                    val message = Message(
-                        firebaseAuth.uid,
-                        toId,
-                        MessageType.IMAGE,
-                        downloadUrl.toString(),
-                        timeStamp
-                    )
-
-                    val sendMessageJob = CoroutineScope(Dispatchers.IO)
-                    sendMessageJob.launch {
-                        sendMessage(message, timeStamp)
-                    }.invokeOnCompletion {
-                        callback.onMessageSent()
-                        sendMessageJob.cancel()
-                    }
-                }
-
-                override fun onImageDeclined() {
-                }
-            })
+            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId$toId")
+                .addChildEventListener(chatChildEventListener)
         }
     }
 
-    override suspend fun sendMessage(message: Message, timeStamp: Long) {
+    override suspend fun sendMessage(message: String, messageType: MessageType) {
+
+        val policy = when (messageType) {
+            MessageType.IMAGE -> ImageDeliverPolicy(this)
+            MessageType.TEXT -> TextDeliverPolicy(this)
+        }
+
+        policy.sendMessage(message)
+    }
+
+    override suspend fun sendMessageUpdates(message: Message, timeStamp: Long) {
 
         scope.launch {
             val fromMessagePath = "/user-messages/$fromId$toId/$fromId$timeStamp$toId"
@@ -87,27 +60,20 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, 
                 latestMessagePathTo to message
             )
 
-            firebaseDatabase.reference.updateChildren(updates)
+            FirebaseInstance.firebaseDatabase.reference.updateChildren(updates)
         }
     }
 
     override suspend fun deleteMessage(timeStamp: String) {
         scope.launch {
-            firebaseDatabase.getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId")
+            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId")
                 .removeValue()
-        }
-    }
-
-    override suspend fun getMessageUpdate() {
-        scope.launch {
-            firebaseDatabase.getReference("/user-messages/$fromId$toId")
-                .addChildEventListener(chatChildEventListener)
         }
     }
 
     override suspend fun getLatestMessage() {
         scope.launch {
-            firebaseDatabase.reference.child("latest-messages")
+            FirebaseInstance.firebaseDatabase.reference.child("latest-messages")
                 .child(fromId)
                 .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -125,11 +91,6 @@ class MessageManager(private val toId: String) : MessageRepo, FirebaseInstance, 
 
                 })
         }
-    }
-
-    override suspend fun getAllMessage() {
-        messages.value = emptyList()
-        getMessageUpdate()
     }
 
     private val chatChildEventListener = object : ChildEventListener {

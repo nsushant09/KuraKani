@@ -2,22 +2,22 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
 import android.app.Application
 import android.net.Uri
-import android.widget.Toast
-
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.services.CameraService
 import com.neupanesushant.kurakani.classes.Message
+import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.UserManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
-import org.koin.java.KoinJavaComponent.get
 
 class ChatMessagingViewModel(
     private val application: Application,
@@ -27,8 +27,6 @@ class ChatMessagingViewModel(
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-
-    private val cameraService: CameraService = get(CameraService::class.java)
 
     private val _chatLog = MutableLiveData<List<Message>>()
     val chatLog get() = _chatLog
@@ -44,7 +42,6 @@ class ChatMessagingViewModel(
     val friendUser get() = _friendUser
 
     private val _isFriendValueLoaded = MutableLiveData<Boolean>()
-    val isFriendValueLoaded get() = _isFriendValueLoaded
 
     private val userManager: UserManager by inject()
     private val messageManager: MessageManager by inject { parametersOf(friendUID) }
@@ -71,42 +68,28 @@ class ChatMessagingViewModel(
 
     fun sendTextMessage(chatMessage: String) {
         uiScope.launch {
-            messageManager.sendTextMessage(chatMessage)
+            messageManager.sendMessage(chatMessage, MessageType.TEXT)
         }
     }
 
-    fun addImagesToDatabase(imageList: ArrayList<Uri>) {
+    fun sendImagesMessage(imageList: ArrayList<Uri>) {
         sentImageUploadCounter = 0
         _sentImagesList.value = imageList
         if (sentImagesList.value != null) {
-            addSingleImageToDatabase(sentImageUploadCounter)
+            sendSingleImageMessage(sentImageUploadCounter)
         }
 
     }
 
-    private fun addSingleImageToDatabase(index: Int) {
+    private fun sendSingleImageMessage(index: Int) {
         uiScope.launch {
             if (index < sentImagesList.value!!.size) {
-                messageManager.sendImageMessage(
-                    sentImagesList.value!![index],
-                    object : MessageManager.MessageCallback {
-
-                        override fun onMessageSent() {
-                            cameraService.removeLastCapturedFile()
-                            addSingleImageToDatabase(index + 1)
-                        }
-
-                        override fun onMessageDeclined() {
-                        }
-                    }
+                messageManager.sendMessage(
+                    sentImagesList.value!![index].toString(),
+                    MessageType.IMAGE
                 )
+                sendSingleImageMessage(index + 1)
             }
-        }
-    }
-
-    fun getAllMessages() {
-        uiScope.launch {
-            messageManager.getAllMessage()
         }
     }
 

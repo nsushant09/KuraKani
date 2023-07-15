@@ -142,40 +142,53 @@ class ChatMessageAdapter(
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == FROM_TEXT) {
-            ViewHolderFromText(
-                ChatMessageFromLayoutBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-            )
-        } else if (viewType == FROM_IMAGE) {
-            ViewHolderFromImage(
-                ChatImageFromLayoutBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-            )
-        } else if (viewType == TO_IMAGE) {
-            ViewHolderToImage(
-                ChatImageToLayoutBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-            )
-        } else {
-            ViewHolderToText(
-                ChatMessageToLayoutBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
-            )
+    private inner class ViewHolderFactory() {
+        fun getViewholder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            return when (viewType) {
+                FROM_TEXT -> {
+                    ViewHolderFromText(
+                        ChatMessageFromLayoutBinding.inflate(
+                            LayoutInflater.from(parent.context),
+                            parent,
+                            false
+                        )
+                    )
+                }
+                TO_TEXT -> {
+                    ViewHolderToText(
+                        ChatMessageToLayoutBinding.inflate(
+                            LayoutInflater.from(parent.context),
+                            parent,
+                            false
+                        )
+                    )
+                }
+                FROM_IMAGE -> {
+                    ViewHolderFromImage(
+                        ChatImageFromLayoutBinding.inflate(
+                            LayoutInflater.from(parent.context),
+                            parent,
+                            false
+                        )
+                    )
+                }
+                else -> {
+// This is when view type is TO_IMAGE
+                    ViewHolderToImage(
+                        ChatImageToLayoutBinding.inflate(
+                            LayoutInflater.from(parent.context),
+                            parent,
+                            false
+                        )
+                    )
+                }
+
+            }
         }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return ViewHolderFactory().getViewholder(parent, viewType)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
