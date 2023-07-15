@@ -1,5 +1,6 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chat
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -13,7 +14,7 @@ import com.neupanesushant.kurakani.databinding.StorySizedUserRecyclerViewLayoutB
 
 class StorySizedUserAdapter(
     val context: Context,
-    val list: List<User>, val onClickOpenChatMessaging: (String) -> Unit, val onNewMessageClick: () -> Unit
+    val list: List<User>, val onClickOpenChatMessaging: (String) -> Unit
 ) : RecyclerView.Adapter<StorySizedUserAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: StorySizedUserRecyclerViewLayoutBinding) :
@@ -32,6 +33,7 @@ class StorySizedUserAdapter(
         )
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (position == 0) {
             holder.profileImage.setImageResource(R.drawable.ic_pen)
@@ -39,7 +41,7 @@ class StorySizedUserAdapter(
             holder.itemView.setOnClickListener {
             }
         } else {
-            val userObject = list.get(position - 1)
+            val userObject = list[position - 1]
             Glide.with(context).load(userObject.profileImage).apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(holder.profileImage)
             holder.fullName.text = userObject.fullName

@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -38,10 +37,10 @@ class MeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentMeBinding.inflate(layoutInflater)
-        viewModel = ViewModelProvider(this).get(MeViewModel::class.java)
+        viewModel = ViewModelProvider(this)[MeViewModel::class.java]
         return binding.root
     }
 
@@ -57,13 +56,13 @@ class MeFragment : Fragment() {
         }
 
         //set user details
-        mainViewModel.user.observe(viewLifecycleOwner, Observer {
+        mainViewModel.user.observe(viewLifecycleOwner) {
             viewModel.setUser(it)
             binding.tvUserName.text = it?.fullName
             Glide.with(requireContext()).load(it?.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(binding.ivUserProfilePicture)
-        })
+        }
 
         //choose new image for user profile
         binding.relativeLayoutUserProfileImageAndIcon.setOnClickListener {
@@ -92,34 +91,26 @@ class MeFragment : Fragment() {
         }
     }
 
-    fun updateUserInfo() {
+    private fun updateUserInfo() {
         if (profileImageURI == null) return
         val fileName = UUID.randomUUID().toString()
         viewModel.addImageToDatabase(fileName, profileImageURI)
         mainViewModel.getUserFromDatabase()
     }
 
-    fun btnSignOutAction() {
+    private fun btnSignOutAction() {
         val alertDialog = AlertDialog.Builder(context)
             .setTitle("Sign Out")
             .setMessage("Are you sure you want to sign out?")
-            .setPositiveButton("Yes", object : DialogInterface.OnClickListener {
-                override fun onClick(p0: DialogInterface?, p1: Int) {
-                    FirebaseAuth.getInstance().signOut()
-                    Intent(requireContext(), LoginActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(this)
-                    }
+            .setPositiveButton("Yes") { _, _ ->
+                FirebaseAuth.getInstance().signOut()
+                Intent(requireContext(), LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(this)
                 }
-
-
-            })
-            .setNegativeButton("Cancle", object : DialogInterface.OnClickListener {
-                override fun onClick(p0: DialogInterface?, p1: Int) {
-                    p0?.cancel()
-                }
-
-            })
+            }
+            .setNegativeButton("Cancel"
+            ) { p0, _ -> p0?.cancel() }
 
         alertDialog.create()
         alertDialog.show()

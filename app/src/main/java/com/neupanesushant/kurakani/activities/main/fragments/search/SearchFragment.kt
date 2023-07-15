@@ -1,5 +1,6 @@
 package com.neupanesushant.kurakani.activities.main.fragments.search
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -10,9 +11,6 @@ import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
@@ -40,12 +38,13 @@ class SearchFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentSearchBinding.inflate(layoutInflater)
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupSearchBar()
@@ -54,19 +53,19 @@ class SearchFragment : Fragment() {
         binding.rvSearchedList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvSearchedList.animation =
             AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
-        viewModel.searchedList.observe(viewLifecycleOwner, Observer {
-            if (it == null || it.size == 0) {
+        viewModel.searchedList.observe(viewLifecycleOwner) {
+            if (it == null || it.isEmpty()) {
                 binding.tvInfoText.text = "Couldn't find a match"
                 binding.rvSearchedList.visibility = View.GONE
                 binding.tvInfoText.visibility = View.VISIBLE
             } else {
                 val adapter =
-                    SearchedListAdapter(requireContext(), viewModel, it, onClickOpenChatMessaging)
+                    SearchedListAdapter(requireContext(), it, onClickOpenChatMessaging)
                 binding.rvSearchedList.adapter = adapter
                 binding.rvSearchedList.visibility = View.VISIBLE
                 binding.tvInfoText.visibility = View.GONE
             }
-        })
+        }
     }
 
     private fun setupSearchBar() {
@@ -82,7 +81,7 @@ class SearchFragment : Fragment() {
     private fun searchBarAction() {
 
         binding.etSearchbar.addTextChangedListener {
-            if (it != null && it.length != 0) {
+            if (it != null && it.isNotEmpty()) {
                 viewModel.filterSearch(it.toString())
             }
         }

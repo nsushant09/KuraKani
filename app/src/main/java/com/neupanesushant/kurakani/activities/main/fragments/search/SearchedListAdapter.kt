@@ -12,7 +12,6 @@ import com.neupanesushant.kurakani.databinding.SearchedListRecyclerViewLayoutBin
 
 class SearchedListAdapter(
     val context: Context,
-    val viewModel: SearchViewModel,
     val list: List<User>,
     val onClickOpenChatMessaging: (uid: String) -> Unit
 ) : RecyclerView.Adapter<SearchedListAdapter.ViewHolder>() {
@@ -34,7 +33,7 @@ class SearchedListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val userObject = list.get(position)
+        val userObject = list[position]
         Glide.with(context).load(userObject.profileImage).apply(RequestOptions().circleCrop())
             .error(R.drawable.ic_user).into(holder.profileImage)
         holder.fullName.text = userObject.fullName

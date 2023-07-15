@@ -14,6 +14,7 @@ import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
+import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.ChatImageFromLayoutBinding
 import com.neupanesushant.kurakani.databinding.ChatImageToLayoutBinding
 import com.neupanesushant.kurakani.databinding.ChatMessageFromLayoutBinding
@@ -21,7 +22,8 @@ import com.neupanesushant.kurakani.databinding.ChatMessageToLayoutBinding
 
 class ChatMessageAdapter(
     val context: Context,
-    val viewModel: ChatMessagingViewModel,
+    val user: User,
+    val friendUser: User,
     val list: List<Message>,
     val performDelete: (Message) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -43,7 +45,7 @@ class ChatMessageAdapter(
         }
 
         internal fun bind(position: Int) {
-            Glide.with(context).load(viewModel.user.value?.profileImage)
+            Glide.with(context).load(user.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
             messageBody.text = list.get(position).messageBody
@@ -67,7 +69,7 @@ class ChatMessageAdapter(
         }
 
         internal fun bind(position: Int) {
-            Glide.with(context).load(viewModel.friendUser.value?.profileImage)
+            Glide.with(context).load(friendUser.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
             messageBody.text = list.get(position).messageBody
@@ -92,7 +94,7 @@ class ChatMessageAdapter(
         }
 
         internal fun bind(position: Int) {
-            Glide.with(context).load(viewModel.user.value?.profileImage)
+            Glide.with(context).load(user.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
 
@@ -123,7 +125,7 @@ class ChatMessageAdapter(
         }
 
         internal fun bind(position: Int) {
-            Glide.with(context).load(viewModel.friendUser.value?.profileImage)
+            Glide.with(context).load(friendUser.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
 
@@ -173,7 +175,7 @@ class ChatMessageAdapter(
                     )
                 }
                 else -> {
-// This is when view type is TO_IMAGE
+                    // This is when view type is TO_IMAGE
                     ViewHolderToImage(
                         ChatImageToLayoutBinding.inflate(
                             LayoutInflater.from(parent.context),
@@ -193,8 +195,7 @@ class ChatMessageAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
-        if (list.get(position).fromUid == viewModel.user.value?.uid) {
-
+        if (list.get(position).fromUid == user.uid) {
             if (position == 0) {
                 holder.itemView.animation =
                     AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
@@ -225,7 +226,7 @@ class ChatMessageAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (list[position].fromUid == viewModel.user.value?.uid) {
+        if (list[position].fromUid == user.uid) {
             if (list[position].messageType == MessageType.TEXT) {
                 return FROM_TEXT
             }

@@ -2,6 +2,7 @@ package com.neupanesushant.kurakani.data
 
 import android.net.Uri
 import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.data.imagepersistence.DatabaseImagePersistence
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -43,7 +44,7 @@ class RegisterAndLogin {
     ) {
         withContext(Dispatchers.IO) {
             if (imageUri != null) {
-                val imageUrl = addImageToDatabase(imageUri)
+                val imageUrl = DatabaseImagePersistence.getInstance().saveImage(imageUri)
                 val user = User(
                     FirebaseInstance.firebaseAuth.uid,
                     firstname,
@@ -60,24 +61,6 @@ class RegisterAndLogin {
                         callback.onFailure(it.toString())
                     }
             }
-        }
-    }
-
-    suspend fun addImageToDatabase(image: Uri): String {
-        return withContext(Dispatchers.IO) {
-            val timeStamp = System.currentTimeMillis() / 100
-            val ref = FirebaseInstance.firebaseStorage.getReference("/images/$timeStamp")
-            val deferred = CompletableDeferred<String>()
-            ref.putFile(image).addOnSuccessListener {
-                ref.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    deferred.complete(downloadUrl.toString())
-                }.addOnFailureListener { exception ->
-                    deferred.completeExceptionally(exception)
-                }
-            }.addOnFailureListener { exception ->
-                deferred.completeExceptionally(exception)
-            }
-            deferred.await()
         }
     }
 }

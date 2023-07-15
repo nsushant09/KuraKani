@@ -84,9 +84,7 @@ class ChatFragment : Fragment() {
             AnimationUtils.loadAnimation(context, R.anim.slide_in_left)
         chatViewModel.allUsers.observe(viewLifecycleOwner) {
             binding.rvStorySizedUser.adapter =
-                StorySizedUserAdapter(requireContext(), it, onClickOpenChatMessaging) {
-                    replaceFragment(searchFragment)
-                }
+                StorySizedUserAdapter(requireContext(), it, onClickOpenChatMessaging)
         }
 
         //set items in latest messages

@@ -13,32 +13,26 @@ import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.neupanesushant.kurakani.MyApplication
 import com.neupanesushant.kurakani.R
-import com.neupanesushant.kurakani.activities.main.MainViewModel
 import com.neupanesushant.kurakani.classes.Message
 import com.neupanesushant.kurakani.classes.MessageType
 import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import com.neupanesushant.kurakani.services.*
 import kotlinx.coroutines.*
-import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashMap
 
 
 class ChatMessagingFragment(private val user: User, private val friendUID: String) : Fragment() {
 
     companion object {
         fun getInstance(user: User, friendUID: String): ChatMessagingFragment {
-            return ChatMessagingFragment(user, friendUID);
+            return ChatMessagingFragment(user, friendUID)
         }
     }
 
@@ -127,7 +121,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
                     CAMERA_IMAGE_CAPTURE_CODE
                 )
             } else {
-                PermissionManager.requestCameraPermission(requireActivity());
+                PermissionManager.requestCameraPermission(requireActivity())
             }
         }
     }
@@ -179,7 +173,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         binding.rvChatContent.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         binding.rvChatContent.adapter =
-            ChatMessageAdapter(requireContext(), viewModel, messageList, performDelete)
+            ChatMessageAdapter(requireContext(), viewModel.user.value!!, viewModel.friendUser.value!!, messageList, performDelete)
     }
 
     private fun chooseImage() {
