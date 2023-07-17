@@ -27,12 +27,12 @@ class SearchFragment : Fragment() {
     private val viewModel : SearchViewModel by inject()
 
     private val onClickOpenChatMessaging: (uid: String) -> Unit = { uid ->
-        val chatMessagingFragment =
-            ChatMessagingFragment.getInstance(mainViewModel.user.value!!, uid)
-        parentFragmentManager.beginTransaction().apply {
-            replace(R.id.fragment_container_view_tag, chatMessagingFragment)
-            commit()
-        }
+//        val chatMessagingFragment =
+//            ChatMessagingFragment.getInstance(mainViewModel.user.value!!, uid)
+//        parentFragmentManager.beginTransaction().apply {
+//            replace(R.id.fragment_container_view_tag, chatMessagingFragment)
+//            commit()
+//        }
     }
 
     override fun onCreateView(

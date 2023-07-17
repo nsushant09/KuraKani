@@ -37,12 +37,12 @@ class MessageManager : MessageRepo, KoinComponent {
 
     override suspend fun sendMessage(message: String, messageType: MessageType) {
 
-        val policy = when (messageType) {
-            MessageType.IMAGE -> ImageDeliverPolicy(this)
-            MessageType.TEXT -> TextDeliverPolicy(this)
-        }
-
-        policy.sendMessage(message)
+        val messageTypePolicies = hashMapOf<MessageType, MessageDeliverPolicy>(
+            Pair(MessageType.IMAGE, ImageDeliverPolicy(this)),
+            Pair(MessageType.TEXT, TextDeliverPolicy(this))
+        )
+        val policy = messageTypePolicies[messageType]
+        policy?.sendMessage(message)
     }
 
     override suspend fun sendMessageUpdates(message: Message, timeStamp: Long) {

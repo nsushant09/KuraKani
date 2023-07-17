@@ -15,9 +15,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
-class LoginActivity : AppCompatActivity(){
+class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private val registerAndLogin : RegisterAndLogin by inject()
+    private val registerAndLogin: RegisterAndLogin by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
@@ -47,39 +47,35 @@ class LoginActivity : AppCompatActivity(){
 
         binding.btnLogin.setOnClickListener {
 
-            when {
-                TextUtils.isEmpty(binding.etEmail.text.toString().trim { it <= ' ' }) -> {
-                    Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
 
-                TextUtils.isEmpty(binding.etPassword.text.toString().trim { it <= ' ' }) -> {
-                    Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
+            if (TextUtils.isEmpty(binding.etEmail.text.toString().trim { it <= ' ' })) {
+                Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            } else if (TextUtils.isEmpty(binding.etPassword.text.toString().trim { it <= ' ' })) {
+                Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            } else {
+                val email: String = binding.etEmail.text.toString()
+                val password: String = binding.etPassword.text.toString()
 
-                else -> {
-                    val email: String = binding.etEmail.text.toString()
-                    val password: String = binding.etPassword.text.toString()
+                CoroutineScope(Dispatchers.Main).launch {
+                    registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
+                        override fun onSuccess() {
+                            gotoMainActivity()
+                        }
 
-                    CoroutineScope(Dispatchers.Main).launch {
-                        registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
-                            override fun onSuccess() {
-                                gotoMainActivity()
-                            }
+                        override fun onFailure(failureReason: String) {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                failureReason ?: "Could not login",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
 
-                            override fun onFailure(failureReason: String) {
-                                Toast.makeText(
-                                    this@LoginActivity,
-                                    failureReason ?: "Could not login",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-
-                        })
-                    }
+                    })
                 }
             }
+
         }
     }
 
