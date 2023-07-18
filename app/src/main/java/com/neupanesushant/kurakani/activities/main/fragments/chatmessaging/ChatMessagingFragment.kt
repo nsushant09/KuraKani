@@ -31,12 +31,6 @@ import java.util.*
 
 class ChatMessagingFragment(private val user: User, private val friendUID: String) : Fragment() {
 
-    companion object {
-        fun getInstance(user: User, friendUID: String): ChatMessagingFragment {
-            return ChatMessagingFragment(user, friendUID)
-        }
-    }
-
     private lateinit var _binding: FragmentChatMessagingBinding
     private val binding get() = _binding
 
@@ -174,7 +168,13 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         binding.rvChatContent.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         binding.rvChatContent.adapter =
-            ChatMessageAdapter(requireContext(), viewModel.user.value!!, viewModel.friendUser.value!!, messageList, performDelete)
+            ChatMessageAdapter(
+                requireContext(),
+                viewModel.user.value!!,
+                viewModel.friendUser.value!!,
+                messageList,
+                performDelete
+            )
     }
 
     private fun chooseImage() {

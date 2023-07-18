@@ -44,7 +44,7 @@ class RegisterAndLogin {
     ) {
         withContext(Dispatchers.IO) {
             if (imageUri != null) {
-                val imageUrl = DatabaseImagePersistence.getInstance().saveImage(imageUri)
+                val imageUrl = DatabaseImagePersistence().saveImage(imageUri)
                 val user = User(
                     FirebaseInstance.firebaseAuth.uid,
                     firstname,

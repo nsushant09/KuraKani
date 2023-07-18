@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
-class DatabaseImagePersistence private constructor() : ImagePersistence {
+class DatabaseImagePersistence() : ImagePersistence {
 
     override suspend fun saveImage(imageUri: Uri): String {
         return withContext(Dispatchers.IO) {
@@ -25,16 +25,5 @@ class DatabaseImagePersistence private constructor() : ImagePersistence {
             }
             deferred.await()
         }
-    }
-
-    companion object {
-        private var instance: DatabaseImagePersistence? = null
-        fun getInstance(): DatabaseImagePersistence {
-            if (instance == null) {
-                instance = DatabaseImagePersistence()
-            }
-            return instance!!
-        }
-
     }
 }

@@ -14,7 +14,7 @@ class ImageDeliverPolicy(private val messageManager: MessageManager) : MessageDe
     KoinComponent {
     override suspend fun sendMessage(message: String) {
         val timeStamp = System.currentTimeMillis() / 100;
-        val imageUrl = DatabaseImagePersistence.getInstance().saveImage(Uri.parse(message))
+        val imageUrl = DatabaseImagePersistence().saveImage(Uri.parse(message))
         val messageObj = Message(
             FirebaseInstance.firebaseAuth.uid,
             messageManager.toId,

@@ -17,14 +17,4 @@ class TextDeliverPolicy(private val messageManager: MessageManager) : MessageDel
         )
         messageManager.sendMessageUpdates(messageObj, timeStamp)
     }
-
-    companion object {
-        private var instance: TextDeliverPolicy? = null
-        fun getInstance(messageManager: MessageManager): TextDeliverPolicy {
-            if (instance == null) {
-                instance = TextDeliverPolicy(messageManager)
-            }
-            return instance!!
-        }
-    }
 }

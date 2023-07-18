@@ -15,6 +15,7 @@ import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.ChatM
 import com.neupanesushant.kurakani.activities.main.fragments.me.MeFragment
 import com.neupanesushant.kurakani.activities.main.fragments.search.SearchFragment
 import com.neupanesushant.kurakani.databinding.FragmentChatBinding
+import com.neupanesushant.kurakani.services.AuthenticatedUser
 import org.koin.android.ext.android.inject
 
 class ChatFragment : Fragment() {
@@ -26,9 +27,12 @@ class ChatFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val chatViewModel: ChatViewModel by inject()
 
+    private var usersLoaded = false;
+    private var messagesLoaded = false;
+
     private val onClickOpenChatMessaging: (uid: String) -> Unit = { uid ->
         val chatMessagingFragment =
-            ChatMessagingFragment.getInstance(mainViewModel.user.value!!, uid)
+            ChatMessagingFragment(AuthenticatedUser.getInstance().getUser()!!, uid)
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatMessagingFragment)
             isAddToBackStackAllowed
@@ -47,50 +51,41 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupView()
+        setupObserver()
+        setupEventListener()
+    }
 
-        //open search fragment
+    private fun setupView() {
+
+        binding.rvLatestMessages.layoutManager = LinearLayoutManager(requireContext())
+
+        binding.rvStorySizedUser.animation =
+            AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
+        binding.rvStorySizedUser.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+    }
+
+    private fun setupEventListener() {
+
         binding.cardViewSearchIcon.setOnClickListener {
             replaceFragment(searchFragment)
         }
-        //open me fragment
         binding.cardViewUserIcon.setOnClickListener {
             replaceFragment(meFragment)
         }
-        //new message fragment
         binding.llAddNewTextInfo.setOnClickListener {
             replaceFragment(searchFragment)
         }
+    }
 
-        //show ui
-        chatViewModel.isAllUILoaded.observe(viewLifecycleOwner) {
-            if (it) {
-                binding.progressBar.visibility = View.GONE
-                binding.layoutChatFragment.visibility = View.VISIBLE
-                binding.llAddNewTextInfo.visibility = View.GONE
-            }
-        }
+    private fun setupObserver() {
 
-        // set profile image and username
         mainViewModel.user.observe(viewLifecycleOwner) {
             binding.tvUserName.text = it?.fullName
             Glide.with(requireContext()).load(it?.profileImage).centerCrop()
                 .error(R.drawable.ic_user).into(binding.ivUserProfilePicture)
         }
-
-        //set items in storysized recycler view
-        binding.rvStorySizedUser.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvStorySizedUser.animation =
-            AnimationUtils.loadAnimation(context, R.anim.slide_in_left)
-        chatViewModel.allUsers.observe(viewLifecycleOwner) {
-            binding.rvStorySizedUser.adapter =
-                StorySizedUserAdapter(requireContext(), it, onClickOpenChatMessaging)
-        }
-
-        //set items in latest messages
-        binding.rvLatestMessages.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvStorySizedUser.animation =
-            AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
 
         chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner) {
             if (it.size == 0) {
@@ -104,11 +99,32 @@ class ChatFragment : Fragment() {
                 binding.rvLatestMessages.visibility = View.VISIBLE
             }
 
-
+            if (!it.isNullOrEmpty()) {
+                messagesLoaded = true
+                displayUI()
+            }
         }
 
+        chatViewModel.allUsers.observe(viewLifecycleOwner) {
+            if (it != null && it.isNotEmpty()) {
+                binding.rvStorySizedUser.adapter =
+                    StorySizedUserAdapter(requireContext(), it, onClickOpenChatMessaging)
+                usersLoaded = true
+                displayUI()
+            }
+        }
     }
 
+    private fun displayUI() {
+        if (usersLoaded && messagesLoaded) {
+            binding.progressBar.visibility = View.GONE
+            binding.layoutChatFragment.visibility = View.VISIBLE
+            binding.llAddNewTextInfo.visibility = View.GONE
+        } else {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.layoutChatFragment.visibility = View.GONE
+        }
+    }
 
     private fun replaceFragment(fragment: Fragment) {
         parentFragmentManager.beginTransaction().apply {

@@ -20,7 +20,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.login.LoginActivity
 import com.neupanesushant.kurakani.activities.main.MainViewModel
+import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.FragmentMeBinding
+import com.neupanesushant.kurakani.services.AuthenticatedUser
 import java.util.*
 
 
@@ -56,18 +58,22 @@ class MeFragment : Fragment() {
         }
 
         //set user details
-        mainViewModel.user.observe(viewLifecycleOwner) {
-            viewModel.setUser(it)
-            binding.tvUserName.text = it?.fullName
-            Glide.with(requireContext()).load(it?.profileImage)
-                .apply(RequestOptions().circleCrop())
-                .error(R.drawable.ic_user).into(binding.ivUserProfilePicture)
+        AuthenticatedUser.getInstance().getUser()?.let {
+            setupUserDetails(it)
         }
 
         //choose new image for user profile
         binding.relativeLayoutUserProfileImageAndIcon.setOnClickListener {
             chooseImage()
         }
+    }
+
+    private fun setupUserDetails(user: User) {
+        viewModel.setUser(user)
+        binding.tvUserName.text = user.fullName
+        Glide.with(requireContext()).load(user.profileImage)
+            .apply(RequestOptions().circleCrop())
+            .error(R.drawable.ic_user).into(binding.ivUserProfilePicture)
     }
 
     private fun chooseImage() {
@@ -109,7 +115,8 @@ class MeFragment : Fragment() {
                     startActivity(this)
                 }
             }
-            .setNegativeButton("Cancel"
+            .setNegativeButton(
+                "Cancel"
             ) { p0, _ -> p0?.cancel() }
 
         alertDialog.create()

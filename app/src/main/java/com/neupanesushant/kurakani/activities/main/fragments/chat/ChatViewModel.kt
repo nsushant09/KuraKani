@@ -10,11 +10,8 @@ import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.data.FirebaseInstance
 import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.UserManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
@@ -26,11 +23,11 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
+    private val userManager: UserManager by inject()
+    private val messageManager: MessageManager by inject { parametersOf("") }
+
     private val _allUsers = MutableLiveData<List<User>>()
     val allUsers: LiveData<List<User>> get() = _allUsers
-
-    private val _isAllUILoaded = MutableLiveData<Boolean>()
-    val isAllUILoaded: LiveData<Boolean> get() = _isAllUILoaded
 
     private val _latestMessages = MutableLiveData<ArrayList<Message>>()
     val latestMessages: LiveData<ArrayList<Message>> get() = _latestMessages
@@ -38,18 +35,8 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     private val _usersOfLatestMessages = MutableLiveData<ArrayList<User>>()
     val usersOfLatestMessages: LiveData<ArrayList<User>> get() = _usersOfLatestMessages
 
-    private val userManager: UserManager by inject()
-    private val messageManager: MessageManager by inject { parametersOf("") }
-
-    private val _userOfLatestMessageLoaded = MutableLiveData<Boolean>()
-    private val _allUsersLoaded = MutableLiveData<Boolean>()
-
 
     init {
-        _isAllUILoaded.value = false
-        _allUsersLoaded.value = false
-        _userOfLatestMessageLoaded.value = false
-
         getAllUsersFromDatabase()
         getLatestMessages()
 
@@ -63,15 +50,8 @@ class ChatViewModel(private val application: Application) : ViewModel(),
         viewModelScope.launch {
             userManager.allUsers.collectLatest {
                 _allUsers.postValue(it)
-                _allUsersLoaded.value = true
-                validateUILoaded()
+                getUsersOfLatestMessages()
             }
-        }
-    }
-
-    private fun validateUILoaded() {
-        if (_userOfLatestMessageLoaded.value!! && _allUsersLoaded.value!!) {
-            setIsUILoaded(true)
         }
     }
 
@@ -88,35 +68,43 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     }
 
     private fun getUsersOfLatestMessages() {
-        val tempUsersOfLatestMessage = arrayListOf<User>()
         uiScope.launch {
-            _latestMessages.value?.forEach {
 
-                val uid = if (it.fromUid == FirebaseInstance.fromId) {
-                    it.toUid ?: ""
-                } else {
-                    it.fromUid ?: ""
-                }
-                userManager.getSelectedUser(uid) { user ->
-                    tempUsersOfLatestMessage.add(user)
-                    if (tempUsersOfLatestMessage.size == _latestMessages.value!!.size) {
-                        _usersOfLatestMessages.value = tempUsersOfLatestMessage
-                    }
-                }
-            }
+            if (_latestMessages.value == null)
+                return@launch
 
-            if (_latestMessages.value?.size == 0) {
+            if (_latestMessages.value!!.isEmpty()) {
                 _usersOfLatestMessages.value = arrayListOf()
+                return@launch
             }
-            sortLatestMessages()
-        }
 
+            if (_allUsers.value.isNullOrEmpty())
+                return@launch
+
+            val deferredList = _latestMessages.value!!.map { message ->
+                val uid = if (message.fromUid == FirebaseInstance.fromId) {
+                    message.toUid ?: ""
+                } else {
+                    message.fromUid ?: ""
+                }
+
+
+                async {
+                    _allUsers.value?.filter {
+                        it.uid == uid
+                    }?.get(0)
+                }
+            }
+
+            val userList = deferredList.awaitAll().filterNotNull().toCollection(arrayListOf())
+            sortLatestMessages(userList)
+        }
     }
 
-    private fun sortLatestMessages() {
+    private fun sortLatestMessages(usersOfLatestMessages: ArrayList<User>) {
 
 
-        val tempUser: ArrayList<User> = _usersOfLatestMessages.value!!
+        val tempUser: ArrayList<User> = usersOfLatestMessages
         val tempMessage: ArrayList<Message> = _latestMessages.value!!
         for (i in 0 until tempUser.size - 1) {
             for (j in i until tempUser.size) {
@@ -134,14 +122,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
 
         _usersOfLatestMessages.value = tempUser
         _latestMessages.value = tempMessage
-        _userOfLatestMessageLoaded.value = true
-        validateUILoaded()
     }
-
-    private fun setIsUILoaded(boolean: Boolean) {
-        _isAllUILoaded.value = boolean
-    }
-
 
 }
 
