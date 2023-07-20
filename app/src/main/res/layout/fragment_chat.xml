@@ -12,7 +12,7 @@
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:indeterminateDrawable="@drawable/progressbarstyle1"
+        android:indeterminateDrawable="@drawable/progressbarstyle3"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -20,6 +20,7 @@
         app:layout_constraintVertical_bias="0.4"
         android:layout_gravity="center"
         android:visibility="visible"
+        android:indeterminateDuration="500"
         />
 <!--    Main Linear Layout that acts as the container for whole page -->
     <LinearLayout
