@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.neupanesushant.kurakani.R
-import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.databinding.StorySizedUserRecyclerViewLayoutBinding
+import com.neupanesushant.kurakani.model.User
 
 
 class StorySizedUserAdapter(
@@ -35,24 +35,26 @@ class StorySizedUserAdapter(
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (position == 0) {
-            holder.profileImage.setImageResource(R.drawable.ic_pen)
-            holder.fullName.text = "New Message"
-            holder.itemView.setOnClickListener {
-            }
-        } else {
-            val userObject = list[position - 1]
-            Glide.with(context).load(userObject.profileImage).apply(RequestOptions().circleCrop())
-                .error(R.drawable.ic_user).into(holder.profileImage)
-            holder.fullName.text = userObject.fullName
-            holder.itemView.setOnClickListener {
-                onClickOpenChatMessaging(userObject.uid!!)
-            }
+//        if (position == 0) {
+//            holder.profileImage.setImageResource(R.drawable.ic_pen)
+//            holder.fullName.text = "New Message"
+//            holder.itemView.setOnClickListener {
+//
+//            }
+//        } else {
+        val userObject = list[position]
+        Glide.with(context).load(userObject.profileImage).apply(RequestOptions().circleCrop())
+            .error(R.drawable.ic_user).into(holder.profileImage)
+        holder.fullName.text = userObject.fullName
+        holder.itemView.setOnClickListener {
+            onClickOpenChatMessaging(userObject.uid!!)
         }
+//        }
     }
 
     override fun getItemCount(): Int {
-        return list.size + 1
+        // return list.size + 1 for new message icons
+        return list.size
     }
 
 }

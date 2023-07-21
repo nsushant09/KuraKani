@@ -6,8 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -134,30 +132,30 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
             }
         }
 
-        val handler = Handler(Looper.getMainLooper())
 
         binding.ivRecordAudioMessage.setOnTouchListener { view, event ->
 
-            if (!PermissionManager.hasRecordAudioPermission(requireContext())) {
+            if (PermissionManager.hasRecordAudioPermission(requireContext())) {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        file = null
+                        File(
+                            requireContext().cacheDir,
+                            System.currentTimeMillis().toString() + ".mp3"
+                        ).also {
+                            audioRecorder.start(it)
+                            file = it
+                        }
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        audioRecorder.stop()
+                        file?.let {
+                            viewModel.sendAudioMessage(it.toUri())
+                        }
+                    }
+                }
+            } else {
                 PermissionManager.requestRecordAudioPermission(requireActivity())
-            }
-
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    File(
-                        requireContext().cacheDir,
-                        System.currentTimeMillis().toString() + ".mp3"
-                    ).also {
-                        audioRecorder.start(it)
-                        file = it
-                    }
-                }
-                MotionEvent.ACTION_UP -> {
-                    audioRecorder.stop()
-                    file?.let {
-                        viewModel.sendAudioMessage(it.toUri())
-                    }
-                }
             }
             true
         }

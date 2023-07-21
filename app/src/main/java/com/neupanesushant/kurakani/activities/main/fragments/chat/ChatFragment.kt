@@ -99,7 +99,7 @@ class ChatFragment : Fragment() {
                 binding.rvLatestMessages.visibility = View.VISIBLE
             }
 
-            if (!it.isNullOrEmpty()) {
+            if (it != null) {
                 messagesLoaded = true
                 displayUI()
             }

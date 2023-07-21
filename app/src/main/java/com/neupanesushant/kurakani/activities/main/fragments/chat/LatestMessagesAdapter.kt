@@ -9,10 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.neupanesushant.kurakani.R
+import com.neupanesushant.kurakani.databinding.LatestChatContentLayoutBinding
 import com.neupanesushant.kurakani.model.Message
 import com.neupanesushant.kurakani.model.MessageType
 import com.neupanesushant.kurakani.model.User
-import com.neupanesushant.kurakani.databinding.LatestChatContentLayoutBinding
 
 class LatestMessagesAdapter(
     val context: Context,
@@ -61,12 +61,18 @@ class LatestMessagesAdapter(
             if (messageObject?.messageType == MessageType.IMAGE) {
                 holder.latestMessage.text = "You sent a image"
             }
+            if (messageObject?.messageType == MessageType.AUDIO) {
+                holder.latestMessage.text = "You sent a voice message"
+            }
         } else {
             if (messageObject?.messageType == MessageType.TEXT) {
                 holder.latestMessage.text = messageObject.messageBody
             }
             if (messageObject?.messageType == MessageType.IMAGE) {
                 holder.latestMessage.text = userObject?.firstName + " sent a image"
+            }
+            if (messageObject?.messageType == MessageType.AUDIO) {
+                holder.latestMessage.text = userObject?.firstName + " sent a voice message"
             }
         }
 

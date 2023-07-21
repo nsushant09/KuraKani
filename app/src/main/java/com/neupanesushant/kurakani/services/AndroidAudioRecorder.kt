@@ -3,8 +3,6 @@ package com.neupanesushant.audiorecorder
 import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
-import android.provider.MediaStore.Audio.Media
-import androidx.core.content.contentValuesOf
 import java.io.File
 import java.io.FileOutputStream
 
@@ -37,9 +35,12 @@ class AndroidAudioRecorder(
     }
 
     override fun stop() {
-        recorder?.stop()
-        recorder?.reset()
-        recorder = null
+        try {
+            recorder?.stop()
+            recorder?.reset()
+            recorder = null
+        } catch (_: Exception) {
+        }
     }
 
 }

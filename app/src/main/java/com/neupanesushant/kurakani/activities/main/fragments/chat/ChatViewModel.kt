@@ -74,7 +74,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
                 return@launch
 
             if (_latestMessages.value!!.isEmpty()) {
-                _usersOfLatestMessages.value = arrayListOf()
+                sortLatestMessages(arrayListOf())
                 return@launch
             }
 
