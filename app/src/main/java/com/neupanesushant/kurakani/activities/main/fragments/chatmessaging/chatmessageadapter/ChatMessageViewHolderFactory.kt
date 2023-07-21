@@ -2,14 +2,13 @@ package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chat
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter.Companion.FROM_AUDIO
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter.Companion.FROM_IMAGE
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter.Companion.FROM_TEXT
+import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter.Companion.TO_AUDIO
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter.Companion.TO_IMAGE
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter.Companion.TO_TEXT
-import com.neupanesushant.kurakani.databinding.ChatImageFromLayoutBinding
-import com.neupanesushant.kurakani.databinding.ChatImageToLayoutBinding
-import com.neupanesushant.kurakani.databinding.ChatMessageFromLayoutBinding
-import com.neupanesushant.kurakani.databinding.ChatMessageToLayoutBinding
+import com.neupanesushant.kurakani.databinding.*
 
 class ChatMessageViewHolderFactory {
     fun getViewHolder(
@@ -51,6 +50,26 @@ class ChatMessageViewHolderFactory {
                 TO_IMAGE, ViewHolderToImage(
                     chatMessageAdapter,
                     ChatImageToLayoutBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    )
+                )
+            ),
+            Pair(
+                FROM_AUDIO, ViewHolderFromAudio(
+                    chatMessageAdapter,
+                    ChatAudioFromLayoutBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    )
+                )
+            ),
+            Pair(
+                TO_AUDIO, ViewHolderToAudio(
+                    chatMessageAdapter,
+                    ChatAudioToLayoutBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent,
                         false

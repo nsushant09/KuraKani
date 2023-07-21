@@ -1,6 +1,6 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter
 
-import android.annotation.SuppressLint
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
@@ -23,9 +23,14 @@ class ViewHolderToText(
     }
 
     override fun bind(position: Int) {
-        Glide.with(chatMessageAdapter.context).load(chatMessageAdapter.friendUser.profileImage)
-            .apply(RequestOptions().circleCrop())
-            .error(R.drawable.ic_user).into(profileImage)
+
+        if (position != 0 && chatMessageAdapter.list[position - 1].fromUid == chatMessageAdapter.list[position].fromUid) {
+            Glide.with(chatMessageAdapter.context).load(chatMessageAdapter.friendUser.profileImage)
+                .apply(RequestOptions().circleCrop())
+                .error(R.drawable.ic_user).into(profileImage)
+        } else {
+            profileImage.visibility = View.INVISIBLE
+        }
         messageBody.text = chatMessageAdapter.list[position].messageBody
 
         itemView.setOnLongClickListener {

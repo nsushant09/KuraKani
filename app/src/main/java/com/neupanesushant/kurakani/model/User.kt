@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.classes
+package com.neupanesushant.kurakani.model
 
 data class User (
     val uid : String? = null,

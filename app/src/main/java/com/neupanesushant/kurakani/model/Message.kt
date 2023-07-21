@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.classes
+package com.neupanesushant.kurakani.model
 
 data class Message (
     val fromUid : String? = null,
@@ -9,6 +9,7 @@ data class Message (
         )
 
 enum class MessageType{
+    TEXT,
     IMAGE,
-    TEXT
+    AUDIO
 }

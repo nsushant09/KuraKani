@@ -1,53 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".activities.main.fragments.chatmessaging.ChatMessagingFragment">
 
     <RelativeLayout
         android:id="@+id/rlToolBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:clipToPadding="false"
+        android:elevation="1dp"
+        android:isScrollContainer="false"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="16dp"
-        android:isScrollContainer="false"
-        android:elevation="1dp"
-        android:clipToPadding="false"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/btnBack"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_baseline_arrow_back_24"
-            app:tint="@color/neon_orange"
             android:layout_centerVertical="true"
             android:contentDescription="@string/back_button"
-            />
+            android:padding="4dp"
+            android:src="@drawable/ic_baseline_arrow_back_24"
+            app:tint="@color/neon_orange" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardViewFriendProfileImage"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            app:cardCornerRadius="32dp"
-            app:cardElevation="0dp"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/btnBack"
             android:layout_marginHorizontal="8dp"
+            android:layout_toEndOf="@id/btnBack"
             app:cardBackgroundColor="?attr/colorOnPrimary"
-            >
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:id="@+id/ivFriendProfileImage"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="@string/profile_image"
-                />
+                android:contentDescription="@string/profile_image" />
 
         </androidx.cardview.widget.CardView>
 
@@ -65,59 +61,56 @@
             android:id="@+id/ivInfo"
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/back_button"
             android:padding="4dp"
             android:src="@drawable/ic_baseline_info_24"
-            app:tint="@color/neon_orange"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"
-            android:contentDescription="@string/back_button"
-            />
+            app:tint="@color/neon_orange" />
     </RelativeLayout>
 
     <View
         android:id="@+id/viewElevate"
         android:layout_width="match_parent"
-        android:layout_marginTop="14dp"
         android:layout_height="2dp"
+        android:layout_marginTop="14dp"
+        android:background="?attr/colorOnPrimary"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rlToolBar"
-        android:background="?attr/colorOnPrimary"
-        />
+        app:layout_constraintTop_toBottomOf="@id/rlToolBar" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChatContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toTopOf="@id/rlTextContainer"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewElevate"
-        app:layout_constraintBottom_toTopOf="@id/rlTextContainer"
-        android:layout_marginBottom="4dp"
-        android:layout_marginHorizontal="16dp"
-        />
+        app:layout_constraintTop_toBottomOf="@id/viewElevate" />
 
     <LinearLayout
         android:id="@+id/rlLongActionsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:padding="8dp"
-        android:orientation="horizontal"
         android:background="@drawable/bg_16dp_top_coloronprimary"
         android:gravity="center"
-        >
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
-            android:layout_weight="1"
             android:text="@string/action_save"
             android:textColor="?attr/colorOnSecondary"
             android:textSize="14sp"
@@ -128,11 +121,11 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="?attr/colorOnSecondary"
             android:layout_weight="1"
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="@string/action_delete"
+            android:textColor="?attr/colorOnSecondary"
             android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButton
@@ -140,19 +133,19 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="?attr/colorOnSecondary"
             android:layout_weight="1"
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="@string/action_share"
+            android:textColor="?attr/colorOnSecondary"
             android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
             style="@style/Widget.Material3.Button.TextButton"
-            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="@string/action_cancel"
@@ -165,35 +158,32 @@
         android:id="@+id/rlTextContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginHorizontal="16dp"
-        android:padding="8dp"
-        android:background="@drawable/bg_16dp_radius_coloronprimary"
         android:layout_marginBottom="8dp"
-        android:visibility="gone"
-        >
+        android:background="@drawable/bg_16dp_radius_coloronprimary"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardViewAddImageIcon"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            app:cardCornerRadius="128dp"
-            app:cardElevation="0dp"
-            android:layout_margin="1dp"
-            app:cardBackgroundColor="@color/neon_orange"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            >
+            android:layout_margin="1dp"
+            app:cardBackgroundColor="@color/neon_orange"
+            app:cardCornerRadius="128dp"
+            app:cardElevation="0dp">
 
             <ImageView
                 android:id="@+id/ivAddImageIcon"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_baseline_camera_alt_24"
                 android:contentDescription="@string/add_image_icon"
+                android:src="@drawable/ic_baseline_camera_alt_24"
                 app:tint="@color/white" />
 
         </androidx.cardview.widget.CardView>
@@ -207,33 +197,50 @@
             android:layout_marginHorizontal="16dp"
             android:layout_toEndOf="@id/cardViewAddImageIcon"
             android:background="@android:color/transparent"
-            android:hint="@string/message" />
+            android:hint="@string/message"
+            android:importantForAutofill="no"
+            android:inputType="textLongMessage" />
 
-        <ImageView
-            android:id="@+id/ivSelectImage"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+        <LinearLayout
+            android:id="@+id/llAudioAndImageSendIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:contentDescription="@string/application_icon"
-            android:padding="4dp"
-            android:src="@drawable/ic_image"
-            app:tint="?attr/colorSecondary"
-            />
+            android:orientation="horizontal">
 
+            <ImageView
+                android:id="@+id/ivRecordAudioMessage"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@string/click_and_hold_to_send_audio_message"
+                android:padding="4dp"
+                android:src="@drawable/ic_mic"
+                app:tint="?attr/colorSecondary" />
+
+
+            <ImageView
+                android:id="@+id/ivSelectImage"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@string/application_icon"
+                android:padding="4dp"
+                android:src="@drawable/ic_image"
+                app:tint="?attr/colorSecondary" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/btnSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:text="@string/send"
-            android:paddingHorizontal="8dp"
             android:layout_centerVertical="true"
-            android:textColor="@color/neon_orange"
             android:fontFamily="@font/montezregular"
+            android:paddingHorizontal="8dp"
+            android:text="@string/send"
+            android:textColor="@color/neon_orange"
             android:textSize="24sp"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
     </RelativeLayout>
 

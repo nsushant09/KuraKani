@@ -5,11 +5,11 @@ import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.classes.Message
-import com.neupanesushant.kurakani.classes.MessageType
-import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.UserManager
+import com.neupanesushant.kurakani.model.Message
+import com.neupanesushant.kurakani.model.MessageType
+import com.neupanesushant.kurakani.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -90,6 +90,15 @@ class ChatMessagingViewModel(
                 )
                 sendSingleImageMessage(index + 1)
             }
+        }
+    }
+
+    fun sendAudioMessage(uri: Uri) {
+        uiScope.launch {
+            messageManager.sendMessage(
+                uri.toString(),
+                MessageType.AUDIO
+            )
         }
     }
 

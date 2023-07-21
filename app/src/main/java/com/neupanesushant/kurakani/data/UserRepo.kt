@@ -1,6 +1,6 @@
 package com.neupanesushant.kurakani.data
 
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.User
 
 interface UserRepo {
     suspend fun getSelectedUser(uid: String, callback : (User) -> Unit)

@@ -1,7 +1,7 @@
 package com.neupanesushant.kurakani.data.messagedeliverpolicy
 
-import com.neupanesushant.kurakani.classes.Message
-import com.neupanesushant.kurakani.classes.MessageType
+import com.neupanesushant.kurakani.model.Message
+import com.neupanesushant.kurakani.model.MessageType
 import com.neupanesushant.kurakani.data.FirebaseInstance
 import com.neupanesushant.kurakani.data.MessageManager
 

@@ -1,6 +1,6 @@
 package com.neupanesushant.kurakani.services
 
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.User
 
 class AuthenticatedUser private constructor() {
     private var user: User? = null

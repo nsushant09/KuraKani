@@ -4,7 +4,7 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.data.FirebaseInstance
 
 class MeViewModel(application: Application) : AndroidViewModel(application) {

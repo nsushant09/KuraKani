@@ -34,7 +34,26 @@ object PermissionManager {
     }
 
     fun requestReadExternalStoragePermission(activity: Activity) {
-        requestPermissions(activity, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), READ_EXTERNAL_STORAGE_PERMISSION_CODE)
+        requestPermissions(
+            activity,
+            arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+            READ_EXTERNAL_STORAGE_PERMISSION_CODE
+        )
+    }
+
+    fun hasRecordAudioPermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun requestRecordAudioPermission(activity: Activity) {
+        requestPermissions(
+            activity,
+            arrayOf(Manifest.permission.RECORD_AUDIO),
+            RECORD_AUDIO_CODE
+        )
     }
 
 }

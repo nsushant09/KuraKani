@@ -5,8 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.classes.Message
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.Message
+import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.data.FirebaseInstance
 import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.UserManager

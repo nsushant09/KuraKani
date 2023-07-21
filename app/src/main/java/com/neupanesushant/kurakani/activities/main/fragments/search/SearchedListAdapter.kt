@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.neupanesushant.kurakani.R
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.databinding.SearchedListRecyclerViewLayoutBinding
 
 class SearchedListAdapter(

@@ -1,9 +1,8 @@
 package com.neupanesushant.kurakani.data
 
 import android.net.Uri
-import com.neupanesushant.kurakani.classes.User
-import com.neupanesushant.kurakani.data.imagepersistence.DatabaseImagePersistence
-import kotlinx.coroutines.CompletableDeferred
+import com.neupanesushant.kurakani.model.User
+import com.neupanesushant.kurakani.data.databasepersistence.DatabaseImagePersistence
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -44,7 +43,7 @@ class RegisterAndLogin {
     ) {
         withContext(Dispatchers.IO) {
             if (imageUri != null) {
-                val imageUrl = DatabaseImagePersistence().saveImage(imageUri)
+                val imageUrl = DatabaseImagePersistence().save(imageUri)
                 val user = User(
                     FirebaseInstance.firebaseAuth.uid,
                     firstname,

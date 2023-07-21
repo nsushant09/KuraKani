@@ -2,7 +2,6 @@ package com.neupanesushant.kurakani.activities.main.fragments.me
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -20,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.login.LoginActivity
 import com.neupanesushant.kurakani.activities.main.MainViewModel
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.databinding.FragmentMeBinding
 import com.neupanesushant.kurakani.services.AuthenticatedUser
 import java.util.*

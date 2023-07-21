@@ -33,4 +33,6 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
     <string name="action_share">Share</string>
+    <string name="click_and_hold_to_send_audio_message">Click and Hold to Send Audio Message</string>
+    <string name="chat_image">Chat Image</string>
 </resources>

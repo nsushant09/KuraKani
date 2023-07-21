@@ -3,12 +3,7 @@ package com.neupanesushant.kurakani.activities.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.data.FirebaseInstance
 import com.neupanesushant.kurakani.data.UserManager
 import com.neupanesushant.kurakani.services.AuthenticatedUser

@@ -1,4 +1,4 @@
-package com.neupanesushant.kurakani.data.imagepersistence
+package com.neupanesushant.kurakani.data.databasepersistence
 
 import android.net.Uri
 import com.neupanesushant.kurakani.data.FirebaseInstance
@@ -6,15 +6,14 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-
-class DatabaseImagePersistence() : ImagePersistence {
-
-    override suspend fun saveImage(imageUri: Uri): String {
+class DatabaseAudioPersistence : DatabasePersistence {
+    override suspend fun save(uri: Uri): String {
         return withContext(Dispatchers.IO) {
             val timeStamp = System.currentTimeMillis() / 100
-            val ref = FirebaseInstance.firebaseStorage.getReference("/images/$timeStamp")
+            val ref =
+                FirebaseInstance.firebaseStorage.getReference("/audio/${FirebaseInstance.fromId}$timeStamp")
             val deferred = CompletableDeferred<String>()
-            ref.putFile(imageUri).addOnSuccessListener {
+            ref.putFile(uri).addOnSuccessListener {
                 ref.downloadUrl.addOnSuccessListener { downloadUrl ->
                     deferred.complete(downloadUrl.toString())
                 }.addOnFailureListener { exception ->

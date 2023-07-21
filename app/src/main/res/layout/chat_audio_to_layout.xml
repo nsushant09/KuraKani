@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="325dp"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="4dp">
+
+    <ImageView
+        android:id="@+id/ivProfileImage"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginHorizontal="8dp"
+        android:contentDescription="@string/profile_image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginHorizontal="8dp"
+
+        android:background="@drawable/to_chat_message_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/ivProfileImage"
+
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnPlayPauseAudio"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+
+            android:layout_marginHorizontal="8dp"
+            android:contentDescription="@string/profile_image"
+            android:src="@drawable/ic_play"
+            app:tint="@color/neon_orange" />
+
+        <SeekBar
+            android:id="@+id/seekBarAudio"
+            android:layout_width="232dp"
+            android:layout_height="wrap_content"
+
+            android:progressBackgroundTint="@color/dark_grey"
+            android:progressTint="@color/neon_orange"
+            android:thumbTint="@color/neon_orange" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

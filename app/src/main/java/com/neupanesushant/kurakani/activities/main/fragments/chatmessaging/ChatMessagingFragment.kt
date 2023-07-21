@@ -1,26 +1,32 @@
 package com.neupanesushant.kurakani.activities.main.fragments.chatmessaging
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.neupanesushant.audiorecorder.AndroidAudioRecorder
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.activities.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter
-import com.neupanesushant.kurakani.classes.Message
-import com.neupanesushant.kurakani.classes.MessageType
-import com.neupanesushant.kurakani.classes.User
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
+import com.neupanesushant.kurakani.model.Message
+import com.neupanesushant.kurakani.model.MessageType
+import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.services.*
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
@@ -38,6 +44,9 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
     private val shareService: ShareService by inject()
     private val cameraService: CameraService by inject()
     private val viewModel: ChatMessagingViewModel by inject { parametersOf(friendUID) }
+
+    private lateinit var audioRecorder: AndroidAudioRecorder
+    private var file: File? = null
 
     private val performDelete: (Message) -> Unit = { message ->
         binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
@@ -74,6 +83,8 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        audioRecorder = AndroidAudioRecorder(requireContext())
+
         setupView()
         setupEventListener()
         setupObserver()
@@ -83,6 +94,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         makeTextContainerVisible()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupEventListener() {
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
@@ -96,9 +108,11 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
             if (it == null || it.isEmpty()) {
                 binding.btnSend.visibility = View.GONE
                 binding.ivSelectImage.visibility = View.VISIBLE
+                binding.ivRecordAudioMessage.visibility = View.VISIBLE
             } else {
                 binding.btnSend.visibility = View.VISIBLE
                 binding.ivSelectImage.visibility = View.GONE
+                binding.ivRecordAudioMessage.visibility = View.GONE
             }
         }
 
@@ -119,10 +133,38 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
                 PermissionManager.requestCameraPermission(requireActivity())
             }
         }
+
+        val handler = Handler(Looper.getMainLooper())
+
+        binding.ivRecordAudioMessage.setOnTouchListener { view, event ->
+
+            if (!PermissionManager.hasRecordAudioPermission(requireContext())) {
+                PermissionManager.requestRecordAudioPermission(requireActivity())
+            }
+
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    File(
+                        requireContext().cacheDir,
+                        System.currentTimeMillis().toString() + ".mp3"
+                    ).also {
+                        audioRecorder.start(it)
+                        file = it
+                    }
+                }
+                MotionEvent.ACTION_UP -> {
+                    audioRecorder.stop()
+                    file?.let {
+                        viewModel.sendAudioMessage(it.toUri())
+                    }
+                }
+            }
+            true
+        }
+
     }
 
     private fun setupObserver() {
-        //set friend name and image
         viewModel.friendUser.observe(viewLifecycleOwner) { user ->
             if (user != null) {
                 Glide.with(requireContext()).load(user.profileImage).centerCrop()

@@ -3,7 +3,7 @@ package com.neupanesushant.kurakani.data
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.neupanesushant.kurakani.classes.User
+import com.neupanesushant.kurakani.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
