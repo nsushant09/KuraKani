@@ -84,7 +84,7 @@ class ViewHolderToAudio(
                 progress: Int,
                 changeFromUser: Boolean
             ) {
-                if (progress == audioPlayer.getDuration()) {
+                if (progress == audioPlayer.getDuration() - 1000) {
                     pauseAudioActions()
                 }
             }
