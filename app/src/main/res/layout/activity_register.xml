@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/colorPrimaryVariant"
     android:orientation="vertical"
-    tools:context=".activities.register.RegisterActivity">
+    tools:context=".view.register.RegisterActivity">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

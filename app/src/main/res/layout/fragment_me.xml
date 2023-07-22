@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".activities.main.fragments.me.MeFragment">
+    tools:context=".view.main.fragments.me.MeFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"
