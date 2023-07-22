@@ -7,11 +7,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
@@ -26,6 +29,7 @@ import com.neupanesushant.kurakani.model.MessageType
 import com.neupanesushant.kurakani.model.User
 import com.neupanesushant.kurakani.services.*
 import com.neupanesushant.kurakani.services.audiorecorder.AndroidAudioRecorder
+import com.neupanesushant.kurakani.services.audiorecorder.AutoRunningTimer
 import com.neupanesushant.kurakani.services.cameraservice.CameraService
 import com.neupanesushant.kurakani.services.downloadservice.DownloadService
 import com.neupanesushant.kurakani.services.permission.PermissionManager
@@ -48,6 +52,8 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
     private val viewModel: ChatMessagingViewModel by inject { parametersOf(friendUID) }
 
     private lateinit var audioRecorder: AndroidAudioRecorder
+    private val autoRunningTimer = AutoRunningTimer()
+
     private var file: File? = null
 
     private val onLongClickAction: (Message) -> Unit = { message ->
@@ -149,11 +155,13 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
                             System.currentTimeMillis().toString() + ".mp3"
                         ).also {
                             audioRecorder.start(it)
+                            displayAudioRecording(true)
                             file = it
                         }
                     }
                     MotionEvent.ACTION_UP -> {
                         audioRecorder.stop()
+                        displayAudioRecording(false)
                         file?.let {
                             viewModel.sendAudioMessage(it.toUri())
                         }
@@ -166,6 +174,33 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
 
     }
+
+    private fun displayAudioRecording(isRecording: Boolean) {
+
+        binding.etWriteMessage.isCursorVisible = !isRecording
+
+        if (isRecording) {
+            autoRunningTimer.getPrettyTime { time ->
+                binding.etWriteMessage.hint = time
+            }
+            binding.etWriteMessage.setHintTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.neon_orange
+                )
+            )
+        } else {
+            binding.etWriteMessage.hint = getString(R.string.message)
+            binding.etWriteMessage.setHintTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.grey
+                )
+            )
+            autoRunningTimer.resetTime()
+        }
+    }
+
 
     private fun setupObserver() {
         viewModel.friendUser.observe(viewLifecycleOwner) { user ->

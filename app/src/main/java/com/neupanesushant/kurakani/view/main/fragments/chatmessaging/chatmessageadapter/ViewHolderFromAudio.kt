@@ -1,5 +1,6 @@
 package com.neupanesushant.kurakani.view.main.fragments.chatmessaging.chatmessageadapter
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Looper
 import android.view.animation.AnimationUtils
@@ -25,7 +26,10 @@ class ViewHolderFromAudio(
     private var isPlayedFirstTime = false
     private var isPlaying = false
 
+    private val maxFramesSpeed: Long = 120
+
     private val handler = android.os.Handler(Looper.getMainLooper())
+    private lateinit var progressAnimator: ObjectAnimator
     private lateinit var runnable: Runnable
 
     init {
@@ -40,10 +44,15 @@ class ViewHolderFromAudio(
     override fun bind(position: Int) {
         val message = chatMessageAdapter.list[position]
         val url = message.messageBody ?: ""
-
         runnable = Runnable {
-            seekBar.progress = audioPlayer.getCurrentPosition()
-            handler.postDelayed(runnable, 1000)
+            val newProgress =
+                if (audioPlayer.getCurrentPosition() < seekBar.max - maxFramesSpeed) audioPlayer.getCurrentPosition() else seekBar.max
+
+            progressAnimator =
+                ObjectAnimator.ofInt(seekBar, "progress", seekBar.progress, newProgress)
+            progressAnimator.duration = maxFramesSpeed
+            progressAnimator.start()
+            handler.postDelayed(runnable, maxFramesSpeed)
         }
 
         layout.setOnLongClickListener {
@@ -55,7 +64,7 @@ class ViewHolderFromAudio(
             if (!isPlayedFirstTime) {
                 audioPlayer.play(url) {
                     seekBar.max = it.duration
-                    handler.postDelayed(runnable, 1000)
+                    handler.post(runnable)
                 }
                 isPlayedFirstTime = true
                 playAudioActions()
@@ -66,6 +75,7 @@ class ViewHolderFromAudio(
                 } else {
                     playAudioActions()
                     audioPlayer.resume()
+                    handler.post(runnable)
                 }
             }
         }
@@ -77,8 +87,13 @@ class ViewHolderFromAudio(
                 progress: Int,
                 changeFromUser: Boolean
             ) {
-                if (progress > audioPlayer.getDuration() - 1000) {
-                    pauseAudioActions()
+                seekbar?.let {
+                    if (progress == seekbar.max) {
+                        pauseAudioActions()
+                        handler.removeCallbacks(runnable)
+                        progressAnimator.end()
+                        seekbar.progress = 0
+                    }
                 }
             }
 
@@ -92,6 +107,7 @@ class ViewHolderFromAudio(
             }
 
         })
+
     }
 
     private fun pauseAudioActions() {

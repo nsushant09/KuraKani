@@ -1,5 +1,6 @@
 package com.neupanesushant.kurakani.view.main.fragments.chatmessaging.chatmessageadapter
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Looper
 import android.view.View
@@ -23,14 +24,16 @@ class ViewHolderToAudio(
     private var context: Context
     private var seekBar: SeekBar
     private var btnPlayPause: ImageView
-    private var profileImage: ImageView
     private var audioPlayer: AndroidAudioPlayer
+    private var profileImage: ImageView
     private var layout: ConstraintLayout
-
     private var isPlayedFirstTime = false
     private var isPlaying = false
 
+    private val maxFramesSpeed: Long = 120
+
     private val handler = android.os.Handler(Looper.getMainLooper())
+    private lateinit var progressAnimator: ObjectAnimator
     private lateinit var runnable: Runnable
 
     init {
@@ -41,26 +44,13 @@ class ViewHolderToAudio(
         context = chatMessageAdapter.context
         audioPlayer = AndroidAudioPlayer(context)
         pauseAudioActions()
-
-        seekBar.isEnabled = true
-
     }
 
     override fun bind(position: Int) {
         val message = chatMessageAdapter.list[position]
         val url = message.messageBody ?: ""
 
-        runnable = Runnable {
-            seekBar.progress = audioPlayer.getCurrentPosition()
-            handler.postDelayed(runnable, 1000)
-        }
-
-        layout.setOnLongClickListener {
-            chatMessageAdapter.onLongClickAction(message)
-            true
-        }
-
-        if (position != 0 && chatMessageAdapter.list[position - 1].fromUid == message.fromUid) {
+        if (position == 0 || chatMessageAdapter.list[position - 1].fromUid == chatMessageAdapter.list[position].fromUid) {
             Glide.with(chatMessageAdapter.context).load(chatMessageAdapter.friendUser.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
@@ -68,11 +58,27 @@ class ViewHolderToAudio(
             profileImage.visibility = View.INVISIBLE
         }
 
+        runnable = Runnable {
+            val newProgress =
+                if (audioPlayer.getCurrentPosition() < seekBar.max - maxFramesSpeed) audioPlayer.getCurrentPosition() else seekBar.max
+
+            progressAnimator =
+                ObjectAnimator.ofInt(seekBar, "progress", seekBar.progress, newProgress)
+            progressAnimator.duration = maxFramesSpeed
+            progressAnimator.start()
+            handler.postDelayed(runnable, maxFramesSpeed)
+        }
+
+        layout.setOnLongClickListener {
+            chatMessageAdapter.onLongClickAction(message)
+            true
+        }
+
         btnPlayPause.setOnClickListener {
             if (!isPlayedFirstTime) {
                 audioPlayer.play(url) {
                     seekBar.max = it.duration
-                    handler.postDelayed(runnable, 1000)
+                    handler.post(runnable)
                 }
                 isPlayedFirstTime = true
                 playAudioActions()
@@ -83,6 +89,7 @@ class ViewHolderToAudio(
                 } else {
                     playAudioActions()
                     audioPlayer.resume()
+                    handler.post(runnable)
                 }
             }
         }
@@ -94,8 +101,13 @@ class ViewHolderToAudio(
                 progress: Int,
                 changeFromUser: Boolean
             ) {
-                if (progress == audioPlayer.getDuration() - 1000) {
-                    pauseAudioActions()
+                seekbar?.let {
+                    if (progress == seekbar.max) {
+                        pauseAudioActions()
+                        handler.removeCallbacks(runnable)
+                        progressAnimator.end()
+                        seekbar.progress = 0
+                    }
                 }
             }
 
@@ -109,6 +121,7 @@ class ViewHolderToAudio(
             }
 
         })
+
     }
 
     private fun pauseAudioActions() {
