@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="?attr/colorPrimaryVariant"
     android:orientation="vertical"
-    tools:context=".view.login.LoginActivity">
+    tools:context=".ui.login.LoginActivity">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

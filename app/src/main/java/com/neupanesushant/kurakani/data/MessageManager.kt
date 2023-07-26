@@ -4,12 +4,14 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.neupanesushant.kurakani.data.messagedeliverpolicy.AudioDeliverPolicy
-import com.neupanesushant.kurakani.data.messagedeliverpolicy.ImageDeliverPolicy
-import com.neupanesushant.kurakani.data.messagedeliverpolicy.MessageDeliverPolicy
-import com.neupanesushant.kurakani.data.messagedeliverpolicy.TextDeliverPolicy
-import com.neupanesushant.kurakani.model.Message
-import com.neupanesushant.kurakani.model.MessageType
+import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
+import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.AudioDeliverPolicy
+import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.ImageDeliverPolicy
+import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.MessageDeliverPolicy
+import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.TextDeliverPolicy
+import com.neupanesushant.kurakani.data.repository.MessageRepo
+import com.neupanesushant.kurakani.domain.model.Message
+import com.neupanesushant.kurakani.domain.model.MessageType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,9 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
-class MessageManager : MessageRepo, KoinComponent {
+class MessageManager(val toId: String) : MessageRepo, KoinComponent {
 
-    val toId: String
     private val fromId = FirebaseInstance.fromId
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)
@@ -27,14 +28,6 @@ class MessageManager : MessageRepo, KoinComponent {
     val messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
     val latestMessages: MutableStateFlow<ArrayList<Message>> = MutableStateFlow(arrayListOf())
 
-
-    constructor(toId: String) {
-        this.toId = toId
-        scope.launch {
-            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId$toId")
-                .addChildEventListener(chatChildEventListener)
-        }
-    }
 
     override suspend fun sendMessage(message: String, messageType: MessageType) {
 
@@ -118,7 +111,13 @@ class MessageManager : MessageRepo, KoinComponent {
         }
 
         override fun onCancelled(error: DatabaseError) {
-//            Toast.makeText(application.applicationContext, "Could not send message", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    init {
+        scope.launch {
+            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId$toId")
+                .addChildEventListener(chatChildEventListener)
         }
     }
 

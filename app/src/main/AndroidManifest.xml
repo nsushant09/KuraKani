@@ -37,11 +37,11 @@
         </provider>
 
         <activity
-            android:name=".view.register.RegisterActivity"
+            android:name=".ui.register.RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="stateAlwaysVisible|adjustPan"/>
         <activity
-            android:name=".view.login.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:exported="true"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
             >
@@ -52,7 +52,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.main.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize">
         </activity>
