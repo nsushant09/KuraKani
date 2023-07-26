@@ -1,6 +1,5 @@
 package com.neupanesushant.kurakani.ui.main.fragments.chatmessaging
 
-import com.neupanesushant.kurakani.domain.usecase.ShareUseCase
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
@@ -27,6 +26,7 @@ import com.neupanesushant.kurakani.domain.model.MessageType
 import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.domain.usecase.CameraUseCase
 import com.neupanesushant.kurakani.domain.usecase.DownloadFileUseCase
+import com.neupanesushant.kurakani.domain.usecase.ShareUseCase
 import com.neupanesushant.kurakani.domain.usecase.audiorecorder.AndroidAudioRecorder
 import com.neupanesushant.kurakani.domain.usecase.audiorecorder.AutoRunningTimer
 import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
@@ -103,6 +103,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupEventListener() {
+
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
@@ -112,15 +113,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
 
         binding.etWriteMessage.addTextChangedListener {
-            if (it.isNullOrEmpty()) {
-                binding.btnSend.visibility = View.GONE
-                binding.ivSelectImage.visibility = View.VISIBLE
-                binding.ivRecordAudioMessage.visibility = View.VISIBLE
-            } else {
-                binding.btnSend.visibility = View.VISIBLE
-                binding.ivSelectImage.visibility = View.GONE
-                binding.ivRecordAudioMessage.visibility = View.GONE
-            }
+            isMessageWritten(it.isNullOrEmpty())
         }
 
         binding.btnSend.setOnClickListener {
@@ -131,14 +124,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
 
         binding.cardViewAddImageIcon.setOnClickListener {
-            if (PermissionManager.hasCameraPermission(requireContext())) {
-                startActivityForResult(
-                    cameraUseCase.getCaptureImageIntent(),
-                    CAMERA_IMAGE_CAPTURE_CODE
-                )
-            } else {
-                PermissionManager.requestCameraPermission(requireActivity())
-            }
+            openCameraForImage()
         }
 
 
@@ -174,6 +160,17 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
 
     }
 
+    private fun setupObserver() {
+        viewModel.friendUser.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                Glide.with(requireContext()).load(user.profileImage).centerCrop()
+                    .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
+                binding.tvFriendFirstName.text = user.firstName
+                setChatLogObserver()
+            }
+        }
+    }
+
     private fun displayAudioRecording(isRecording: Boolean) {
 
         binding.etWriteMessage.isCursorVisible = !isRecording
@@ -200,18 +197,6 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
     }
 
-
-    private fun setupObserver() {
-        viewModel.friendUser.observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                Glide.with(requireContext()).load(user.profileImage).centerCrop()
-                    .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-                binding.tvFriendFirstName.text = user.firstName
-                setChatLogObserver()
-            }
-        }
-    }
-
     private fun setChatLogObserver() {
         viewModel.chatLog.observe(viewLifecycleOwner) {
             if (it.isNotEmpty()) {
@@ -220,6 +205,16 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
     }
 
+    private fun openCameraForImage() {
+        if (PermissionManager.hasCameraPermission(requireContext())) {
+            startActivityForResult(
+                cameraUseCase.getCaptureImageIntent(),
+                CAMERA_IMAGE_CAPTURE_CODE
+            )
+        } else {
+            PermissionManager.requestCameraPermission(requireActivity())
+        }
+    }
 
     private fun makeTextContainerVisible() {
         binding.apply {
@@ -241,6 +236,14 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
             requireContext(),
             androidx.appcompat.R.anim.abc_slide_in_bottom
         )
+    }
+
+    private fun isMessageWritten(boolean: Boolean) {
+        binding.apply {
+            btnSend.isVisible = boolean
+            ivSelectImage.isVisible = !boolean
+            ivRecordAudioMessage.isVisible = !boolean
+        }
     }
 
     private fun setChatData(messageList: ArrayList<Message>) {
