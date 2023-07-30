@@ -36,7 +36,7 @@ val appModule = module {
     }
 
     factory<MessageManager> { (toId: String) ->
-        MessageManager(toId)
+        MessageManager(androidApplication(), toId)
     }
 
     viewModel { (friendUID: String) ->

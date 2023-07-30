@@ -113,7 +113,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
 
         binding.etWriteMessage.addTextChangedListener {
-            isMessageWritten(it.isNullOrEmpty())
+            isMessageWritten(!it.isNullOrEmpty())
         }
 
         binding.btnSend.setOnClickListener {

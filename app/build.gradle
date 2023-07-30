@@ -7,12 +7,12 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.neupanesushant.kurakani"
         minSdk 21
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -88,4 +88,6 @@ dependencies {
     implementation "io.insert-koin:koin-android:3.2.0"
     implementation "io.insert-koin:koin-android-compat:3.2.0"
     implementation "io.insert-koin:koin-androidx-navigation:3.2.0"
+
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
 }

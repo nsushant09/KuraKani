@@ -1,23 +1,40 @@
 package com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy
 
+import android.content.Context
 import android.net.Uri
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
+import com.google.gson.Gson
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
-import com.neupanesushant.kurakani.data.MessageManager
-import com.neupanesushant.kurakani.domain.usecase.databasepersistence.DatabaseAudioPersistence
+import com.neupanesushant.kurakani.domain.WorkerCodes
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
+import com.neupanesushant.kurakani.domain.usecase.databasepersistence.DatabaseAudioPersistence
 
-class AudioDeliverPolicy(private val messageManager: MessageManager) : MessageDeliverPolicy {
-    override suspend fun sendMessage(message: String) {
+class AudioDeliverPolicy(
+    context: Context,
+    workerParameters: WorkerParameters,
+) : CoroutineWorker(context, workerParameters) {
+    suspend fun sendMessage(message: String, toId: String): Message {
         val timeStamp = System.currentTimeMillis() / 100;
         val imageUrl = DatabaseAudioPersistence().save(Uri.parse(message))
-        val messageObj = Message(
+        return Message(
             FirebaseInstance.firebaseAuth.uid,
-            messageManager.toId,
+            toId,
             MessageType.AUDIO,
             imageUrl,
             timeStamp
         )
-        messageManager.sendMessageUpdates(messageObj, timeStamp)
+    }
+
+    override suspend fun doWork(): Result {
+        val message = inputData.getString(WorkerCodes.INPUT_MESSAGE) ?: return Result.failure()
+        val toId = inputData.getString(WorkerCodes.INPUT_MESSAGE_TO_ID) ?: return Result.failure()
+        val result = sendMessage(message, toId)
+        val resultJson = Gson().toJson(result)
+        return Result.success(
+            workDataOf(WorkerCodes.RESULT_MESSAGE to resultJson)
+        )
     }
 }

@@ -24,7 +24,7 @@ class ViewHolderToText(
 
     override fun bind(position: Int) {
 
-        if (position == 0 || chatMessageAdapter.list[position - 1].fromUid == chatMessageAdapter.list[position].fromUid) {
+        if (position == 0 || chatMessageAdapter.list[position].fromUid != chatMessageAdapter.list[position + 1].fromUid) {
             Glide.with(chatMessageAdapter.context).load(chatMessageAdapter.friendUser.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
