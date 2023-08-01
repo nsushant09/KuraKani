@@ -58,6 +58,29 @@
             android:maxLines="1" />
 
         <ImageView
+            android:id="@+id/ivCall"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/phone_call"
+            android:padding="4dp"
+            android:layout_toStartOf="@id/ivVideo"
+            android:src="@drawable/ic_phone_filled"
+            app:tint="@color/neon_orange" />
+
+        <ImageView
+            android:id="@+id/ivVideo"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:contentDescription="@string/video_call"
+            android:padding="4dp"
+            android:layout_toStartOf="@id/ivInfo"
+            android:src="@drawable/ic_cam"
+            app:tint="@color/neon_orange" />
+
+
+        <ImageView
             android:id="@+id/ivInfo"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -67,6 +90,7 @@
             android:padding="4dp"
             android:src="@drawable/ic_baseline_info_24"
             app:tint="@color/neon_orange" />
+
     </RelativeLayout>
 
     <View
@@ -161,10 +185,11 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/bg_16dp_radius_coloronprimary"
-        android:padding="8dp"
+        android:paddingHorizontal="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintRight_toRightOf="parent"
+        >
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardViewAddImageIcon"
@@ -192,7 +217,7 @@
             android:id="@+id/etWriteMessage"
             style="@style/UbuntuRegular14Secondary"
             android:layout_width="250dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_centerVertical="true"
             android:layout_marginHorizontal="16dp"
             android:layout_toEndOf="@id/cardViewAddImageIcon"
@@ -206,7 +231,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_centerInParent="true"
+            android:foregroundGravity="center_vertical"
+            >
 
             <ImageView
                 android:id="@+id/ivRecordAudioMessage"

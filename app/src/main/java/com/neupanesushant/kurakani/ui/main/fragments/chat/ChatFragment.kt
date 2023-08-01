@@ -117,9 +117,9 @@ class ChatFragment : Fragment() {
 
     private fun displayUI() {
         if (usersLoaded && messagesLoaded) {
+            binding.llAddNewTextInfo.visibility = View.GONE
             binding.progressBar.visibility = View.GONE
             binding.layoutChatFragment.visibility = View.VISIBLE
-            binding.llAddNewTextInfo.visibility = View.GONE
         } else {
             binding.progressBar.visibility = View.VISIBLE
             binding.layoutChatFragment.visibility = View.GONE

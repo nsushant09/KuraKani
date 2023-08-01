@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:id="@+id/layout"
-        android:layout_width="325dp"
+        android:layout_width="273dp"
         android:layout_height="36dp"
         android:background="@drawable/from_chat_message_bg"
         android:gravity="center_vertical"
@@ -29,7 +29,7 @@
 
         <SeekBar
             android:id="@+id/seekBarAudio"
-            android:layout_width="280dp"
+            android:layout_width="232dp"
             android:layout_height="wrap_content"
 
             android:progressBackgroundTint="@color/grey"

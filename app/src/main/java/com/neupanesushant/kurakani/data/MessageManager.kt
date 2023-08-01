@@ -56,7 +56,8 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
                 .build()
         )
             .setInputData(
-                Data.Builder().putString(WorkerCodes.INPUT_MESSAGE, message).putString(WorkerCodes.INPUT_MESSAGE_TO_ID, toId).build()
+                Data.Builder().putString(WorkerCodes.INPUT_MESSAGE, message)
+                    .putString(WorkerCodes.INPUT_MESSAGE_TO_ID, toId).build()
             )
             .build()
 
@@ -121,6 +122,9 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
                                 tempList.add(message)
                             }
                         }
+                        tempList.sortByDescending {
+                            it.timeStamp
+                        }
                         latestMessages.value = tempList
                     }
 
@@ -136,7 +140,7 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
             val currentMessages = messages.value.toMutableList()
             val message = snapshot.getValue(Message::class.java)
             message?.let {
-                currentMessages.add(0, message)
+                currentMessages.add(message)
                 messages.value = currentMessages
             }
         }

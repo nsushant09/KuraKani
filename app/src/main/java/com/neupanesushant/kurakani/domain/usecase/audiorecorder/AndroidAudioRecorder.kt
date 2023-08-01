@@ -20,18 +20,24 @@ class AndroidAudioRecorder(
 
     }
 
-    override fun start(outputFile: File) {
-        createRecorder().apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            setOutputFile(FileOutputStream(outputFile).fd)
+    override fun start(): File {
+        val file = File(
+            context.cacheDir,
+            System.currentTimeMillis().toString() + ".mp3"
+        ).also { file ->
+            createRecorder().apply {
+                setAudioSource(MediaRecorder.AudioSource.MIC)
+                setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                setOutputFile(FileOutputStream(file).fd)
 
-            prepare()
-            start()
+                prepare()
+                start()
 
-            recorder = this
+                recorder = this
+            }
         }
+        return file
     }
 
     override fun stop() {

@@ -5,13 +5,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.domain.model.Message
-import com.neupanesushant.kurakani.domain.model.User
-import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.UserManager
-import kotlinx.coroutines.*
+import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
+import com.neupanesushant.kurakani.domain.model.Message
+import com.neupanesushant.kurakani.domain.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
@@ -37,91 +42,66 @@ class ChatViewModel(private val application: Application) : ViewModel(),
 
 
     init {
-        getAllUsersFromDatabase()
-        getLatestMessages()
+
+        viewModelScope.launch {
+            async { getAllUsersFromDatabase() }
+            async { getLatestMessages() }
+
+        }
 
         viewModelScope.launch {
             messageManager.latestMessages.collectLatest {
                 _latestMessages.postValue(it)
-                getUsersOfLatestMessages()
+                sortLatestMessages()
             }
         }
 
         viewModelScope.launch {
             userManager.allUsers.collectLatest {
                 _allUsers.postValue(it)
-                getUsersOfLatestMessages()
+                sortLatestMessages()
             }
         }
     }
 
-    private fun getAllUsersFromDatabase() {
-        uiScope.launch {
-            userManager.getAllUser()
-        }
+    private suspend fun getAllUsersFromDatabase() {
+        userManager.getAllUser()
     }
 
-    private fun getLatestMessages() {
-        uiScope.launch {
-            messageManager.getLatestMessage()
-        }
+    private suspend fun getLatestMessages() {
+        messageManager.getLatestMessage()
     }
 
-    private fun getUsersOfLatestMessages() {
+    private suspend fun sortLatestMessages() {
+
+        if (_latestMessages.value == null)
+            return
+
+        if (_allUsers.value == null)
+            return
+
+
+        // Get Users accordingly
         uiScope.launch {
-
-            if (_latestMessages.value == null)
-                return@launch
-
-            if (_latestMessages.value!!.isEmpty()) {
-                sortLatestMessages(arrayListOf())
-                return@launch
-            }
-
-            if (_allUsers.value.isNullOrEmpty())
-                return@launch
-
             val deferredList = _latestMessages.value!!.map { message ->
                 val uid = if (message.fromUid == FirebaseInstance.fromId) {
                     message.toUid ?: ""
                 } else {
                     message.fromUid ?: ""
                 }
-
-
                 async {
+
                     _allUsers.value?.filter {
                         it.uid == uid
                     }?.get(0)
                 }
             }
 
-            val userList = deferredList.awaitAll().filterNotNull().toCollection(arrayListOf())
-            sortLatestMessages(userList)
-        }
-    }
 
-    private fun sortLatestMessages(usersOfLatestMessages: ArrayList<User>) {
-
-
-        val tempUser: ArrayList<User> = usersOfLatestMessages
-        val tempMessage: ArrayList<Message> = _latestMessages.value!!
-        for (i in 0 until tempUser.size - 1) {
-            for (j in i until tempUser.size) {
-                if (tempMessage[j].timeStamp!! > tempMessage[i].timeStamp!!) {
-                    val mTemp = tempMessage[i]
-                    tempMessage[i] = tempMessage[j]
-                    tempMessage[j] = mTemp
-
-                    val uTemp = tempUser[i]
-                    tempUser[i] = tempUser[j]
-                    tempUser[j] = uTemp
-                }
-            }
+            _usersOfLatestMessages.value =
+                deferredList.awaitAll().filterNotNull().toCollection(arrayListOf())
         }
 
-        _usersOfLatestMessages.value = tempUser
-        _latestMessages.value = tempMessage
     }
 
 }

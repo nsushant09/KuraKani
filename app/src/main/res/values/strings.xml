@@ -35,4 +35,6 @@
     <string name="action_share">Share</string>
     <string name="click_and_hold_to_send_audio_message">Click and Hold to Send Audio Message</string>
     <string name="chat_image">Chat Image</string>
+    <string name="video_call">Video Call</string>
+    <string name="phone_call">Phone Call</string>
 </resources>

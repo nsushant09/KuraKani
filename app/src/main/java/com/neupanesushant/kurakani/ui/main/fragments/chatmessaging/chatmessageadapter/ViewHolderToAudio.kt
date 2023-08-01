@@ -50,12 +50,12 @@ class ViewHolderToAudio(
         val message = chatMessageAdapter.list[position]
         val url = message.messageBody ?: ""
 
-        if (position == 0 || chatMessageAdapter.list[position].fromUid != chatMessageAdapter.list[position + 1].fromUid) {
+        if (position != 0 && chatMessageAdapter.list[position - 1].fromUid == chatMessageAdapter.list[position].fromUid) {
+            profileImage.visibility = View.INVISIBLE
+        } else {
             Glide.with(chatMessageAdapter.context).load(chatMessageAdapter.friendUser.profileImage)
                 .apply(RequestOptions().circleCrop())
                 .error(R.drawable.ic_user).into(profileImage)
-        } else {
-            profileImage.visibility = View.INVISIBLE
         }
 
         runnable = Runnable {

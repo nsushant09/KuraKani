@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
+import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
 import com.neupanesushant.kurakani.domain.model.User
@@ -54,29 +55,6 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
 
     private var file: File? = null
 
-    private val onLongClickAction: (Message) -> Unit = { message ->
-
-        binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
-        binding.btnShare.isVisible = message.messageType == MessageType.IMAGE
-
-        makeLongActionContainerVisible()
-        binding.btnDelete.setOnClickListener {
-            makeTextContainerVisible()
-            viewModel.deleteMessage(message.timeStamp!!.toString())
-        }
-        binding.btnCancel.setOnClickListener {
-            makeTextContainerVisible()
-        }
-        binding.btnSave.setOnClickListener {
-            makeTextContainerVisible()
-            downloadFileUseCase.download(message)
-        }
-        binding.btnShare.setOnClickListener {
-            makeTextContainerVisible()
-            shareUseCase.share(message)
-        }
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -124,88 +102,87 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
 
         binding.cardViewAddImageIcon.setOnClickListener {
-            openCameraForImage()
+            openCamera()
+        }
+
+        binding.ivVideo.setOnClickListener {
+            Utils.showToast(requireContext(), "This feature will be added soon")
+            // TODO : Video Implementation
+        }
+        binding.ivCall.setOnClickListener {
+            Utils.showToast(requireContext(), "This feature will be added soon")
+            // TODO : Call Implementation
         }
 
 
         binding.ivRecordAudioMessage.setOnTouchListener { _, event ->
 
-            if (PermissionManager.hasRecordAudioPermission(requireContext())) {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        file = null
-                        File(
-                            requireContext().cacheDir,
-                            System.currentTimeMillis().toString() + ".mp3"
-                        ).also {
-                            audioRecorder.start(it)
-                            displayAudioRecording(true)
-                            file = it
-                        }
-                    }
+            if (!PermissionManager.hasRecordAudioPermission(requireContext())) {
+                PermissionManager.requestRecordAudioPermission(requireActivity())
+                return@setOnTouchListener true
+            }
 
-                    MotionEvent.ACTION_UP -> {
-                        audioRecorder.stop()
-                        displayAudioRecording(false)
-                        file?.let {
-                            viewModel.sendAudioMessage(it.toUri())
-                        }
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    file = null
+                    file = audioRecorder.start()
+                    displayAudioRecording(true)
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    audioRecorder.stop()
+                    displayAudioRecording(false)
+                    file?.let {
+                        //TODO : Ask user if they are sure about sending the message
+                        viewModel.sendAudioMessage(it.toUri())
                     }
                 }
-            } else {
-                PermissionManager.requestRecordAudioPermission(requireActivity())
+
+                else -> {}
             }
             true
         }
-
     }
 
     private fun setupObserver() {
         viewModel.friendUser.observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                Glide.with(requireContext()).load(user.profileImage).centerCrop()
-                    .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-                binding.tvFriendFirstName.text = user.firstName
-                setChatLogObserver()
-            }
+            if (user == null)
+                return@observe
+
+            Glide.with(requireContext()).load(user.profileImage).centerCrop()
+                .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
+            binding.tvFriendFirstName.text = user.firstName
+            setChatLogObserver()
         }
     }
 
     private fun displayAudioRecording(isRecording: Boolean) {
 
         binding.etWriteMessage.isCursorVisible = !isRecording
+        val color = if (isRecording) R.color.neon_orange else R.color.grey
 
         if (isRecording) {
             autoRunningTimer.getPrettyTime { time ->
                 binding.etWriteMessage.hint = time
             }
-            binding.etWriteMessage.setHintTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.neon_orange
-                )
-            )
         } else {
             binding.etWriteMessage.hint = getString(R.string.message)
-            binding.etWriteMessage.setHintTextColor(
-                ContextCompat.getColor(
-                    requireContext(),
-                    R.color.grey
-                )
-            )
             autoRunningTimer.resetTime()
         }
+
+        binding.etWriteMessage.setHintTextColor(ContextCompat.getColor(requireContext(), color))
     }
 
     private fun setChatLogObserver() {
         viewModel.chatLog.observe(viewLifecycleOwner) {
-            if (it.isNotEmpty()) {
-                setChatData(it as ArrayList<Message>)
-            }
+            if (it.isEmpty())
+                return@observe
+
+            setChatData(it as ArrayList<Message>)
         }
     }
 
-    private fun openCameraForImage() {
+    private fun openCamera() {
         if (PermissionManager.hasCameraPermission(requireContext())) {
             startActivityForResult(
                 cameraUseCase.getCaptureImageIntent(),
@@ -309,6 +286,30 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         if (requestCode == CAMERA_PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             startActivityForResult(cameraUseCase.getCaptureImageIntent(), CAMERA_IMAGE_CAPTURE_CODE)
         }
+    }
+
+    private val onLongClickAction: (Message) -> Unit = { message ->
+
+        binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
+        binding.btnShare.isVisible = message.messageType == MessageType.IMAGE
+        makeLongActionContainerVisible()
+
+        binding.btnDelete.setOnClickListener {
+            viewModel.deleteMessage(message.timeStamp!!.toString())
+            makeTextContainerVisible()
+        }
+        binding.btnCancel.setOnClickListener {
+            makeTextContainerVisible()
+        }
+        binding.btnSave.setOnClickListener {
+            downloadFileUseCase.download(message)
+            makeTextContainerVisible()
+        }
+        binding.btnShare.setOnClickListener {
+            shareUseCase.share(message)
+            makeTextContainerVisible()
+        }
+
     }
 
 }

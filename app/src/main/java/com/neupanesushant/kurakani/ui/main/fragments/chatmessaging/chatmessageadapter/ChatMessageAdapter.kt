@@ -12,9 +12,13 @@ class ChatMessageAdapter(
     val context: Context,
     val user: User,
     val friendUser: User,
-    val list: List<Message>,
+    var list: List<Message>,
     val onLongClickAction: (Message) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    init {
+        list = list.reversed()
+    }
 
     companion object {
         const val FROM_TEXT = 10
@@ -37,6 +41,7 @@ class ChatMessageAdapter(
         }
 
         (holder as ChatMessageViewHolder).bind(position)
+
     }
 
     override fun getItemCount(): Int {
