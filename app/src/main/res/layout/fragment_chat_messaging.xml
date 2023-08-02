@@ -62,9 +62,9 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/ivVideo"
             android:contentDescription="@string/phone_call"
             android:padding="4dp"
-            android:layout_toStartOf="@id/ivVideo"
             android:src="@drawable/ic_phone_filled"
             app:tint="@color/neon_orange" />
 
@@ -73,9 +73,9 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/ivInfo"
             android:contentDescription="@string/video_call"
             android:padding="4dp"
-            android:layout_toStartOf="@id/ivInfo"
             android:src="@drawable/ic_cam"
             app:tint="@color/neon_orange" />
 
@@ -114,70 +114,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/viewElevate" />
 
-    <LinearLayout
-        android:id="@+id/rlLongActionsContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_16dp_top_coloronprimary"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            android:text="@string/action_save"
-            android:textColor="?attr/colorOnSecondary"
-            android:textSize="14sp"
-            app:cornerRadius="32dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDelete"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            android:text="@string/action_delete"
-            android:textColor="?attr/colorOnSecondary"
-            android:textSize="14sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnShare"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            android:text="@string/action_share"
-            android:textColor="?attr/colorOnSecondary"
-            android:textSize="14sp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCancel"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            android:text="@string/action_cancel"
-            android:textColor="@color/neon_orange"
-            android:textSize="14sp" />
-
-    </LinearLayout>
-
     <RelativeLayout
         android:id="@+id/rlTextContainer"
         android:layout_width="match_parent"
@@ -188,8 +124,7 @@
         android:paddingHorizontal="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        >
+        app:layout_constraintRight_toRightOf="parent">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardViewAddImageIcon"
@@ -231,10 +166,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:orientation="horizontal"
             android:layout_centerInParent="true"
             android:foregroundGravity="center_vertical"
-            >
+            android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/ivRecordAudioMessage"

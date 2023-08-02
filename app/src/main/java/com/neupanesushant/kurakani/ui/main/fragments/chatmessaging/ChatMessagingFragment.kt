@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
@@ -23,7 +22,6 @@ import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.Message
-import com.neupanesushant.kurakani.domain.model.MessageType
 import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.domain.usecase.CameraUseCase
 import com.neupanesushant.kurakani.domain.usecase.DownloadFileUseCase
@@ -33,6 +31,7 @@ import com.neupanesushant.kurakani.domain.usecase.audiorecorder.AutoRunningTimer
 import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
 import com.neupanesushant.kurakani.services.*
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter
+import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.long_actions.LongActionsFragment
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
@@ -76,7 +75,6 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
     }
 
     private fun setupView() {
-        makeTextContainerVisible()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -193,28 +191,6 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         }
     }
 
-    private fun makeTextContainerVisible() {
-        binding.apply {
-            rlTextContainer.visibility = View.VISIBLE
-            rlLongActionsContainer.visibility = View.INVISIBLE
-        }
-        binding.rlTextContainer.animation = AnimationUtils.loadAnimation(
-            requireContext(),
-            androidx.appcompat.R.anim.abc_slide_in_bottom
-        )
-    }
-
-    private fun makeLongActionContainerVisible() {
-        binding.apply {
-            rlTextContainer.visibility = View.INVISIBLE
-            rlLongActionsContainer.visibility = View.VISIBLE
-        }
-        binding.rlLongActionsContainer.animation = AnimationUtils.loadAnimation(
-            requireContext(),
-            androidx.appcompat.R.anim.abc_slide_in_bottom
-        )
-    }
-
     private fun isMessageWritten(boolean: Boolean) {
         binding.apply {
             btnSend.isVisible = boolean
@@ -289,27 +265,8 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
     }
 
     private val onLongClickAction: (Message) -> Unit = { message ->
-
-        binding.btnSave.isVisible = message.messageType == MessageType.IMAGE
-        binding.btnShare.isVisible = message.messageType == MessageType.IMAGE
-        makeLongActionContainerVisible()
-
-        binding.btnDelete.setOnClickListener {
-            viewModel.deleteMessage(message.timeStamp!!.toString())
-            makeTextContainerVisible()
-        }
-        binding.btnCancel.setOnClickListener {
-            makeTextContainerVisible()
-        }
-        binding.btnSave.setOnClickListener {
-            downloadFileUseCase.download(message)
-            makeTextContainerVisible()
-        }
-        binding.btnShare.setOnClickListener {
-            shareUseCase.share(message)
-            makeTextContainerVisible()
-        }
-
+        LongActionsFragment.getInstance(message, friendUID)
+            .show(parentFragmentManager, LongActionsFragment::class.java.name)
     }
 
 }
