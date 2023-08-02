@@ -13,6 +13,7 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
 import com.google.gson.Gson
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.data.repository.MessageRepo
@@ -37,8 +38,8 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
     private val workManager = WorkManager.getInstance(context)
     private val gson = Gson()
 
-    val messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
-    val latestMessages: MutableStateFlow<ArrayList<Message>> = MutableStateFlow(arrayListOf())
+    val messages: MutableStateFlow<MutableList<Message>> = MutableStateFlow(mutableListOf())
+    val latestMessages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
 
 
     override suspend fun sendMessage(message: String, messageType: MessageType) {
@@ -114,35 +115,34 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
         scope.launch {
             FirebaseInstance.firebaseDatabase.reference.child("latest-messages")
                 .child(fromId)
-                .addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val tempList = ArrayList<Message>()
-                        snapshot.children.forEach {
-                            it.getValue(Message::class.java)?.let { message ->
-                                tempList.add(message)
-                            }
-                        }
-                        tempList.sortByDescending {
-                            it.timeStamp
-                        }
-                        latestMessages.value = tempList
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                    }
-
-                })
+                .addValueEventListener(valueEventListener)
         }
+    }
+
+    private val valueEventListener = object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val tempList =
+                snapshot.getValue<HashMap<String, Message>>()
+                    ?.values
+                    ?.sortedByDescending { it.timeStamp }
+                    ?: return
+
+            CoroutineScope(Dispatchers.IO).launch {
+                latestMessages.emit(tempList)
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+        }
+
     }
 
     private val chatChildEventListener = object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            val message = snapshot.getValue(Message::class.java) ?: return
             val currentMessages = messages.value.toMutableList()
-            val message = snapshot.getValue(Message::class.java)
-            message?.let {
-                currentMessages.add(message)
-                messages.value = currentMessages
-            }
+            currentMessages.add(message)
+            messages.value = currentMessages
         }
 
         override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {

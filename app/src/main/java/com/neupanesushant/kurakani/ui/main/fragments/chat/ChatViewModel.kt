@@ -34,8 +34,8 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     private val _allUsers = MutableLiveData<List<User>>()
     val allUsers: LiveData<List<User>> get() = _allUsers
 
-    private val _latestMessages = MutableLiveData<ArrayList<Message>>()
-    val latestMessages: LiveData<ArrayList<Message>> get() = _latestMessages
+    private val _latestMessages = MutableLiveData<List<Message>>()
+    val latestMessages: LiveData<List<Message>> get() = _latestMessages
 
     private val _usersOfLatestMessages = MutableLiveData<ArrayList<User>>()
     val usersOfLatestMessages: LiveData<ArrayList<User>> get() = _usersOfLatestMessages
