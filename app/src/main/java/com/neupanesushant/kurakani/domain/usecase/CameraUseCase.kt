@@ -24,10 +24,4 @@ class CameraUseCase(private val context: Context) {
     }
 
     fun getLastCapturedFileName(): String = lastCapturedFileName;
-    fun removeLastCapturedFile() {
-        val file = File(context.cacheDir, getLastCapturedFileName())
-        if (file.exists())
-            file.delete()
-    }
-
 }

@@ -2,6 +2,7 @@ package com.neupanesushant.kurakani.data
 
 import android.net.Uri
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
+import com.neupanesushant.kurakani.domain.model.GenericCallback
 import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.domain.usecase.databasepersistence.DatabaseImagePersistence
 import kotlinx.coroutines.Dispatchers

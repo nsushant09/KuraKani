@@ -24,8 +24,6 @@ import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.domain.usecase.CameraUseCase
-import com.neupanesushant.kurakani.domain.usecase.DownloadFileUseCase
-import com.neupanesushant.kurakani.domain.usecase.ShareUseCase
 import com.neupanesushant.kurakani.domain.usecase.audiorecorder.AndroidAudioRecorder
 import com.neupanesushant.kurakani.domain.usecase.audiorecorder.AutoRunningTimer
 import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
@@ -44,15 +42,13 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
     private lateinit var _binding: FragmentChatMessagingBinding
     private val binding get() = _binding
 
-    private val downloadFileUseCase: DownloadFileUseCase by inject()
-    private val shareUseCase: ShareUseCase by inject()
     private val cameraUseCase: CameraUseCase by inject()
     private val viewModel: ChatMessagingViewModel by inject { parametersOf(friendUID) }
 
     private lateinit var audioRecorder: AndroidAudioRecorder
     private val autoRunningTimer = AutoRunningTimer()
 
-    private var file: File? = null
+    private var audioRecorderFile: File? = null
 
 
     override fun onCreateView(
@@ -122,15 +118,15 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    file = null
-                    file = audioRecorder.start()
+                    audioRecorderFile = null
+                    audioRecorderFile = audioRecorder.start()
                     displayAudioRecording(true)
                 }
 
                 MotionEvent.ACTION_UP -> {
                     audioRecorder.stop()
                     displayAudioRecording(false)
-                    file?.let {
+                    audioRecorderFile?.let {
                         //TODO : Ask user if they are sure about sending the message
                         viewModel.sendAudioMessage(it.toUri())
                     }

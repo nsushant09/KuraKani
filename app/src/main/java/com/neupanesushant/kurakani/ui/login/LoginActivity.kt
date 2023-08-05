@@ -1,15 +1,16 @@
 package com.neupanesushant.kurakani.ui.login
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.neupanesushant.kurakani.data.RegisterAndLogin
+import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
+import com.neupanesushant.kurakani.databinding.ActivityLoginBinding
+import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.ui.main.MainActivity
 import com.neupanesushant.kurakani.ui.register.RegisterActivity
-import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
-import com.neupanesushant.kurakani.data.RegisterAndLogin
-import com.neupanesushant.kurakani.databinding.ActivityLoginBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,35 +48,34 @@ class LoginActivity : AppCompatActivity() {
 
         binding.btnLogin.setOnClickListener {
 
+            val email: String = binding.etEmail.text.toString()
+            val password: String = binding.etPassword.text.toString()
 
-            if (TextUtils.isEmpty(binding.etEmail.text.toString().trim { it <= ' ' })) {
-                Toast.makeText(this, "Please enter email", Toast.LENGTH_SHORT).show()
+            if (email.isEmptyAfterTrim()) {
+                Utils.showToast(this, "Please enter email")
                 return@setOnClickListener
-            } else if (TextUtils.isEmpty(binding.etPassword.text.toString().trim { it <= ' ' })) {
-                Toast.makeText(this, "Please enter password", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            } else {
-                val email: String = binding.etEmail.text.toString()
-                val password: String = binding.etPassword.text.toString()
-
-                CoroutineScope(Dispatchers.Main).launch {
-                    registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
-                        override fun onSuccess() {
-                            gotoMainActivity()
-                        }
-
-                        override fun onFailure(failureReason: String) {
-                            Toast.makeText(
-                                this@LoginActivity,
-                                failureReason ?: "Could not login",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                    })
-                }
             }
 
+            if (password.isEmptyAfterTrim()) {
+                Utils.showToast(this, "Please enter password")
+                return@setOnClickListener
+            }
+
+            CoroutineScope(Dispatchers.Main).launch {
+                registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
+                    override fun onSuccess() {
+                        gotoMainActivity()
+                    }
+
+                    override fun onFailure(failureReason: String) {
+                        Toast.makeText(
+                            this@LoginActivity,
+                            failureReason ?: "Could not login",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
+            }
         }
     }
 
@@ -84,5 +84,9 @@ class LoginActivity : AppCompatActivity() {
             startActivity(this)
             finish()
         }
+    }
+
+    private fun String.isEmptyAfterTrim(): Boolean {
+        return TextUtils.isEmpty(this.trim { it <= ' ' })
     }
 }
