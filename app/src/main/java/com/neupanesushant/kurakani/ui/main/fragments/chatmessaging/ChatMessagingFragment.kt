@@ -3,8 +3,10 @@ package com.neupanesushant.kurakani.ui.main.fragments.chatmessaging
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -19,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
+import com.neupanesushant.kurakani.broadcast_recievers.WiFiBroadcastReceiver
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.Message
@@ -40,6 +43,7 @@ import java.util.*
 class ChatMessagingFragment(private val user: User, private val friendUID: String) : Fragment() {
 
     private lateinit var _binding: FragmentChatMessagingBinding
+    private val wifiBroadcastReceiver: WiFiBroadcastReceiver by inject()
     private val binding get() = _binding
 
     private val cameraUseCase: CameraUseCase by inject()
@@ -63,6 +67,9 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
+
         audioRecorder = AndroidAudioRecorder(requireContext())
 
         setupView()
@@ -75,6 +82,8 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupEventListener() {
+
+        setupWifiBroadcastReciever()
 
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
@@ -218,6 +227,16 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         )
     }
 
+    private fun setupWifiBroadcastReciever() {
+        val filter = IntentFilter()
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
+        requireContext().registerReceiver(wifiBroadcastReceiver, filter)
+
+        wifiBroadcastReceiver.setOnWifiStateChange { isWifiConnected ->
+            binding.tvNoInternet.isVisible = !isWifiConnected
+        }
+    }
+
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -265,5 +284,9 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
             .show(parentFragmentManager, LongActionsFragment::class.java.name)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        requireContext().unregisterReceiver(wifiBroadcastReceiver)
+    }
 }
 

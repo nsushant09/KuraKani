@@ -93,6 +93,20 @@
 
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/tvNoInternet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="@string/no_internet_connection"
+        android:textAlignment="center"
+        android:textColor="@color/error_red"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rlToolBar"
+        android:visibility="gone"
+        />
+
     <View
         android:id="@+id/viewElevate"
         android:layout_width="match_parent"
@@ -101,7 +115,7 @@
         android:background="?attr/colorOnPrimary"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rlToolBar" />
+        app:layout_constraintTop_toBottomOf="@id/tvNoInternet" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChatContent"

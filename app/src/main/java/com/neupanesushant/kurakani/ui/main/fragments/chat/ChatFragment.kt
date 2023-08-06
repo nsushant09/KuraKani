@@ -1,21 +1,25 @@
 package com.neupanesushant.kurakani.ui.main.fragments.chat
 
+import android.content.IntentFilter
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
+import com.neupanesushant.kurakani.broadcast_recievers.WiFiBroadcastReceiver
+import com.neupanesushant.kurakani.databinding.FragmentChatBinding
+import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import com.neupanesushant.kurakani.ui.main.MainViewModel
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingFragment
 import com.neupanesushant.kurakani.ui.main.fragments.me.MeFragment
 import com.neupanesushant.kurakani.ui.main.fragments.search.SearchFragment
-import com.neupanesushant.kurakani.databinding.FragmentChatBinding
-import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import org.koin.android.ext.android.inject
 
 class ChatFragment : Fragment() {
@@ -26,6 +30,7 @@ class ChatFragment : Fragment() {
     private val meFragment = MeFragment()
     private val mainViewModel: MainViewModel by activityViewModels()
     private val chatViewModel: ChatViewModel by inject()
+    private val wifiBroadcastReceiver: WiFiBroadcastReceiver by inject()
 
     private var usersLoaded = false;
     private var messagesLoaded = false;
@@ -67,6 +72,8 @@ class ChatFragment : Fragment() {
     }
 
     private fun setupEventListener() {
+
+        setupWifiBroadcastReciever()
 
         binding.cardViewSearchIcon.setOnClickListener {
             replaceFragment(searchFragment)
@@ -135,5 +142,19 @@ class ChatFragment : Fragment() {
         }
     }
 
+    private fun setupWifiBroadcastReciever() {
+        val filter = IntentFilter()
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
+        requireContext().registerReceiver(wifiBroadcastReceiver, filter)
+
+        wifiBroadcastReceiver.setOnWifiStateChange { isWifiConnected ->
+            binding.tvNoInternet.isVisible = !isWifiConnected
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        requireContext().unregisterReceiver(wifiBroadcastReceiver)
+    }
 
 }

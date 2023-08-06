@@ -35,6 +35,7 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
     private val fromId = FirebaseInstance.fromId
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)
+
     private val workManager = WorkManager.getInstance(context)
     private val gson = Gson()
 
