@@ -6,7 +6,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.google.gson.Gson
-import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.domain.WorkerCodes
 import com.neupanesushant.kurakani.domain.model.Message

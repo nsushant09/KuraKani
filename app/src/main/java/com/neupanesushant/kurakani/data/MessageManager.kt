@@ -33,6 +33,7 @@ import org.koin.core.component.KoinComponent
 class MessageManager(val context: Context, val toId: String) : MessageRepo, KoinComponent {
 
     private val fromId = FirebaseInstance.fromId
+
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
