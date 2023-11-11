@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.neupanesushant.kurakani.ui.main.MainActivity
 import com.neupanesushant.kurakani.data.RegisterAndLogin
+import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.databinding.ActivityRegisterBinding
 import com.neupanesushant.kurakani.services.IMAGE_SELECTOR_REQUEST_CODE
 import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
@@ -153,6 +154,7 @@ class RegisterActivity : AppCompatActivity() {
                     override fun onFailure(failureReason: String) {
                         Toast.makeText(this@RegisterActivity, failureReason, Toast.LENGTH_SHORT)
                             .show()
+                        FirebaseInstance.firebaseAuth.signOut()
                     }
 
                 }

@@ -36,8 +36,8 @@ object PermissionManager {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun requestReadExternalStoragePermission(activity: Activity) {
-        requestPermissions(
+     fun requestReadExternalStoragePermission(activity: Activity) {
+        ActivityCompat.requestPermissions(
             activity,
             arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
             READ_EXTERNAL_STORAGE_PERMISSION_CODE

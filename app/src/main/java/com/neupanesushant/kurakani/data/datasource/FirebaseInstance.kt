@@ -9,7 +9,7 @@ object FirebaseInstance {
 
     val firebaseStorage: FirebaseStorage get() = FirebaseStorage.getInstance()
 
-    val firebaseDatabase : FirebaseDatabase get() = FirebaseDatabase.getInstance()
+    val firebaseDatabase : FirebaseDatabase get() = FirebaseDatabase.getInstance("https://kurakani-asia-default-rtdb.asia-southeast1.firebasedatabase.app")
 
     val firebaseUser get() = firebaseAuth.currentUser!!
 

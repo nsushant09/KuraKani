@@ -69,6 +69,7 @@ class ChatFragment : Fragment() {
             AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
         binding.rvStorySizedUser.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        displayUI()
     }
 
     private fun setupEventListener() {

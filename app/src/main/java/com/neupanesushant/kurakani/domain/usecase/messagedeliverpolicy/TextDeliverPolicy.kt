@@ -12,7 +12,7 @@ import com.neupanesushant.kurakani.domain.model.MessageType
 
 class TextDeliverPolicy(context: Context, workerParameters: WorkerParameters) :
     CoroutineWorker(context, workerParameters) {
-    fun sendMessage(message: String, toId: String): Message {
+    private suspend fun sendMessage(message: String, toId: String): Message {
         val timeStamp = System.currentTimeMillis() / 100
         return Message(
             FirebaseInstance.firebaseAuth.uid,

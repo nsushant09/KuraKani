@@ -1,44 +1,26 @@
 {
   "project_info": {
-    "project_number": "951694693733",
-    "project_id": "kurakani-cc35b",
-    "storage_bucket": "kurakani-cc35b.appspot.com"
+    "project_number": "285410917756",
+    "project_id": "kurakani-asia",
+    "storage_bucket": "kurakani-asia.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:951694693733:android:27b2439eefbf3968d7fd8c",
+        "mobilesdk_app_id": "1:285410917756:android:cc20a0b66d6de37719f8f9",
         "android_client_info": {
           "package_name": "com.neupanesushant.kurakani"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "951694693733-96ut2ph9qkegb21noi9qes4a3ktuvojd.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.neupanesushant.kurakani",
-            "certificate_hash": "a6cde985ea987feea6fbd3bd9595396f01d0c78f"
-          }
-        },
-        {
-          "client_id": "951694693733-rg9rs3b8trc3kbpvknsemal1ut0q62oi.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDa8DGHYDva6_AXA62-LcneqecPFHMSRAs"
+          "current_key": "AIzaSyA5SLocSWQ1vGF6k7rBKoXImkCeRhusfP8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "951694693733-rg9rs3b8trc3kbpvknsemal1ut0q62oi.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
