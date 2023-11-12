@@ -87,10 +87,10 @@ class MeFragment : Fragment() {
 
         if (requestCode == IMAGE_SELECTOR_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             profileImageURI = data.data!!
-            val bitmap =
-                MediaStore.Images.Media.getBitmap(activity?.contentResolver, profileImageURI)
-            val bitmapDrawable = BitmapDrawable(bitmap)
-            binding.ivUserProfilePicture.setImageDrawable(bitmapDrawable)
+            Glide.with(this)
+                .load(profileImageURI)
+                .apply(RequestOptions().centerCrop())
+                .into(binding.ivUserProfilePicture)
 
             updateUserInfo()
         }

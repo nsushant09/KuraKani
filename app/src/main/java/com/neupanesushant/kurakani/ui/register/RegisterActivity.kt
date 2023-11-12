@@ -23,6 +23,8 @@ import com.neupanesushant.kurakani.services.IMAGE_SELECTOR_REQUEST_CODE
 import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
 import com.neupanesushant.kurakani.services.READ_EXTERNAL_STORAGE_PERMISSION_CODE
 import com.neupanesushant.kurakani.domain.Utils
+import com.neupanesushant.kurakani.domain.usecase.validator.RegistrationValidator
+import com.neupanesushant.kurakani.domain.usecase.validator.Validator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,7 +55,7 @@ class RegisterActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun setupEventListener() {
         binding.btnSignUp.setOnClickListener {
-            createNewUser()
+            validateRegistrationDetails()
         }
 
         binding.tvChoosePhoto.setOnClickListener {
@@ -70,49 +72,34 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    fun createNewUser() {
+    fun validateRegistrationDetails() {
         val email = binding.etEmail.text.toString()
         val password = binding.etPassword.text.toString()
         val firstName = binding.etFirstname.text.toString()
 
-        when {
-            TextUtils.isEmpty(email.trim { it <= ' ' }) -> {
-                Utils.showToast(this@RegisterActivity, "Please enter email ")
-            }
+        val validator : Validator = RegistrationValidator(firstName, email, password)
+        val (isValid, errorMessage) = validator.isValid()
+        if(!isValid){
+            Utils.showToast(this, errorMessage)
+            return
+        }
+        createNewUser(email, password)
+    }
 
-            TextUtils.isEmpty(firstName.trim { it <= ' ' }) -> {
-                Utils.showToast(this@RegisterActivity, "Please enter firstname")
-            }
+    private fun createNewUser(email : String, password : String){
+        CoroutineScope(Dispatchers.Main).launch {
+            registerAndLogin.createNewUser(
+                email,
+                password,
+                object : RegisterAndLogin.Callback {
+                    override fun onSuccess() {
+                        saveUserToFirebaseDatabase()
+                    }
 
-            TextUtils.isEmpty(password.trim { it <= ' ' }) -> {
-                Utils.showToast(this@RegisterActivity, "Please enter password")
-            }
-
-            password.length < 8 -> {
-                Utils.showToast(
-                    this,
-                    "You password should contain at least 8 letters"
-                )
-            }
-
-
-            else -> {
-
-                CoroutineScope(Dispatchers.Main).launch {
-                    registerAndLogin.createNewUser(
-                        email,
-                        password,
-                        object : RegisterAndLogin.Callback {
-                            override fun onSuccess() {
-                                saveUserToFirebaseDatabase()
-                            }
-
-                            override fun onFailure(failureReason: String) {
-                                Utils.showToast(this@RegisterActivity, failureReason)
-                            }
-                        })
-                }
-            }
+                    override fun onFailure(failureReason: String) {
+                        Utils.showToast(this@RegisterActivity, failureReason)
+                    }
+                })
         }
     }
 

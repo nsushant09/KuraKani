@@ -3,12 +3,13 @@ package com.neupanesushant.kurakani.ui.login
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.databinding.ActivityLoginBinding
 import com.neupanesushant.kurakani.domain.Utils
+import com.neupanesushant.kurakani.domain.usecase.validator.LoginValidator
+import com.neupanesushant.kurakani.domain.usecase.validator.Validator
 import com.neupanesushant.kurakani.ui.main.MainActivity
 import com.neupanesushant.kurakani.ui.register.RegisterActivity
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 class LoginActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityLoginBinding
     private val registerAndLogin: RegisterAndLogin by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,35 +49,32 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.btnLogin.setOnClickListener {
+            val email = binding.etEmail.text.toString()
+            val password = binding.etEmail.text.toString()
 
-            val email: String = binding.etEmail.text.toString()
-            val password: String = binding.etPassword.text.toString()
-
-            if (email.isEmptyAfterTrim()) {
-                Utils.showToast(this, "Please enter email")
+            val validator: Validator =
+                LoginValidator(email, password)
+            val (isValid, errorMessage) = validator.isValid()
+            if (!isValid) {
+                Utils.showToast(this, errorMessage)
                 return@setOnClickListener
             }
 
-            if (password.isEmptyAfterTrim()) {
-                Utils.showToast(this, "Please enter password")
-                return@setOnClickListener
-            }
+            performLogin(email, password)
+        }
+    }
 
-            CoroutineScope(Dispatchers.Main).launch {
-                registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
-                    override fun onSuccess() {
-                        gotoMainActivity()
-                    }
+    private fun performLogin(email: String, password: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
+                override fun onSuccess() {
+                    gotoMainActivity()
+                }
 
-                    override fun onFailure(failureReason: String) {
-                        Toast.makeText(
-                            this@LoginActivity,
-                            failureReason ?: "Could not login",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                })
-            }
+                override fun onFailure(failureReason: String) {
+                    Utils.showToast(this@LoginActivity, failureReason)
+                }
+            })
         }
     }
 
