@@ -3,28 +3,25 @@ package com.neupanesushant.kurakani.ui.register
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.neupanesushant.kurakani.ui.main.MainActivity
+import com.google.android.gms.tasks.Tasks
 import com.neupanesushant.kurakani.data.RegisterAndLogin
-import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.databinding.ActivityRegisterBinding
-import com.neupanesushant.kurakani.services.IMAGE_SELECTOR_REQUEST_CODE
-import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
-import com.neupanesushant.kurakani.services.READ_EXTERNAL_STORAGE_PERMISSION_CODE
 import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.usecase.validator.RegistrationValidator
 import com.neupanesushant.kurakani.domain.usecase.validator.Validator
+import com.neupanesushant.kurakani.services.IMAGE_SELECTOR_REQUEST_CODE
+import com.neupanesushant.kurakani.services.READ_EXTERNAL_STORAGE_PERMISSION_CODE
+import com.neupanesushant.kurakani.ui.main.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,7 +32,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
 
     private var profileImageURI: Uri? = null
-    private val registerAndLogin : RegisterAndLogin by inject()
+    private val registerAndLogin: RegisterAndLogin by inject()
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,29 +74,21 @@ class RegisterActivity : AppCompatActivity() {
         val password = binding.etPassword.text.toString()
         val firstName = binding.etFirstname.text.toString()
 
-        val validator : Validator = RegistrationValidator(firstName, email, password)
+        val validator: Validator = RegistrationValidator(firstName, email, password)
         val (isValid, errorMessage) = validator.isValid()
-        if(!isValid){
+        if (!isValid) {
             Utils.showToast(this, errorMessage)
             return
         }
         createNewUser(email, password)
     }
 
-    private fun createNewUser(email : String, password : String){
-        CoroutineScope(Dispatchers.Main).launch {
-            registerAndLogin.createNewUser(
-                email,
-                password,
-                object : RegisterAndLogin.Callback {
-                    override fun onSuccess() {
-                        saveUserToFirebaseDatabase()
-                    }
-
-                    override fun onFailure(failureReason: String) {
-                        Utils.showToast(this@RegisterActivity, failureReason)
-                    }
-                })
+    private fun createNewUser(email: String, password: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = registerAndLogin.createNewUser(email, password)
+            if (result.user != null) {
+                saveUserToFirebaseDatabase()
+            }
         }
     }
 
@@ -133,24 +122,15 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun saveUserToFirebaseDatabase() {
-        CoroutineScope(Dispatchers.Main).launch {
-            registerAndLogin.addUser(
+        CoroutineScope(Dispatchers.IO).launch {
+            val isSuccessfulTask = registerAndLogin.addUser(
                 binding.etFirstname.text.toString(),
                 binding.etLastname.text.toString(),
-                profileImageURI,
-                object : RegisterAndLogin.Callback {
-                    override fun onSuccess() {
-                        logIn()
-                    }
-
-                    override fun onFailure(failureReason: String) {
-                        Toast.makeText(this@RegisterActivity, failureReason, Toast.LENGTH_SHORT)
-                            .show()
-                        FirebaseInstance.firebaseAuth.signOut()
-                    }
-
-                }
+                profileImageURI
             )
+            if(isSuccessfulTask){
+                logIn()
+            }
         }
     }
 
@@ -158,21 +138,20 @@ class RegisterActivity : AppCompatActivity() {
         val email = binding.etEmail.text.toString()
         val password = binding.etPassword.text.toString()
 
-        CoroutineScope(Dispatchers.Main).launch {
-            registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
-                override fun onSuccess() {
-                    Intent(this@RegisterActivity, MainActivity::class.java).apply {
-                        flags =
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(this)
-                        finish()
-                    }
-                }
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = registerAndLogin.login(email, password)
+            if (result.user != null) {
+                gotoMainActivity()
+            }
+        }
+    }
 
-                override fun onFailure(failureReason: String) {
-                    Utils.showToast(this@RegisterActivity, failureReason)
-                }
-            })
+    private fun gotoMainActivity() {
+        Intent(this@RegisterActivity, MainActivity::class.java).apply {
+            flags =
+                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(this)
+            finish()
         }
     }
 

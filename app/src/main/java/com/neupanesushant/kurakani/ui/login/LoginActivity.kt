@@ -3,6 +3,7 @@ package com.neupanesushant.kurakani.ui.login
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
@@ -14,6 +15,8 @@ import com.neupanesushant.kurakani.ui.main.MainActivity
 import com.neupanesushant.kurakani.ui.register.RegisterActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -50,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString()
-            val password = binding.etEmail.text.toString()
+            val password = binding.etPassword.text.toString()
 
             val validator: Validator =
                 LoginValidator(email, password)
@@ -64,17 +67,17 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun performLogin(email: String, password: String) {
-        CoroutineScope(Dispatchers.Main).launch {
-            registerAndLogin.login(email, password, object : RegisterAndLogin.Callback {
-                override fun onSuccess() {
-                    gotoMainActivity()
-                }
+    private fun performLogin(email: String, password: String)  {
 
-                override fun onFailure(failureReason: String) {
-                    Utils.showToast(this@LoginActivity, failureReason)
-                }
-            })
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val result = registerAndLogin.login(email, password)
+            if(result.user != null){
+                gotoMainActivity()
+            }else{
+                Log.i("LOGIN", "Could not login")
+//                Utils.showToast(this@LoginActivity, "Could not login")
+            }
         }
     }
 
