@@ -13,6 +13,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.neupanesushant.kurakani.ui.main.MainActivity
 import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
@@ -115,13 +117,12 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun chooseImage() {
-        if (PermissionManager.hasReadExternalStoragePermission(this)) {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            startActivityForResult(intent, IMAGE_SELECTOR_REQUEST_CODE)
-        } else {
-            PermissionManager.requestReadExternalStoragePermission(this)
-        }
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(
+            Intent.createChooser(intent, "Select Images"),
+            IMAGE_SELECTOR_REQUEST_CODE
+        )
     }
 
 
@@ -131,9 +132,13 @@ class RegisterActivity : AppCompatActivity() {
 
         if (requestCode == IMAGE_SELECTOR_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
             profileImageURI = data.data!!
-            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, profileImageURI)
-            val bitmapDrawable = BitmapDrawable(bitmap)
-            binding.ivProfileImage.setImageDrawable(bitmapDrawable)
+
+            Glide.with(this)
+                .load(profileImageURI)
+                .apply(RequestOptions().centerCrop())
+                .into(binding.ivProfileImage)
+
+
             binding.ivProfileImage.visibility = View.VISIBLE
             binding.tvChoosePhoto.visibility = View.GONE
 
