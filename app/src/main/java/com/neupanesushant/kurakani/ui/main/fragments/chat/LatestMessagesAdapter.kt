@@ -17,7 +17,7 @@ import com.neupanesushant.kurakani.domain.model.User
 class LatestMessagesAdapter(
     val context: Context,
     viewModel: ChatViewModel,
-    val onClickOpenChatMessaging: (String) -> Unit
+    val onClickOpenChatMessaging: (User) -> Unit
 ) : RecyclerView.Adapter<LatestMessagesAdapter.ViewHolder>() {
 
     private var messagesList: List<Message>? = viewModel.latestMessages.value
@@ -48,7 +48,7 @@ class LatestMessagesAdapter(
         holder.itemView.animation =
             AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
         holder.itemView.setOnClickListener {
-            onClickOpenChatMessaging(userObject?.uid.toString())
+            onClickOpenChatMessaging(userObject!!)
         }
         Glide.with(context).load(userObject?.profileImage).apply(RequestOptions().circleCrop())
             .error(R.drawable.ic_user).into(holder.profileImage)

@@ -5,11 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.data.MessageManager
 import com.neupanesushant.kurakani.data.UserManager
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.domain.usecase.message_manager.LatestMessageRetriever
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.parameter.parametersOf
 
 class ChatViewModel(private val application: Application) : ViewModel(),
     KoinComponent {
@@ -29,7 +28,6 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     private val userManager: UserManager by inject()
-    private val messageManager: MessageManager by inject { parametersOf("") }
 
     private val _allUsers = MutableLiveData<List<User>>()
     val allUsers: LiveData<List<User>> get() = _allUsers
@@ -39,6 +37,8 @@ class ChatViewModel(private val application: Application) : ViewModel(),
 
     private val _usersOfLatestMessages = MutableLiveData<ArrayList<User>>()
     val usersOfLatestMessages: LiveData<ArrayList<User>> get() = _usersOfLatestMessages
+
+    private val latestMessageRetriever: LatestMessageRetriever  = LatestMessageRetriever()
 
 
     init {
@@ -50,7 +50,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
         }
 
         viewModelScope.launch {
-            messageManager.latestMessages.collectLatest {
+            latestMessageRetriever.latestMessages.collectLatest {
                 _latestMessages.postValue(it)
                 sortLatestMessages()
             }
@@ -69,7 +69,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     }
 
     private suspend fun getLatestMessages() {
-        messageManager.getLatestMessage()
+        latestMessageRetriever.get()
     }
 
     private suspend fun sortLatestMessages() {
@@ -90,7 +90,6 @@ class ChatViewModel(private val application: Application) : ViewModel(),
                     message.fromUid ?: ""
                 }
                 async {
-
                     _allUsers.value?.filter {
                         it.uid == uid
                     }?.get(0)

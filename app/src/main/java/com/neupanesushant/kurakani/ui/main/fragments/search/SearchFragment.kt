@@ -25,12 +25,11 @@ class SearchFragment : Fragment() {
 
     private lateinit var _binding: FragmentSearchBinding
     private val binding get() = _binding
-    private val mainViewModel: MainViewModel by inject()
     private val viewModel: SearchViewModel by inject()
 
-    private val onClickOpenChatMessaging: (uid: String) -> Unit = { uid ->
+    private val onClickOpenChatMessaging: (friendUser: User) -> Unit = { friendUser ->
         val chatMessagingFragment =
-            ChatMessagingFragment(AuthenticatedUser.getInstance().getUser()!!, uid)
+            ChatMessagingFragment(friendUser)
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatMessagingFragment)
             commit()

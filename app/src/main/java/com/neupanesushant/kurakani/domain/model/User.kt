@@ -5,5 +5,6 @@ data class User (
     val firstName : String? = null,
     val lastName : String? = null,
     val fullName : String? = null,
-    var profileImage : String? = null
+    var profileImage : String? = null,
+    var fcmToken : String? = null
         )

@@ -26,6 +26,7 @@ import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import com.neupanesushant.kurakani.domain.usecase.CameraUseCase
 import com.neupanesushant.kurakani.domain.usecase.audiorecorder.AndroidAudioRecorder
 import com.neupanesushant.kurakani.domain.usecase.audiorecorder.AutoRunningTimer
@@ -40,14 +41,16 @@ import java.io.File
 import java.util.*
 
 
-class ChatMessagingFragment(private val user: User, private val friendUID: String) : Fragment() {
+@Suppress("DEPRECATION")
+class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
+    private lateinit var user: User
     private lateinit var _binding: FragmentChatMessagingBinding
     private val wifiBroadcastReceiver: WiFiBroadcastReceiver by inject()
     private val binding get() = _binding
 
     private val cameraUseCase: CameraUseCase by inject()
-    private val viewModel: ChatMessagingViewModel by inject { parametersOf(friendUID) }
+    private val viewModel: ChatMessagingViewModel by inject { parametersOf(friendObj) }
 
     private lateinit var audioRecorder: AndroidAudioRecorder
     private val autoRunningTimer = AutoRunningTimer()
@@ -60,8 +63,13 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
-        viewModel.getFriendUserDetails(friendUID)
-        viewModel.setUser(user)
+
+        if (AuthenticatedUser.getInstance().getUser() == null) {
+            requireActivity().supportFragmentManager.beginTransaction().remove(this).commit()
+        }
+
+        user = AuthenticatedUser.getInstance().getUser()!!
+        viewModel.getFriendUserDetails(friendObj.uid!!)
         return binding.root
     }
 
@@ -210,7 +218,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
         binding.rvChatContent.adapter =
             ChatMessageAdapter(
                 requireContext(),
-                viewModel.user.value!!,
+                user,
                 viewModel.friendUser.value!!,
                 messageList,
                 onLongClickAction
@@ -280,7 +288,7 @@ class ChatMessagingFragment(private val user: User, private val friendUID: Strin
     }
 
     private val onLongClickAction: (Message) -> Unit = { message ->
-        LongActionsFragment.getInstance(message, friendUID)
+        LongActionsFragment.getInstance(message, friendObj.uid!!)
             .show(parentFragmentManager, LongActionsFragment::class.java.name)
     }
 

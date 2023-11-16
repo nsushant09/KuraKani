@@ -7,6 +7,5 @@ interface MessageRepo {
     suspend fun sendMessage(message: String, messageType: MessageType)
     fun sendMessageUpdates(message: Message)
     suspend fun deleteMessage(timeStamp: String)
-    suspend fun getLatestMessage()
 
 }

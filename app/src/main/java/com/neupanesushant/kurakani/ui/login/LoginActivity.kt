@@ -74,9 +74,6 @@ class LoginActivity : AppCompatActivity() {
             val result = registerAndLogin.login(email, password)
             if(result.user != null){
                 gotoMainActivity()
-            }else{
-                Log.i("LOGIN", "Could not login")
-//                Utils.showToast(this@LoginActivity, "Could not login")
             }
         }
     }

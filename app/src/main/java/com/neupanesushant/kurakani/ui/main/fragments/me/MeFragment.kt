@@ -3,10 +3,8 @@ package com.neupanesushant.kurakani.ui.main.fragments.me
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,16 +15,16 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.neupanesushant.kurakani.R
+import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
+import com.neupanesushant.kurakani.databinding.FragmentMeBinding
+import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import com.neupanesushant.kurakani.ui.login.LoginActivity
 import com.neupanesushant.kurakani.ui.main.MainViewModel
-import com.neupanesushant.kurakani.domain.model.User
-import com.neupanesushant.kurakani.databinding.FragmentMeBinding
-import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 
 class MeFragment : Fragment() {
@@ -112,11 +110,7 @@ class MeFragment : Fragment() {
             .setTitle("Sign Out")
             .setMessage("Are you sure you want to sign out?")
             .setPositiveButton("Yes") { _, _ ->
-                FirebaseAuth.getInstance().signOut()
-                Intent(requireContext(), LoginActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(this)
-                }
+                removeFCMToken()
             }
             .setNegativeButton(
                 "Cancel"
@@ -124,5 +118,18 @@ class MeFragment : Fragment() {
 
         alertDialog.create()
         alertDialog.show()
+    }
+
+    private fun removeFCMToken(){
+        FirebaseInstance.firebaseCloudMessage.deleteToken().addOnCompleteListener {
+            signOut()
+        }
+    }
+    private fun signOut(){
+        FirebaseAuth.getInstance().signOut()
+        Intent(requireContext(), LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(this)
+        }
     }
 }

@@ -13,7 +13,7 @@ import com.neupanesushant.kurakani.databinding.SearchedListRecyclerViewLayoutBin
 class SearchedListAdapter(
     val context: Context,
     val list: List<User>,
-    val onClickOpenChatMessaging: (uid: String) -> Unit
+    val onClickOpenChatMessaging: (friend: User) -> Unit
 ) : RecyclerView.Adapter<SearchedListAdapter.ViewHolder>() {
 
     inner class ViewHolder(binding: SearchedListRecyclerViewLayoutBinding) :
@@ -38,7 +38,7 @@ class SearchedListAdapter(
             .error(R.drawable.ic_user).into(holder.profileImage)
         holder.fullName.text = userObject.fullName
         holder.itemView.setOnClickListener {
-            onClickOpenChatMessaging(userObject.uid!!)
+            onClickOpenChatMessaging(userObject)
         }
     }
 

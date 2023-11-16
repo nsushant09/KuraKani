@@ -15,12 +15,14 @@ import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.broadcast_recievers.WiFiBroadcastReceiver
 import com.neupanesushant.kurakani.databinding.FragmentChatBinding
+import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import com.neupanesushant.kurakani.ui.main.MainViewModel
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingFragment
 import com.neupanesushant.kurakani.ui.main.fragments.me.MeFragment
 import com.neupanesushant.kurakani.ui.main.fragments.search.SearchFragment
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 class ChatFragment : Fragment() {
 
@@ -35,9 +37,9 @@ class ChatFragment : Fragment() {
     private var usersLoaded = false;
     private var messagesLoaded = false;
 
-    private val onClickOpenChatMessaging: (uid: String) -> Unit = { uid ->
+    private val onClickOpenChatMessaging: (friendObj : User) -> Unit = { friendObj ->
         val chatMessagingFragment =
-            ChatMessagingFragment(AuthenticatedUser.getInstance().getUser()!!, uid)
+            ChatMessagingFragment(friendObj)
         parentFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatMessagingFragment)
             isAddToBackStackAllowed

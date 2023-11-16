@@ -20,8 +20,7 @@ import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
 class ChatMessagingViewModel(
-    private val application: Application,
-    private val friendUID: String
+    private val friend: User
 ) :
     ViewModel(), KoinComponent {
 
@@ -35,16 +34,13 @@ class ChatMessagingViewModel(
     private val sentImagesList get() = _sentImagesList
     private var sentImageUploadCounter = 0
 
-    private val _user = MutableLiveData<User?>()
-    val user get() = _user
-
     private val _friendUser = MutableLiveData<User?>()
     val friendUser get() = _friendUser
 
     private val _isFriendValueLoaded = MutableLiveData<Boolean>()
 
     private val userManager: UserManager by inject()
-    private val messageManager: MessageManager by inject { parametersOf(friendUID) }
+    private val messageManager: MessageManager by inject { parametersOf(friend) }
 
 
     init {
@@ -53,11 +49,6 @@ class ChatMessagingViewModel(
                 _chatLog.postValue(it)
             }
         }
-    }
-
-
-    fun setUser(user: User) {
-        _user.postValue(user)
     }
 
     fun deleteMessage(timeStamp: String) {

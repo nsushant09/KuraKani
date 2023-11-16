@@ -5,24 +5,24 @@ import androidx.work.Constraints
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.getValue
 import com.google.gson.Gson
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.data.repository.MessageRepo
 import com.neupanesushant.kurakani.domain.WorkerCodes
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
+import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.AudioDeliverPolicy
 import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.ImageDeliverPolicy
 import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.TextDeliverPolicy
+import com.neupanesushant.kurakani.domain.usecase.messaging_notification.MessagingNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
-class MessageManager(val context: Context, val toId: String) : MessageRepo, KoinComponent {
+class MessageManager(val context: Context, private val friend: User) : MessageRepo, KoinComponent {
 
     private val fromId = FirebaseInstance.fromId
 
@@ -41,16 +41,19 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
     private val gson = Gson()
 
     val messages: MutableStateFlow<MutableList<Message>> = MutableStateFlow(mutableListOf())
-    val latestMessages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
+
+    private val messagingNotification: MessagingNotification =
+        MessagingNotification(AuthenticatedUser.getInstance().getUser()!!, friend.fcmToken ?: "")
+
+    private val messageTypePolicies = hashMapOf(
+        Pair(MessageType.IMAGE, OneTimeWorkRequestBuilder<ImageDeliverPolicy>()),
+        Pair(MessageType.TEXT, OneTimeWorkRequestBuilder<TextDeliverPolicy>()),
+        Pair(MessageType.AUDIO, OneTimeWorkRequestBuilder<AudioDeliverPolicy>()),
+    )
 
 
     override suspend fun sendMessage(message: String, messageType: MessageType) {
 
-        val messageTypePolicies = hashMapOf<MessageType, OneTimeWorkRequest.Builder>(
-            Pair(MessageType.IMAGE, OneTimeWorkRequestBuilder<ImageDeliverPolicy>()),
-            Pair(MessageType.TEXT, OneTimeWorkRequestBuilder<TextDeliverPolicy>()),
-            Pair(MessageType.AUDIO, OneTimeWorkRequestBuilder<AudioDeliverPolicy>()),
-        )
         val policy = messageTypePolicies[messageType] ?: return
 
         val messageWorkRequest = policy.setConstraints(
@@ -60,7 +63,7 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
         )
             .setInputData(
                 Data.Builder().putString(WorkerCodes.INPUT_MESSAGE, message)
-                    .putString(WorkerCodes.INPUT_MESSAGE_TO_ID, toId).build()
+                    .putString(WorkerCodes.INPUT_MESSAGE_TO_ID, friend.uid).build()
             )
             .build()
 
@@ -75,10 +78,7 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
                 val requestInfo = workInfo.find { it.id == messageWorkRequest.id }
                 when (requestInfo?.state) {
                     WorkInfo.State.SUCCEEDED -> {
-                        val messageJson =
-                            requestInfo.outputData.getString(WorkerCodes.RESULT_MESSAGE)
-                        val messageFinal = gson.fromJson(messageJson, Message::class.java)
-                        sendMessageUpdates(messageFinal)
+                        onMessagePrepared(requestInfo)
                     }
 
                     else -> {}
@@ -88,7 +88,7 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
 
     override fun sendMessageUpdates(message: Message) {
         val timeStamp = message.timeStamp
-
+        val toId = friend.uid
         scope.launch {
             val fromMessagePath = "/user-messages/$fromId$toId/$fromId$timeStamp$toId"
             val toMessagePath = "/user-messages/$toId$fromId/$toId$timeStamp$fromId"
@@ -108,35 +108,9 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
 
     override suspend fun deleteMessage(timeStamp: String) {
         scope.launch {
-            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId$toId/$fromId$timeStamp$toId")
+            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId${friend.uid}/$fromId$timeStamp${friend.uid}")
                 .removeValue()
         }
-    }
-
-    override suspend fun getLatestMessage() {
-        scope.launch {
-            FirebaseInstance.firebaseDatabase.reference.child("latest-messages")
-                .child(fromId)
-                .addValueEventListener(valueEventListener)
-        }
-    }
-
-    private val valueEventListener = object : ValueEventListener {
-        override fun onDataChange(snapshot: DataSnapshot) {
-            val tempList =
-                snapshot.getValue<HashMap<String, Message>>()
-                    ?.values
-                    ?.sortedByDescending { it.timeStamp }
-                    ?: return
-
-            CoroutineScope(Dispatchers.IO).launch {
-                latestMessages.emit(tempList)
-            }
-        }
-
-        override fun onCancelled(error: DatabaseError) {
-        }
-
     }
 
     private val chatChildEventListener = object : ChildEventListener {
@@ -163,9 +137,30 @@ class MessageManager(val context: Context, val toId: String) : MessageRepo, Koin
         }
     }
 
+    private fun onMessagePrepared(requestInfo: WorkInfo) {
+        val messageJson =
+            requestInfo.outputData.getString(WorkerCodes.RESULT_MESSAGE)
+        val messageFinal = gson.fromJson(messageJson, Message::class.java)
+        sendMessageUpdates(messageFinal)
+
+        when (messageFinal.messageType) {
+            MessageType.AUDIO -> {
+                messagingNotification.send("Sent a voice message")
+            }
+
+            MessageType.IMAGE -> {
+                messagingNotification.send("Sent a photo")
+            }
+
+            else -> {
+                messagingNotification.send(messageFinal.messageBody ?: "")
+            }
+        }
+    }
+
     init {
         scope.launch {
-            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId$toId")
+            FirebaseInstance.firebaseDatabase.getReference("/user-messages/$fromId${friend.uid}")
                 .addChildEventListener(chatChildEventListener)
         }
     }
