@@ -22,7 +22,11 @@ import com.neupanesushant.kurakani.ui.main.MainViewModel
 import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.databinding.FragmentMeBinding
 import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.coroutines.coroutineContext
 
 
 class MeFragment : Fragment() {
@@ -68,7 +72,6 @@ class MeFragment : Fragment() {
     }
 
     private fun setupUserDetails(user: User) {
-        viewModel.setUser(user)
         binding.tvUserName.text = user.fullName
         Glide.with(requireContext()).load(user.profileImage)
             .apply(RequestOptions().circleCrop())
@@ -97,10 +100,11 @@ class MeFragment : Fragment() {
     }
 
     private fun updateUserInfo() {
-        if (profileImageURI == null) return
-        val fileName = UUID.randomUUID().toString()
-        viewModel.addImageToDatabase(fileName, profileImageURI)
-        mainViewModel.getUserFromDatabase()
+        CoroutineScope(Dispatchers.IO).launch {
+            if (profileImageURI == null) return@launch
+            viewModel.updateUserProfileImage(profileImageURI!!)
+            mainViewModel.getUserFromDatabase()
+        }
     }
 
     private fun btnSignOutAction() {
