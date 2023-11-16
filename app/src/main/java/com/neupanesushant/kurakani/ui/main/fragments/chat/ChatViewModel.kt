@@ -38,7 +38,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     private val _usersOfLatestMessages = MutableLiveData<ArrayList<User>>()
     val usersOfLatestMessages: LiveData<ArrayList<User>> get() = _usersOfLatestMessages
 
-    private val latestMessageRetriever: LatestMessageRetriever  = LatestMessageRetriever()
+    private val latestMessageRetriever: LatestMessageRetriever = LatestMessageRetriever()
 
 
     init {
@@ -46,7 +46,6 @@ class ChatViewModel(private val application: Application) : ViewModel(),
         viewModelScope.launch {
             async { getAllUsersFromDatabase() }
             async { getLatestMessages() }
-
         }
 
         viewModelScope.launch {
@@ -69,7 +68,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
     }
 
     private suspend fun getLatestMessages() {
-        latestMessageRetriever.get()
+        latestMessageRetriever.fetch()
     }
 
     private suspend fun sortLatestMessages() {
