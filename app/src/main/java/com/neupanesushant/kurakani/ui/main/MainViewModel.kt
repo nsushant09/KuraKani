@@ -1,5 +1,6 @@
 package com.neupanesushant.kurakani.ui.main
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -41,6 +42,7 @@ class MainViewModel() : ViewModel(), KoinComponent {
     private fun getFCMToken() {
         FirebaseInstance.firebaseCloudMessage.token.addOnCompleteListener { task ->
             val user = AuthenticatedUser.getInstance().getUser() ?: return@addOnCompleteListener
+            Log.i("Token", "Token : ${user.firstName} : " + task.result)
             if (task.isSuccessful && task.result != user.fcmToken) {
                 user.fcmToken = task.result
                 FirebaseInstance.firebaseDatabase.getReference("/users/${FirebaseInstance.firebaseAuth.uid}")

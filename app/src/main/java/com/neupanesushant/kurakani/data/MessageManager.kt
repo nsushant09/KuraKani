@@ -78,7 +78,10 @@ class MessageManager(val context: Context, private val friend: User) : MessageRe
                 val requestInfo = workInfo.find { it.id == messageWorkRequest.id }
                 when (requestInfo?.state) {
                     WorkInfo.State.SUCCEEDED -> {
-                        onMessagePrepared(requestInfo)
+                        val messageJson =
+                            requestInfo.outputData.getString(WorkerCodes.RESULT_MESSAGE)
+                        val messageFinal = gson.fromJson(messageJson, Message::class.java)
+                        sendMessageUpdates(messageFinal)
                     }
 
                     else -> {}
@@ -87,6 +90,7 @@ class MessageManager(val context: Context, private val friend: User) : MessageRe
     }
 
     override fun sendMessageUpdates(message: Message) {
+        messagingNotification.send(message)
         val timeStamp = message.timeStamp
         val toId = friend.uid
         scope.launch {
@@ -134,27 +138,6 @@ class MessageManager(val context: Context, private val friend: User) : MessageRe
         }
 
         override fun onCancelled(error: DatabaseError) {
-        }
-    }
-
-    private fun onMessagePrepared(requestInfo: WorkInfo) {
-        val messageJson =
-            requestInfo.outputData.getString(WorkerCodes.RESULT_MESSAGE)
-        val messageFinal = gson.fromJson(messageJson, Message::class.java)
-        sendMessageUpdates(messageFinal)
-
-        when (messageFinal.messageType) {
-            MessageType.AUDIO -> {
-                messagingNotification.send("Sent a voice message")
-            }
-
-            MessageType.IMAGE -> {
-                messagingNotification.send("Sent a photo")
-            }
-
-            else -> {
-                messagingNotification.send(messageFinal.messageBody ?: "")
-            }
         }
     }
 
