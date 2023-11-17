@@ -15,28 +15,47 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val chatFragment = ChatFragment()
+    private val userManager = UserManager()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(R.layout.activity_main)
 
-        val userManager = UserManager()
         if (intent.extras != null) {
             val friendUID = intent.extras!!.getString("friendUID")
-            CoroutineScope(Dispatchers.Main).launch{
-                userManager.getSelectedUser(friendUID!!){user ->
-                    val chatMessagingFragment = ChatMessagingFragment(user)
-                    supportFragmentManager.beginTransaction().apply {
-                        replace(R.id.fragment_container_view_tag, chatMessagingFragment)
-                        commit()
-                    }
-                }
-            }
+            navigateToChatMessagingFragmentFromUser(friendUID ?: "")
         }
 
         supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatFragment)
             commit()
+        }
+    }
+
+    private fun navigateToChatMessagingFragmentFromUser(uid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+
+            if (userManager.allUsers.value.filter { it.uid == uid }.isNotEmpty()) {
+                val user = userManager.allUsers.value.filter { it.uid == uid }.get(0)
+                chatMessagingFragment(user)
+                return@launch
+            }
+
+            userManager.getSelectedUser(uid) { user ->
+                chatMessagingFragment(user)
+            }
+
+        }
+    }
+
+    private fun chatMessagingFragment(user: User) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val chatMessagingFragment = ChatMessagingFragment(user)
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.fragment_container_view_tag, chatMessagingFragment)
+                commit()
+            }
+
         }
     }
 }

@@ -1,11 +1,9 @@
 package com.neupanesushant.kurakani.services
 
-import android.util.Log
+import android.annotation.SuppressLint
 import com.google.firebase.messaging.FirebaseMessagingService
-import com.google.firebase.messaging.RemoteMessage
+import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
+import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 
 class FCMNotificationService : FirebaseMessagingService() {
-    override fun onMessageReceived(message: RemoteMessage) {
-        super.onMessageReceived(message)
-    }
 }

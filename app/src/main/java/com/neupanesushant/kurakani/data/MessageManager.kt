@@ -69,7 +69,7 @@ class MessageManager(val context: Context, private val friend: User) : MessageRe
 
         workManager.beginUniqueWork(
             WorkerCodes.SEND_MESSAGE_WORK,
-            ExistingWorkPolicy.APPEND,
+            ExistingWorkPolicy.REPLACE,
             messageWorkRequest
         ).enqueue()
 

@@ -3,11 +3,13 @@ package com.neupanesushant.kurakani.domain.usecase.messaging_notification
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
 import com.neupanesushant.kurakani.domain.model.User
-import okhttp3.MediaType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
 class MessagingNotification(
@@ -49,19 +51,21 @@ class MessagingNotification(
     }
 
     private fun callMessagingAPI(jsonObject: JSONObject) {
-        val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
-        val okHttpClient = OkHttpClient()
-        val url = "https://fcm.googleapis.com/fcm/send"
-        val body = RequestBody.create(JSON, jsonObject.toString())
-        val request = Request.Builder()
-            .url(url)
-            .post(body)
-            .header(
-                "Authorization",
-                "Bearer AAAAQnPQ_Xw:APA91bGDz8xCJunNHcOKRps1gHozLHeGSphgGmajImi1TGB3pagtAV27i1MXUg4GOOnlHP7YJ6rz7kRBSW01fmXl3UJ-yXt1owVz7s71aFhvVcTYAQ4JVf69Q3B0wzBPtxLtCdhQvjbL"
-            )
-            .build()
+        CoroutineScope(Dispatchers.IO).launch {
+            val JSON = "application/json; charset=utf-8".toMediaType()
+            val client = OkHttpClient()
+            val url = "https://fcm.googleapis.com/fcm/send"
+            val body = jsonObject.toString().toRequestBody(JSON)
+            val request = Request.Builder()
+                .url(url)
+                .post(body)
+                .header(
+                    "Authorization",
+                    "Bearer AAAAQnPQ_Xw:APA91bGDz8xCJunNHcOKRps1gHozLHeGSphgGmajImi1TGB3pagtAV27i1MXUg4GOOnlHP7YJ6rz7kRBSW01fmXl3UJ-yXt1owVz7s71aFhvVcTYAQ4JVf69Q3B0wzBPtxLtCdhQvjbL"
+                )
+                .build()
 
-        okHttpClient.newCall(request)
+            client.newCall(request).execute()
+        }
     }
 }
