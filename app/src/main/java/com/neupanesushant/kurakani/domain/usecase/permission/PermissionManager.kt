@@ -4,11 +4,13 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import com.neupanesushant.kurakani.services.CAMERA_PERMISSION_CODE
+import com.neupanesushant.kurakani.services.POST_NOTIFICATION_CODE
 import com.neupanesushant.kurakani.services.READ_EXTERNAL_STORAGE_PERMISSION_CODE
 import com.neupanesushant.kurakani.services.RECORD_AUDIO_CODE
 
@@ -36,7 +38,7 @@ object PermissionManager {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-     fun requestReadExternalStoragePermission(activity: Activity) {
+    fun requestReadExternalStoragePermission(activity: Activity) {
         ActivityCompat.requestPermissions(
             activity,
             arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
@@ -57,6 +59,26 @@ object PermissionManager {
             arrayOf(Manifest.permission.RECORD_AUDIO),
             RECORD_AUDIO_CODE
         )
+    }
+
+    fun hasNotificationPermission(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            return true;
+        }
+    }
+
+    fun requestNotificationPermission(activity: Activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                POST_NOTIFICATION_CODE
+            )
+        }
     }
 
 }

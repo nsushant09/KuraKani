@@ -1,11 +1,19 @@
 package com.neupanesushant.kurakani.ui.main
 
+import android.Manifest
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.data.UserManager
+import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.databinding.ActivityMainBinding
+import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
+import com.neupanesushant.kurakani.ui.login.LoginActivity
 import com.neupanesushant.kurakani.ui.main.fragments.chat.ChatFragment
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingFragment
 import kotlinx.coroutines.CoroutineScope
@@ -21,14 +29,32 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(R.layout.activity_main)
 
-        if (intent.extras != null) {
-            val friendUID = intent.extras!!.getString("friendUID")
-            navigateToChatMessagingFragmentFromUser(friendUID ?: "")
+        checkNotificationPermission()
+
+        if (FirebaseInstance.firebaseAuth.currentUser == null) {
+            navigateToLoginActivity()
+            return
         }
 
+        if (intent.extras != null) {
+            val friendUID = intent.extras!!.getString("userID") ?: ""
+            navigateToChatMessagingFragmentFromUser(friendUID)
+        }
+
+        navigateToChatFragment()
+    }
+
+    private fun navigateToChatFragment() {
         supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container_view_tag, chatFragment)
             commit()
+        }
+    }
+
+    private fun navigateToLoginActivity() {
+        Intent(this, LoginActivity::class.java).apply {
+            startActivity(this)
+            finish()
         }
     }
 
@@ -56,6 +82,24 @@ class MainActivity : AppCompatActivity() {
                 commit()
             }
 
+        }
+    }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (PermissionManager.hasNotificationPermission(this)) {
+                PermissionManager.requestNotificationPermission(this)
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { isGranted: Boolean ->
+        if (!isGranted) {
+            Utils.showToast(this, "You will not recieve notifications.")
         }
     }
 }

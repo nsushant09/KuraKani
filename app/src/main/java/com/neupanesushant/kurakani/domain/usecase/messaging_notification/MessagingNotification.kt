@@ -25,7 +25,7 @@ class MessagingNotification(
         notificationObject.put("body", getMessageBody(message))
 
         val dataObj = JSONObject()
-        dataObj.put("friendUID", currentUser.uid)
+        dataObj.put("userID", currentUser.uid)
 
         jsonObject.put("notification", notificationObject)
         jsonObject.put("data", dataObj)

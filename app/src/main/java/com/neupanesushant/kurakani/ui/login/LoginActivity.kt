@@ -2,11 +2,8 @@ package com.neupanesushant.kurakani.ui.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.TextUtils
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.neupanesushant.kurakani.data.RegisterAndLogin
-import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.databinding.ActivityLoginBinding
 import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.usecase.validator.LoginValidator
@@ -15,8 +12,6 @@ import com.neupanesushant.kurakani.ui.main.MainActivity
 import com.neupanesushant.kurakani.ui.register.RegisterActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -29,19 +24,7 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (FirebaseInstance.firebaseAuth.currentUser != null) {
-            gotoMainActivity()
-        }
-
-        setupView()
         setupEventListener()
-        setupObserver()
-    }
-
-    private fun setupView() {
-    }
-
-    private fun setupObserver() {
     }
 
     private fun setupEventListener() {
@@ -67,14 +50,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun performLogin(email: String, password: String)  {
-
+    private fun performLogin(email: String, password: String) {
         CoroutineScope(Dispatchers.IO).launch {
-
             val result = registerAndLogin.login(email, password)
-            if(result.user != null){
-                gotoMainActivity()
-            }
+            if (result.user == null) return@launch
+            gotoMainActivity()
         }
     }
 
@@ -83,9 +63,5 @@ class LoginActivity : AppCompatActivity() {
             startActivity(this)
             finish()
         }
-    }
-
-    private fun String.isEmptyAfterTrim(): Boolean {
-        return TextUtils.isEmpty(this.trim { it <= ' ' })
     }
 }
