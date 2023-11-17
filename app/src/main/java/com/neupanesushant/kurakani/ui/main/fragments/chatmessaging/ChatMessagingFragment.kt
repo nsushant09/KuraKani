@@ -76,8 +76,6 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
         audioRecorder = AndroidAudioRecorder(requireContext())
 
         setupView()
@@ -90,8 +88,6 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupEventListener() {
-
-        setupWifiBroadcastReciever()
 
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
@@ -294,7 +290,7 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        requireContext().unregisterReceiver(wifiBroadcastReceiver)
+//        requireContext().unregisterReceiver(wifiBroadcastReceiver)
     }
 }
 

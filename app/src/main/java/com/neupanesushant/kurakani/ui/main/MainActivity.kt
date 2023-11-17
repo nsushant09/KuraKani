@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
 
             if (userManager.allUsers.value.filter { it.uid == uid }.isNotEmpty()) {
-                val user = userManager.allUsers.value.filter { it.uid == uid }.get(0)
+                val user = userManager.allUsers.value.filter { it.uid == uid }[0]
                 chatMessagingFragment(user)
                 return@launch
             }

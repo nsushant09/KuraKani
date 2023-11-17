@@ -58,6 +58,7 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setupView()
         setupObserver()
         setupEventListener()
@@ -75,8 +76,6 @@ class ChatFragment : Fragment() {
     }
 
     private fun setupEventListener() {
-
-        setupWifiBroadcastReciever()
 
         binding.cardViewSearchIcon.setOnClickListener {
             replaceFragment(searchFragment)
@@ -157,7 +156,7 @@ class ChatFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        requireContext().unregisterReceiver(wifiBroadcastReceiver)
+//        requireContext().unregisterReceiver(wifiBroadcastReceiver)
     }
 
 }
