@@ -10,7 +10,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class ChatEventHandler(private val friend: User) : ChildEventListener {
 
-    val messages: MutableStateFlow<MutableList<Message>> = MutableStateFlow(mutableListOf())
+    enum class ACTION {
+        ADD,
+        DELETE
+    }
+
+    val messageWithAction: MutableStateFlow<Pair<Message, ACTION>?> = MutableStateFlow(null)
 
     init {
         FirebaseInstance.firebaseDatabase.getReference("/user-messages/${FirebaseInstance.fromId}${friend.uid}")
@@ -18,19 +23,16 @@ class ChatEventHandler(private val friend: User) : ChildEventListener {
     }
 
     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-        val message = snapshot.getValue(Message::class.java) ?: return
-        val currentMessages = messages.value.toMutableList()
-        currentMessages.add(message)
-        messages.value = currentMessages
+        val newMessage = snapshot.getValue(Message::class.java) ?: return
+        messageWithAction.value = Pair(newMessage, ACTION.ADD)
     }
 
     override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
     }
 
     override fun onChildRemoved(snapshot: DataSnapshot) {
-        val currentMessages = messages.value.toMutableList()
-        currentMessages.remove(snapshot.getValue(Message::class.java))
-        messages.value = currentMessages
+        val message = snapshot.getValue(Message::class.java) ?: return
+        messageWithAction.value = Pair(message, ACTION.DELETE)
     }
 
     override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {

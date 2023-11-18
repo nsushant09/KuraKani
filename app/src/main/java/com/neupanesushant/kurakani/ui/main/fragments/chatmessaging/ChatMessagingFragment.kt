@@ -186,7 +186,7 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
             if (it.isEmpty())
                 return@observe
 
-            setChatData(it as ArrayList<Message>)
+            setChatData(it)
         }
     }
 
@@ -285,7 +285,7 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
     }
 
     private val onLongClickAction: (Message) -> Unit = { message ->
-        LongActionsFragment.getInstance(message, friendObj.uid!!)
+        LongActionsFragment.getInstance(message, friendObj)
             .show(parentFragmentManager, LongActionsFragment::class.java.name)
     }
 

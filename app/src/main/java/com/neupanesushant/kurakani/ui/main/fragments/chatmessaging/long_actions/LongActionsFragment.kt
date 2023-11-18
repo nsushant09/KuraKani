@@ -11,6 +11,7 @@ import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.databinding.FragmentLongActionsBinding
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
+import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.domain.usecase.DownloadFileUseCase
 import com.neupanesushant.kurakani.domain.usecase.ShareUseCase
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingViewModel
@@ -23,10 +24,10 @@ class LongActionsFragment() : BottomSheetDialogFragment() {
     private val binding get() = _binding
 
     private lateinit var message: Message
-    private lateinit var friendUID: String
+    private lateinit var friend: User
     private val downloadFileUseCase: DownloadFileUseCase by inject()
     private val shareUseCase: ShareUseCase by inject()
-    private val viewModel: ChatMessagingViewModel by inject { parametersOf(friendUID) }
+    private val viewModel: ChatMessagingViewModel by inject { parametersOf(friend) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogThemeNoFloating)
@@ -83,12 +84,12 @@ class LongActionsFragment() : BottomSheetDialogFragment() {
 
     companion object {
         private var instance: LongActionsFragment? = null
-        fun getInstance(message: Message, friendUID: String): LongActionsFragment {
+        fun getInstance(message: Message, friend: User): LongActionsFragment {
             if (instance == null) {
                 instance = LongActionsFragment()
             }
             instance!!.message = message
-            instance!!.friendUID = friendUID
+            instance!!.friend = friend
             return instance!!
         }
     }

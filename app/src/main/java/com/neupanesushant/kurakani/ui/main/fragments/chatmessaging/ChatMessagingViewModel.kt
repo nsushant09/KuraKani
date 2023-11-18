@@ -28,8 +28,10 @@ class ChatMessagingViewModel(
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    private val _chatLog = MutableLiveData<List<Message>>()
-    val chatLog: LiveData<List<Message>> get() = _chatLog
+    private val _chatLog = MutableLiveData<ArrayList<Message>>()
+    val chatLog: LiveData<ArrayList<Message>> get() = _chatLog
+
+    private val tempChatLog: ArrayList<Message> = arrayListOf()
 
     private val _sentImagesList = MutableLiveData<java.util.ArrayList<Uri>>()
     private val sentImagesList get() = _sentImagesList
@@ -42,8 +44,11 @@ class ChatMessagingViewModel(
 
     init {
         viewModelScope.launch {
-            chatEventHandler.messages.collectLatest {
-                _chatLog.postValue(it)
+            chatEventHandler.messageWithAction.collectLatest {
+                if (it == null) return@collectLatest
+                if(it.second == ChatEventHandler.ACTION.ADD) tempChatLog.add(it.first)
+                if(it.second == ChatEventHandler.ACTION.DELETE) tempChatLog.remove(it.first)
+                _chatLog.value = tempChatLog
             }
         }
     }
