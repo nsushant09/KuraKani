@@ -23,6 +23,7 @@ import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.AudioDeli
 import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.ImageDeliverPolicy
 import com.neupanesushant.kurakani.domain.usecase.messagedeliverpolicy.TextDeliverPolicy
 import com.neupanesushant.kurakani.domain.usecase.messaging_notification.MessagingNotification
+import com.neupanesushant.kurakani.domain.usecase.messaging_notification.NotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,7 +43,7 @@ class MessageManager(val context: Context, private val friend: User) : MessageRe
 
     val messages: MutableStateFlow<MutableList<Message>> = MutableStateFlow(mutableListOf())
 
-    private val messagingNotification: MessagingNotification =
+    private val notificationManager: NotificationManager =
         MessagingNotification(AuthenticatedUser.getInstance().getUser()!!, friend.fcmToken ?: "")
 
     private val messageTypePolicies = hashMapOf(
@@ -90,7 +91,7 @@ class MessageManager(val context: Context, private val friend: User) : MessageRe
     }
 
     override fun sendMessageUpdates(message: Message) {
-        messagingNotification.send(message)
+        notificationManager.send(message)
         val timeStamp = message.timeStamp
         val toId = friend.uid
         scope.launch {

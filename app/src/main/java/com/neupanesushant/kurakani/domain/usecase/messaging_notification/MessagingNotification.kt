@@ -15,9 +15,9 @@ import org.json.JSONObject
 class MessagingNotification(
     private val currentUser: User,
     private val otherUserFCMToken: String
-) {
+) : NotificationManager {
 
-    fun send(message: Message) {
+    override fun send(message: Message) {
         val jsonObject = JSONObject()
 
         val notificationObject = JSONObject()

@@ -6,14 +6,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.google.android.gms.tasks.Tasks
 import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.databinding.ActivityRegisterBinding
 import com.neupanesushant.kurakani.domain.Utils
@@ -84,6 +82,7 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun createNewUser(email: String, password: String) {
+        Toast.makeText(this, "Creating your account", Toast.LENGTH_LONG).show()
         CoroutineScope(Dispatchers.IO).launch {
             val result = registerAndLogin.createNewUser(email, password)
             if (result.user != null) {
@@ -128,7 +127,7 @@ class RegisterActivity : AppCompatActivity() {
                 binding.etLastname.text.toString(),
                 profileImageURI
             )
-            if(isSuccessfulTask){
+            if (isSuccessfulTask) {
                 logIn()
             }
         }
