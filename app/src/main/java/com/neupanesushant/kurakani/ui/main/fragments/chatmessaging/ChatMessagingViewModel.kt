@@ -1,15 +1,16 @@
 package com.neupanesushant.kurakani.ui.main.fragments.chatmessaging
 
-import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.data.MessageManager
-import com.neupanesushant.kurakani.data.UserManager
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
 import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.domain.usecase.message_manager.ChatEventHandler
+import com.neupanesushant.kurakani.domain.usecase.message_manager.MessageDeleter
+import com.neupanesushant.kurakani.domain.usecase.message_manager.MessageSender
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -28,24 +29,20 @@ class ChatMessagingViewModel(
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
     private val _chatLog = MutableLiveData<List<Message>>()
-    val chatLog get() = _chatLog
+    val chatLog: LiveData<List<Message>> get() = _chatLog
 
     private val _sentImagesList = MutableLiveData<java.util.ArrayList<Uri>>()
     private val sentImagesList get() = _sentImagesList
     private var sentImageUploadCounter = 0
 
-    private val _friendUser = MutableLiveData<User?>()
-    val friendUser get() = _friendUser
-
-    private val _isFriendValueLoaded = MutableLiveData<Boolean>()
-
-    private val userManager: UserManager by inject()
-    private val messageManager: MessageManager by inject { parametersOf(friend) }
+    private val messageSender: MessageSender by inject { parametersOf(friend) }
+    private val messageDeleter: MessageDeleter by inject { parametersOf(friend) }
+    private val chatEventHandler: ChatEventHandler by inject { parametersOf(friend) }
 
 
     init {
         viewModelScope.launch {
-            messageManager.messages.collectLatest {
+            chatEventHandler.messages.collectLatest {
                 _chatLog.postValue(it)
             }
         }
@@ -53,13 +50,13 @@ class ChatMessagingViewModel(
 
     fun deleteMessage(timeStamp: String) {
         uiScope.launch {
-            messageManager.deleteMessage(timeStamp)
+            messageDeleter.delete(timeStamp)
         }
     }
 
     fun sendTextMessage(chatMessage: String) {
         uiScope.launch {
-            messageManager.sendMessage(chatMessage, MessageType.TEXT)
+            messageSender.send(chatMessage, MessageType.TEXT)
         }
     }
 
@@ -75,7 +72,7 @@ class ChatMessagingViewModel(
     private fun sendSingleImageMessage(index: Int) {
         uiScope.launch {
             if (index < sentImagesList.value!!.size) {
-                messageManager.sendMessage(
+                messageSender.send(
                     sentImagesList.value!![index].toString(),
                     MessageType.IMAGE
                 )
@@ -86,20 +83,10 @@ class ChatMessagingViewModel(
 
     fun sendAudioMessage(uri: Uri) {
         uiScope.launch {
-            messageManager.sendMessage(
+            messageSender.send(
                 uri.toString(),
                 MessageType.AUDIO
             )
-        }
-    }
-
-    fun getFriendUserDetails(uid: String) {
-        _isFriendValueLoaded.value = false
-        uiScope.launch {
-            userManager.getSelectedUser(uid) { user ->
-                _friendUser.postValue(user)
-                _isFriendValueLoaded.postValue(true)
-            }
         }
     }
 

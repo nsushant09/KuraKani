@@ -54,7 +54,6 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
     private lateinit var audioRecorder: AndroidAudioRecorder
     private val autoRunningTimer = AutoRunningTimer()
-
     private var audioRecorderFile: File? = null
 
 
@@ -69,7 +68,6 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
         }
 
         user = AuthenticatedUser.getInstance().getUser()!!
-        viewModel.getFriendUserDetails(friendObj.uid!!)
         return binding.root
     }
 
@@ -84,6 +82,7 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
     }
 
     private fun setupView() {
+        setFriendUserDetail()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -123,44 +122,46 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
 
         binding.ivRecordAudioMessage.setOnTouchListener { _, event ->
-
-            if (!PermissionManager.hasRecordAudioPermission(requireContext())) {
-                PermissionManager.requestRecordAudioPermission(requireActivity())
-                return@setOnTouchListener true
-            }
-
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    audioRecorderFile = null
-                    audioRecorderFile = audioRecorder.start()
-                    displayAudioRecording(true)
-                }
-
-                MotionEvent.ACTION_UP -> {
-                    audioRecorder.stop()
-                    displayAudioRecording(false)
-                    audioRecorderFile?.let {
-                        //TODO : Ask user if they are sure about sending the message
-                        viewModel.sendAudioMessage(it.toUri())
-                    }
-                }
-
-                else -> {}
-            }
-            true
+            recordAudioMessageEventHandler(event)
         }
     }
 
-    private fun setupObserver() {
-        viewModel.friendUser.observe(viewLifecycleOwner) { user ->
-            if (user == null)
-                return@observe
 
-            Glide.with(requireContext()).load(user.profileImage).centerCrop()
-                .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
-            binding.tvFriendFirstName.text = user.firstName
-            setChatLogObserver()
+    private fun setupObserver() {
+    }
+
+    private fun recordAudioMessageEventHandler(event: MotionEvent): Boolean {
+        if (!PermissionManager.hasRecordAudioPermission(requireContext())) {
+            PermissionManager.requestRecordAudioPermission(requireActivity())
+            return true
         }
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                audioRecorderFile = null
+                audioRecorderFile = audioRecorder.start()
+                displayAudioRecording(true)
+            }
+
+            MotionEvent.ACTION_UP -> {
+                audioRecorder.stop()
+                displayAudioRecording(false)
+                audioRecorderFile?.let {
+                    //TODO : Ask user if they are sure about sending the message
+                    viewModel.sendAudioMessage(it.toUri())
+                }
+            }
+
+            else -> {}
+        }
+        return true
+    }
+
+    private fun setFriendUserDetail() {
+        Glide.with(requireContext()).load(friendObj.profileImage).centerCrop()
+            .error(R.drawable.ic_user).into(binding.ivFriendProfileImage)
+        binding.tvFriendFirstName.text = friendObj.firstName
+        setChatLogObserver()
     }
 
     private fun displayAudioRecording(isRecording: Boolean) {
@@ -215,7 +216,7 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
             ChatMessageAdapter(
                 requireContext(),
                 user,
-                viewModel.friendUser.value!!,
+                friendObj,
                 messageList,
                 onLongClickAction
             )
@@ -287,6 +288,7 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
         LongActionsFragment.getInstance(message, friendObj.uid!!)
             .show(parentFragmentManager, LongActionsFragment::class.java.name)
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
