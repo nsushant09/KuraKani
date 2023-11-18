@@ -81,11 +81,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (PermissionManager.hasNotificationPermission(this)) {
+            if (!PermissionManager.hasNotificationPermission(this)) {
                 PermissionManager.requestNotificationPermission(this)
-            } else {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 

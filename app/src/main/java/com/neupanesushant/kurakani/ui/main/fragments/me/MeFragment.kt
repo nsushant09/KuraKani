@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -32,7 +33,6 @@ class MeFragment : Fragment() {
     private lateinit var _binding: FragmentMeBinding
     private val binding get() = _binding
     private lateinit var viewModel: MeViewModel
-    private val IMAGE_SELECTOR_REQUEST_CODE = 111223344
 
     private var profileImageURI: Uri? = null
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -79,22 +79,18 @@ class MeFragment : Fragment() {
     private fun chooseImage() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
-        startActivityForResult(intent, IMAGE_SELECTOR_REQUEST_CODE)
+        imageChooseLauncher.launch(intent)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == IMAGE_SELECTOR_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-            profileImageURI = data.data!!
-            Glide.with(this)
-                .load(profileImageURI)
-                .apply(RequestOptions().centerCrop())
-                .into(binding.ivUserProfilePicture)
-
-            updateUserInfo()
-        }
+    val imageChooseLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+        val intent = it.data ?: return@registerForActivityResult
+        profileImageURI = intent.data ?: return@registerForActivityResult
+        Glide.with(this).load(profileImageURI).apply(RequestOptions().centerCrop())
+            .into(binding.ivUserProfilePicture)
+        updateUserInfo()
     }
 
     private fun updateUserInfo() {
@@ -120,12 +116,13 @@ class MeFragment : Fragment() {
         alertDialog.show()
     }
 
-    private fun removeFCMToken(){
+    private fun removeFCMToken() {
         FirebaseInstance.firebaseCloudMessage.deleteToken().addOnCompleteListener {
             signOut()
         }
     }
-    private fun signOut(){
+
+    private fun signOut() {
         FirebaseAuth.getInstance().signOut()
         Intent(requireContext(), LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

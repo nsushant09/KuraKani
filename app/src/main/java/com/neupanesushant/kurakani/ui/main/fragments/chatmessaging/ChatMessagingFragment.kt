@@ -1,17 +1,16 @@
 package com.neupanesushant.kurakani.ui.main.fragments.chatmessaging
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
@@ -21,7 +20,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
-import com.neupanesushant.kurakani.broadcast_recievers.WiFiBroadcastReceiver
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
 import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.Message
@@ -41,12 +39,10 @@ import java.io.File
 import java.util.*
 
 
-@Suppress("DEPRECATION")
 class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
     private lateinit var user: User
     private lateinit var _binding: FragmentChatMessagingBinding
-    private val wifiBroadcastReceiver: WiFiBroadcastReceiver by inject()
     private val binding get() = _binding
 
     private val cameraUseCase: CameraUseCase by inject()
@@ -192,12 +188,10 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
     private fun openCamera() {
         if (PermissionManager.hasCameraPermission(requireContext())) {
-            startActivityForResult(
-                cameraUseCase.getCaptureImageIntent(),
-                CAMERA_IMAGE_CAPTURE_CODE
-            )
+            cameraActivityLauncher.launch(cameraUseCase.getCaptureImageIntent())
         } else {
             PermissionManager.requestCameraPermission(requireActivity())
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -226,62 +220,42 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        startActivityForResult(
-            Intent.createChooser(intent, "Select Images"),
-            IMAGE_SELECTOR_REQUEST_CODE
-        )
+        imageSelectorRequestLauncher.launch(Intent.createChooser(intent, "Select images"))
     }
 
-    private fun setupWifiBroadcastReciever() {
-        val filter = IntentFilter()
-        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
-        requireContext().registerReceiver(wifiBroadcastReceiver, filter)
-
-        wifiBroadcastReceiver.setOnWifiStateChange { isWifiConnected ->
-            binding.tvNoInternet.isVisible = !isWifiConnected
-        }
-    }
-
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == IMAGE_SELECTOR_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
-
-            val tempImages: ArrayList<Uri> = arrayListOf()
-            if (data.clipData != null) {
-                for (i in 0 until data.clipData!!.itemCount) {
-                    tempImages.add(data.clipData!!.getItemAt(i).uri)
-                }
-                viewModel.sendImagesMessage(tempImages)
+    private val imageSelectorRequestLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+        val data = result.data ?: return@registerForActivityResult
+        val tempImages: ArrayList<Uri> = arrayListOf()
+        if (data.clipData != null) {
+            for (i in 0 until data.clipData!!.itemCount) {
+                tempImages.add(data.clipData!!.getItemAt(i).uri)
             }
-        }
-
-        if (requestCode == CAMERA_IMAGE_CAPTURE_CODE && resultCode == Activity.RESULT_OK) {
-            val file = File(requireContext().cacheDir, cameraUseCase.getLastCapturedFileName())
-            val uri = FileProvider.getUriForFile(
-                requireContext(),
-                requireContext().applicationContext.packageName + ".provider",
-                file
-            )
-            val tempImages: ArrayList<Uri> = arrayListOf()
-            tempImages.add(uri)
             viewModel.sendImagesMessage(tempImages)
         }
-
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) return@registerForActivityResult
+        cameraActivityLauncher.launch(cameraUseCase.getCaptureImageIntent())
+    }
+
+    private val cameraActivityLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
     ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == CAMERA_PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startActivityForResult(cameraUseCase.getCaptureImageIntent(), CAMERA_IMAGE_CAPTURE_CODE)
-        }
+        val file = File(requireContext().cacheDir, cameraUseCase.getLastCapturedFileName())
+        val uri = FileProvider.getUriForFile(
+            requireContext(),
+            requireContext().applicationContext.packageName + ".provider",
+            file
+        )
+        val tempImages: ArrayList<Uri> = arrayListOf()
+        tempImages.add(uri)
+        viewModel.sendImagesMessage(tempImages)
     }
 
     private val onLongClickAction: (Message) -> Unit = { message ->
@@ -289,10 +263,5 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
             .show(parentFragmentManager, LongActionsFragment::class.java.name)
     }
 
-
-    override fun onDestroy() {
-        super.onDestroy()
-//        requireContext().unregisterReceiver(wifiBroadcastReceiver)
-    }
 }
 
