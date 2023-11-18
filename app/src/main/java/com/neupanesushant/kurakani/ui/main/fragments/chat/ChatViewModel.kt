@@ -31,6 +31,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
 
     private val _allUsers = MutableLiveData<List<User>>()
     val allUsers: LiveData<List<User>> get() = _allUsers
+    private val tempUsers: ArrayList<User> = arrayListOf()
 
     private val _latestMessages = MutableLiveData<List<Message>>()
     val latestMessages: LiveData<List<Message>> get() = _latestMessages
@@ -56,9 +57,10 @@ class ChatViewModel(private val application: Application) : ViewModel(),
         }
 
         viewModelScope.launch {
-            userManager.allUsers.collectLatest {
-                _allUsers.postValue(it)
-                sortLatestMessages()
+            userManager.users.collectLatest {
+                if (it == null) return@collectLatest
+                tempUsers.add(it)
+                _allUsers.postValue(tempUsers)
             }
         }
     }

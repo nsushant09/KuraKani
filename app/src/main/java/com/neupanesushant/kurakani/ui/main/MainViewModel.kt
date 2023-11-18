@@ -1,6 +1,5 @@
 package com.neupanesushant.kurakani.ui.main
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -30,8 +29,10 @@ class MainViewModel() : ViewModel(), KoinComponent {
     }
 
     fun getUserFromDatabase() {
-        uiScope.launch {
-            userManager.getSelectedUser(FirebaseInstance.firebaseAuth.uid!!) { user ->
+        CoroutineScope(Dispatchers.IO).launch {
+            val snapshot = userManager.getSelectedUser(FirebaseInstance.firebaseAuth.uid!!)
+            val user = snapshot.getValue(User::class.java)
+            if (user != null) {
                 AuthenticatedUser.getInstance().setUser(user)
                 _user.postValue(user)
                 getFCMToken()

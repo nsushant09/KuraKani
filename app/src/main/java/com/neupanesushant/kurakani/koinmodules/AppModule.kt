@@ -66,6 +66,6 @@ val appModule = module {
     }
 
     viewModel {
-        SearchViewModel(androidApplication())
+        SearchViewModel()
     }
 }

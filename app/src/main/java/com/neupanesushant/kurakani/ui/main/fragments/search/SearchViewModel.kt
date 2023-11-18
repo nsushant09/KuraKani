@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.data.UserManager
+import com.neupanesushant.kurakani.domain.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class SearchViewModel(private val application: Application) : ViewModel(), KoinComponent {
+class SearchViewModel() : ViewModel(), KoinComponent {
 
     private val viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
@@ -22,6 +22,7 @@ class SearchViewModel(private val application: Application) : ViewModel(), KoinC
 
     private val _allUsers = MutableLiveData<List<User>>()
     val allUser get() = _allUsers
+    val tempUsers = arrayListOf<User>()
 
     private val _searchedList = MutableLiveData<List<User>>()
     val searchedList get() = _searchedList
@@ -32,8 +33,10 @@ class SearchViewModel(private val application: Application) : ViewModel(), KoinC
     init {
         getAllUsersFromDatabase()
         viewModelScope.launch {
-            userManager.allUsers.collectLatest {
-                _allUsers.postValue(it)
+            userManager.users.collectLatest {
+                if (it == null) return@collectLatest
+                tempUsers.add(it)
+                _allUsers.postValue(tempUsers)
             }
         }
     }

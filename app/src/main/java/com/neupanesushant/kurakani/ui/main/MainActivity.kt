@@ -60,17 +60,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToChatMessagingFragmentFromUser(uid: String) {
         CoroutineScope(Dispatchers.IO).launch {
-
-            if (userManager.allUsers.value.filter { it.uid == uid }.isNotEmpty()) {
-                val user = userManager.allUsers.value.filter { it.uid == uid }[0]
-                chatMessagingFragment(user)
-                return@launch
-            }
-
-            userManager.getSelectedUser(uid) { user ->
+            val snapshot = userManager.getSelectedUser(uid)
+            val user = snapshot.getValue(User::class.java)
+            if (user != null) {
                 chatMessagingFragment(user)
             }
-
         }
     }
 
