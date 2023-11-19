@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
             val chatMessagingFragment = ChatMessagingFragment(user)
             supportFragmentManager.beginTransaction().apply {
                 replace(R.id.fragment_container_view_tag, chatMessagingFragment)
+                addToBackStack(null)
                 commit()
             }
 

@@ -32,6 +32,7 @@ import com.neupanesushant.kurakani.domain.usecase.permission.PermissionManager
 import com.neupanesushant.kurakani.services.*
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.chatmessageadapter.ChatMessageAdapter
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.long_actions.LongActionsFragment
+import com.neupanesushant.kurakani.ui.main.rtc.RTCActivity
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
@@ -108,12 +109,10 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
         }
 
         binding.ivVideo.setOnClickListener {
-            Utils.showToast(requireContext(), "This feature will be added soon")
-            // TODO : Video Implementation
+            onVideoCall()
         }
         binding.ivCall.setOnClickListener {
-            Utils.showToast(requireContext(), "This feature will be added soon")
-            // TODO : Call Implementation
+            onVoiceCall()
         }
 
 
@@ -263,5 +262,22 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
             .show(parentFragmentManager, LongActionsFragment::class.java.name)
     }
 
+    private fun onVoiceCall() {
+        Intent(activity, RTCActivity::class.java).apply {
+            putExtra("user", user)
+            putExtra("friend", friendObj)
+            putExtra("communicationType", RTCActivity.CommunicationType.AUDIO)
+            startActivity(this)
+        }
+    }
+
+    private fun onVideoCall() {
+        Intent(activity, RTCActivity::class.java).apply {
+            putExtra("user", user)
+            putExtra("friend", friendObj)
+            putExtra("communicationType", RTCActivity.CommunicationType.VIDEO)
+            startActivity(this)
+        }
+    }
 }
 

@@ -13,11 +13,9 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.neupanesushant.kurakani.R
-import com.neupanesushant.kurakani.ui.main.MainViewModel
-import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingFragment
-import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.databinding.FragmentSearchBinding
-import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
+import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingFragment
 import org.koin.android.ext.android.inject
 
 
@@ -105,8 +103,11 @@ class SearchFragment : Fragment() {
     private fun searchBarAction() {
 
         binding.etSearchbar.addTextChangedListener {
-            if (it != null && it.isNotEmpty()) {
+            if (!it.isNullOrEmpty()) {
                 viewModel.filterSearch(it.toString())
+            } else {
+                if (viewModel.allUser.value != null)
+                    setUsersData(viewModel.allUser.value!!)
             }
         }
 

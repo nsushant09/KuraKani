@@ -3,9 +3,10 @@ package com.neupanesushant.kurakani.domain
 import android.content.Context
 import android.text.TextUtils
 import android.widget.Toast
+import com.neupanesushant.kurakani.domain.model.Message
 
 object Utils {
-    fun showToast(context : Context, message : String){
+    fun showToast(context: Context, message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 

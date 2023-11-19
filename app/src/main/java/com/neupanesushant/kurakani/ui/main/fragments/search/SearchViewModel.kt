@@ -16,13 +16,9 @@ import org.koin.core.component.inject
 
 class SearchViewModel() : ViewModel(), KoinComponent {
 
-    private val viewModelJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-
-
     private val _allUsers = MutableLiveData<List<User>>()
     val allUser get() = _allUsers
-    val tempUsers = arrayListOf<User>()
+    private var tempUsers = arrayListOf<User>()
 
     private val _searchedList = MutableLiveData<List<User>>()
     val searchedList get() = _searchedList
@@ -31,19 +27,13 @@ class SearchViewModel() : ViewModel(), KoinComponent {
 
 
     init {
-        getAllUsersFromDatabase()
+        tempUsers = arrayListOf()
         viewModelScope.launch {
             userManager.users.collectLatest {
                 if (it == null) return@collectLatest
                 tempUsers.add(it)
                 _allUsers.postValue(tempUsers)
             }
-        }
-    }
-
-    private fun getAllUsersFromDatabase() {
-        uiScope.launch {
-            userManager.getAllUser()
         }
     }
 

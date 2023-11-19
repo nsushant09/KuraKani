@@ -88,6 +88,8 @@ dependencies {
 
     // okHttp
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
-
     implementation("com.google.code.gson:gson:2.9.0")
+
+    //agora
+    implementation("io.agora.rtc:full-sdk:4.0.1")
 }

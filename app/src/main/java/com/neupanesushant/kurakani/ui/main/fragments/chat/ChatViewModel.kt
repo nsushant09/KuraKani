@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ChatViewModel(private val application: Application) : ViewModel(),
+class ChatViewModel() : ViewModel(),
     KoinComponent {
 
 
@@ -31,7 +31,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
 
     private val _allUsers = MutableLiveData<List<User>>()
     val allUsers: LiveData<List<User>> get() = _allUsers
-    private val tempUsers: ArrayList<User> = arrayListOf()
+    private var tempUsers: ArrayList<User> = arrayListOf()
 
     private val _latestMessages = MutableLiveData<List<Message>>()
     val latestMessages: LiveData<List<Message>> get() = _latestMessages
@@ -43,7 +43,6 @@ class ChatViewModel(private val application: Application) : ViewModel(),
 
 
     init {
-
         viewModelScope.launch {
             async { getAllUsersFromDatabase() }
             async { getLatestMessages() }
@@ -57,6 +56,7 @@ class ChatViewModel(private val application: Application) : ViewModel(),
         }
 
         viewModelScope.launch {
+            tempUsers = arrayListOf()
             userManager.users.collectLatest {
                 if (it == null) return@collectLatest
                 tempUsers.add(it)

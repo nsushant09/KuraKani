@@ -62,7 +62,7 @@ val appModule = module {
     }
 
     viewModel {
-        ChatViewModel(androidApplication())
+        ChatViewModel()
     }
 
     viewModel {
