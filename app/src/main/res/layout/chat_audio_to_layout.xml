@@ -4,7 +4,7 @@
     android:id="@+id/layout"
     android:layout_width="325dp"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="4dp">
+    android:layout_marginVertical="2dp">
 
     <ImageView
         android:id="@+id/ivProfileImage"
@@ -43,7 +43,7 @@
             android:layout_width="232dp"
             android:layout_height="wrap_content"
 
-            android:progressBackgroundTint="@color/dark_grey"
+            android:progressBackgroundTint="@color/white"
             android:progressTint="@color/neon_orange"
             android:thumbTint="@color/neon_orange" />
 

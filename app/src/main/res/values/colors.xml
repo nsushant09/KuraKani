@@ -11,5 +11,5 @@
     <color name="dark_grey">#303030</color>
     <color name="colorOnGrey_grey">#a9a9a9</color>
     <color name="textfield_grey">#C8C8C8</color>
-    <color name="error_red">#cc0000</color>
+    <color name="error_red">#E61010</color>
 </resources>

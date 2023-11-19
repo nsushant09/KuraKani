@@ -29,11 +29,10 @@ class AgoraManager(
         }
     }
 
-    fun joinChannel(onChannelJoined: () -> Unit) {
+    fun joinChannel() {
         val options = ChannelMediaOptions()
         options.channelProfile = Constants.CHANNEL_PROFILE_COMMUNICATION_1v1
         options.clientRoleType = Constants.CLIENT_ROLE_BROADCASTER
-        onChannelJoined()
         agoraEngine?.let {
             it.startPreview()
             it.joinChannel(TOKEN, channelId, LOCAL_USER_ID, options)
@@ -83,6 +82,21 @@ class AgoraManager(
                 uid,
                 "OFFLINE"
             )
+        }
+
+        override fun onRemoteVideoStateChanged(uid: Int, state: Int, reason: Int, elapsed: Int) {
+            if (state == Constants.REMOTE_VIDEO_STATE_STARTING) {
+                if (this@AgoraManager::onUserActivityStatusChange.isInitialized) onUserActivityStatusChange(
+                    uid,
+                    "REMOTE_VIDEO_ON"
+                )
+
+            } else if (state == Constants.REMOTE_VIDEO_STATE_STOPPED) {
+                if (this@AgoraManager::onUserActivityStatusChange.isInitialized) onUserActivityStatusChange(
+                    uid,
+                    "REMOTE_VIDEO_OFF"
+                )
+            }
         }
     }
 

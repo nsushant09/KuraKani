@@ -14,6 +14,7 @@ import com.neupanesushant.kurakani.ui.main.MainViewModel
 import com.neupanesushant.kurakani.ui.main.fragments.chat.ChatViewModel
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingViewModel
 import com.neupanesushant.kurakani.ui.main.fragments.search.SearchViewModel
+import com.neupanesushant.kurakani.ui.main.rtc.RTCViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -67,5 +68,9 @@ val appModule = module {
 
     viewModel {
         SearchViewModel()
+    }
+
+    viewModel {
+        RTCViewModel()
     }
 }
