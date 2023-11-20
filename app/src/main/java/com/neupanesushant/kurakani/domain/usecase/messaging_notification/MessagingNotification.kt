@@ -1,5 +1,6 @@
 package com.neupanesushant.kurakani.domain.usecase.messaging_notification
 
+import com.neupanesushant.kurakani.BuildConfig
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
 import com.neupanesushant.kurakani.domain.model.User
@@ -61,7 +62,7 @@ class MessagingNotification(
                 .post(body)
                 .header(
                     "Authorization",
-                    "Bearer AAAAQnPQ_Xw:APA91bGDz8xCJunNHcOKRps1gHozLHeGSphgGmajImi1TGB3pagtAV27i1MXUg4GOOnlHP7YJ6rz7kRBSW01fmXl3UJ-yXt1owVz7s71aFhvVcTYAQ4JVf69Q3B0wzBPtxLtCdhQvjbL"
+                    "Bearer " + BuildConfig.FCM_TOKEN
                 )
                 .build()
 

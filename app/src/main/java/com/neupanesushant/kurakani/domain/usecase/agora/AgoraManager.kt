@@ -2,6 +2,7 @@ package com.neupanesushant.kurakani.domain.usecase.agora
 
 import android.content.Context
 import android.widget.Toast
+import com.neupanesushant.kurakani.BuildConfig
 import io.agora.rtc2.ChannelMediaOptions
 import io.agora.rtc2.Constants
 import io.agora.rtc2.IRtcEngineEventHandler
@@ -18,15 +19,16 @@ class AgoraManager(
     private lateinit var onUserActivityStatusChange: (Int, String) -> Unit
 
     fun setupVideoSDKEngine() {
-        try {
-            val config = RtcEngineConfig()
-            config.mContext = context
-            config.mAppId = APP_ID
-            config.mEventHandler = mRtcEventHandler
-            agoraEngine = RtcEngine.create(config)
-        } catch (e: Exception) {
-            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
-        }
+        val a =
+            try {
+                val config = RtcEngineConfig()
+                config.mContext = context
+                config.mAppId = APP_ID
+                config.mEventHandler = mRtcEventHandler
+                agoraEngine = RtcEngine.create(config)
+            } catch (e: Exception) {
+                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show()
+            }
     }
 
     fun joinChannel() {
@@ -101,9 +103,8 @@ class AgoraManager(
     }
 
     companion object {
-        private const val APP_ID = "6cc8100e186e48c98ba6cdcb3cb6f8e0"
-        private const val TOKEN =
-            "007eJxTYBAXWX720bGZWxnn3W38OT/Gwv7Q5+h9cuIuG68z5+0t2nRAgcEsOdnC0MAg1dDCLNXEItnSIinRLDklOck4OckszSLV4NLkyNSGQEaG+kcqzIwMEAji8zM4pucXJQaFODtnJOblpeYwMAAAXv0lYQ=="
+        private val APP_ID = BuildConfig.AGORA_APP_ID
+        private val TOKEN = BuildConfig.AGORA_TOKEN
         private const val LOCAL_USER_ID = 0
     }
 }

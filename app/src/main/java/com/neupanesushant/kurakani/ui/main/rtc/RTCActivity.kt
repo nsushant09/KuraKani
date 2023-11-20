@@ -43,7 +43,6 @@ class RTCActivity : AppCompatActivity() {
 
     private val viewModel: RTCViewModel by inject()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRtcactivityBinding.inflate(layoutInflater)
