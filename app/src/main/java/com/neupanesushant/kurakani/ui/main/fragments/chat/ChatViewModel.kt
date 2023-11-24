@@ -60,7 +60,8 @@ class ChatViewModel() : ViewModel(),
             userManager.users.collectLatest {
                 if (it == null) return@collectLatest
                 tempUsers.add(it)
-                _allUsers.postValue(tempUsers)
+                _allUsers.value = tempUsers
+                sortLatestMessages()
             }
         }
     }

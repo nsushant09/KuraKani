@@ -2,12 +2,14 @@ package com.neupanesushant.kurakani.ui.main
 
 import android.Manifest
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.neupanesushant.kurakani.R
+import com.neupanesushant.kurakani.broadcast_recievers.WiFiBroadcastReceiver
 import com.neupanesushant.kurakani.data.UserManager
 import com.neupanesushant.kurakani.data.datasource.FirebaseInstance
 import com.neupanesushant.kurakani.databinding.ActivityMainBinding
@@ -25,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val chatFragment = ChatFragment()
     private val userManager = UserManager()
+    private val wifiBroadcastReceiver = WiFiBroadcastReceiver()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -36,13 +39,18 @@ class MainActivity : AppCompatActivity() {
             navigateToLoginActivity()
             return
         }
-
-        if (intent.extras != null) {
-            val friendUID = intent.extras!!.getString("userID") ?: ""
-            navigateToChatMessagingFragmentFromUser(friendUID)
-        }
-
+        tryNavigateToChatMessagingFragment()
         navigateToChatFragment()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerWifiReceiver()
+        unregisterReceiver(wifiBroadcastReceiver)
+    }
+
+    override fun onStop() {
+        super.onStop()
     }
 
     private fun navigateToChatFragment() {
@@ -59,7 +67,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToChatMessagingFragmentFromUser(uid: String) {
+    private fun tryNavigateToChatMessagingFragment() {
+        if (intent.extras == null) return
+        val uid = intent.extras!!.getString("userID") ?: return
         CoroutineScope(Dispatchers.IO).launch {
             val snapshot = userManager.getSelectedUser(uid)
             val user = snapshot.getValue(User::class.java)
@@ -96,5 +106,15 @@ class MainActivity : AppCompatActivity() {
         if (!isGranted) {
             Utils.showToast(this, "You will not recieve notifications.")
         }
+    }
+
+    private fun registerWifiReceiver() {
+        val filter = IntentFilter()
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
+        registerReceiver(wifiBroadcastReceiver, filter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }

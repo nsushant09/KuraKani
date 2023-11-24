@@ -1,6 +1,5 @@
 package com.neupanesushant.kurakani.koinmodules
 
-import com.neupanesushant.kurakani.broadcast_recievers.WiFiBroadcastReceiver
 import com.neupanesushant.kurakani.data.RegisterAndLogin
 import com.neupanesushant.kurakani.data.UserManager
 import com.neupanesushant.kurakani.domain.model.User
@@ -48,10 +47,6 @@ val appModule = module {
     }
     factory { (friend: User) ->
         MessageDeleter(friend)
-    }
-
-    single {
-        WiFiBroadcastReceiver()
     }
 
     viewModel { (friend: User) ->
