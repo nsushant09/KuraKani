@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 
 class RegisterAndLogin {
 
+    private val imagePersistence = DatabaseImagePersistence()
     suspend fun login(email: String, password: String): AuthResult = coroutineScope {
         val job = async {
             FirebaseInstance.firebaseAuth.signInWithEmailAndPassword(email, password)
@@ -34,9 +35,11 @@ class RegisterAndLogin {
         imageUri: Uri?,
     ): Boolean {
         return withContext(Dispatchers.IO) {
-            if (imageUri == null) {return@withContext false}
+            if (imageUri == null) {
+                return@withContext false
+            }
 
-            val imageUrl = DatabaseImagePersistence().save(imageUri)
+            val imageUrl = imagePersistence(imageUri)
             val user = User(
                 FirebaseInstance.firebaseAuth.uid,
                 firstname,

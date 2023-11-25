@@ -16,14 +16,16 @@ class AudioDeliverPolicy(
     context: Context,
     workerParameters: WorkerParameters,
 ) : CoroutineWorker(context, workerParameters) {
+
+    private val audioPersistence = DatabaseAudioPersistence()
     private suspend fun sendMessage(message: String, toId: String): Message {
         val timeStamp = System.currentTimeMillis() / 100;
-        val imageUrl = DatabaseAudioPersistence().save(Uri.parse(message))
+        val audioUrl = audioPersistence(Uri.parse(message))
         return Message(
             FirebaseInstance.firebaseAuth.uid,
             toId,
             MessageType.AUDIO,
-            imageUrl,
+            audioUrl,
             timeStamp
         )
     }

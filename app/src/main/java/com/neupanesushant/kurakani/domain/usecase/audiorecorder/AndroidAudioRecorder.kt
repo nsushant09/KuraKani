@@ -11,6 +11,7 @@ class AndroidAudioRecorder(
 ) : AudioRecorder {
 
     private var recorder: MediaRecorder? = null
+    private var file: File? = null
 
     private fun createRecorder(): MediaRecorder {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -38,6 +39,16 @@ class AndroidAudioRecorder(
             }
         }
         return file
+    }
+
+    fun onMotionEventDown(onEventDown: () -> Unit) {
+        file = start()
+        onEventDown()
+    }
+
+    fun onMotionEventUp(onEventUp: (File) -> Unit) {
+        stop()
+        file?.let(onEventUp)
     }
 
     override fun stop() {

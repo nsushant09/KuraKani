@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.databinding.FragmentChatBinding
 import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.ui.helper.ProgressDialog
 import com.neupanesushant.kurakani.ui.main.MainViewModel
 import com.neupanesushant.kurakani.ui.main.fragments.chatmessaging.ChatMessagingFragment
 import com.neupanesushant.kurakani.ui.main.fragments.me.MeFragment
@@ -27,7 +29,7 @@ class ChatFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val chatViewModel: ChatViewModel by inject()
 
-    private var messagesLoaded = false;
+    private lateinit var progressDialog: ProgressDialog
 
     private val onClickOpenChatMessaging: (friendObj: User) -> Unit = { friendObj ->
         val chatMessagingFragment =
@@ -64,7 +66,11 @@ class ChatFragment : Fragment() {
             AnimationUtils.loadAnimation(context, androidx.appcompat.R.anim.abc_fade_in)
         binding.rvStorySizedUser.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        displayUI()
+
+        binding.llAddNewTextInfo.visibility = View.GONE
+
+        progressDialog = ProgressDialog(requireContext())
+        progressDialog.show()
     }
 
     private fun setupEventListener() {
@@ -89,41 +95,25 @@ class ChatFragment : Fragment() {
         }
 
         chatViewModel.usersOfLatestMessages.observe(viewLifecycleOwner) {
-            if (it.size == 0) {
-                binding.rvLatestMessages.visibility = View.GONE
-                binding.llAddNewTextInfo.visibility = View.VISIBLE
-            } else {
-                val adapter =
-                    LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
-                binding.rvLatestMessages.adapter = adapter
-                binding.llAddNewTextInfo.visibility = View.GONE
-                binding.rvLatestMessages.visibility = View.VISIBLE
-            }
+            val adapter =
+                LatestMessagesAdapter(requireContext(), chatViewModel, onClickOpenChatMessaging)
+            binding.rvLatestMessages.adapter = adapter
 
-            if (it != null) {
-                messagesLoaded = true
-                displayUI()
-            }
+            setLatestMessageVisibility(!it.isNullOrEmpty())
+            progressDialog.dismiss()
         }
 
-        chatViewModel.allUsers.observe(viewLifecycleOwner) {
-            if (it != null) {
-                binding.rvStorySizedUser.adapter =
-                    StorySizedUserAdapter(requireContext(), it, onClickOpenChatMessaging)
-                displayUI()
-            }
+        chatViewModel.allUsers.observe(viewLifecycleOwner)
+        {
+            if (it.isNullOrEmpty()) return@observe
+            binding.rvStorySizedUser.adapter =
+                StorySizedUserAdapter(requireContext(), it, onClickOpenChatMessaging)
         }
     }
 
-    private fun displayUI() {
-        if (messagesLoaded) {
-            binding.llAddNewTextInfo.visibility = View.GONE
-            binding.progressBar.visibility = View.GONE
-            binding.layoutChatFragment.visibility = View.VISIBLE
-        } else {
-            binding.progressBar.visibility = View.VISIBLE
-            binding.layoutChatFragment.visibility = View.GONE
-        }
+    private fun setLatestMessageVisibility(isVisible: Boolean) {
+        binding.rvLatestMessages.isVisible = isVisible
+        binding.llAddNewTextInfo.isVisible = !isVisible
     }
 
     private fun replaceFragment(fragment: Fragment) {

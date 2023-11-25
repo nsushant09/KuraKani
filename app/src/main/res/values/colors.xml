@@ -12,4 +12,5 @@
     <color name="colorOnGrey_grey">#a9a9a9</color>
     <color name="textfield_grey">#C8C8C8</color>
     <color name="error_red">#E61010</color>
+    <color name="transparent_black">#14423E3E</color>
 </resources>

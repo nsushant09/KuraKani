@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -21,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.neupanesushant.kurakani.R
 import com.neupanesushant.kurakani.databinding.FragmentChatMessagingBinding
-import com.neupanesushant.kurakani.domain.Utils
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.User
 import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
@@ -51,7 +49,6 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
 
     private lateinit var audioRecorder: AndroidAudioRecorder
     private val autoRunningTimer = AutoRunningTimer()
-    private var audioRecorderFile: File? = null
 
 
     override fun onCreateView(
@@ -59,23 +56,28 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChatMessagingBinding.inflate(layoutInflater)
-
-        if (AuthenticatedUser.getInstance().getUser() == null) {
-            requireActivity().supportFragmentManager.beginTransaction().remove(this).commit()
-        }
-
-        user = AuthenticatedUser.getInstance().getUser()!!
+        checkUserLoggedIn()
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        audioRecorder = AndroidAudioRecorder(requireContext())
-
+        initializeVariables()
         setupView()
         setupEventListener()
         setupObserver()
+    }
+
+    private fun checkUserLoggedIn() {
+        if (AuthenticatedUser.getInstance().getUser() == null) {
+            requireActivity().supportFragmentManager.beginTransaction().remove(this).commit()
+        }
+        user = AuthenticatedUser.getInstance().getUser()!!
+    }
+
+    private fun initializeVariables() {
+        audioRecorder = AndroidAudioRecorder(requireContext())
     }
 
     private fun setupView() {
@@ -115,7 +117,6 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
             onVoiceCall()
         }
 
-
         binding.ivRecordAudioMessage.setOnTouchListener { _, event ->
             recordAudioMessageEventHandler(event)
         }
@@ -126,29 +127,18 @@ class ChatMessagingFragment(private val friendObj: User) : Fragment() {
     }
 
     private fun recordAudioMessageEventHandler(event: MotionEvent): Boolean {
+
         if (!PermissionManager.hasRecordAudioPermission(requireContext())) {
             PermissionManager.requestRecordAudioPermission(requireActivity())
             return true
         }
 
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                audioRecorderFile = null
-                audioRecorderFile = audioRecorder.start()
-                displayAudioRecording(true)
-            }
+        if (event.action == MotionEvent.ACTION_UP)
+            audioRecorder.onMotionEventUp { displayAudioRecording(true) }
 
-            MotionEvent.ACTION_UP -> {
-                audioRecorder.stop()
-                displayAudioRecording(false)
-                audioRecorderFile?.let {
-                    //TODO : Ask user if they are sure about sending the message
-                    viewModel.sendAudioMessage(it.toUri())
-                }
-            }
+        if (event.action == MotionEvent.ACTION_DOWN)
+            audioRecorder.onMotionEventDown { displayAudioRecording(false) }
 
-            else -> {}
-        }
         return true
     }
 
