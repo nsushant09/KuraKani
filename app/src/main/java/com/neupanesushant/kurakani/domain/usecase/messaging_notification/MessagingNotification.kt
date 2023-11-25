@@ -3,9 +3,10 @@ package com.neupanesushant.kurakani.domain.usecase.messaging_notification
 import com.neupanesushant.kurakani.BuildConfig
 import com.neupanesushant.kurakani.domain.model.Message
 import com.neupanesushant.kurakani.domain.model.MessageType
-import com.neupanesushant.kurakani.domain.model.User
+import com.neupanesushant.kurakani.domain.usecase.AuthenticatedUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -14,11 +15,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
 class MessagingNotification(
-    private val currentUser: User,
     private val otherUserFCMToken: String
 ) : NotificationManager {
 
+    private val currentUser = AuthenticatedUser.getInstance().getUser()
     override fun send(message: Message) {
+        if (currentUser == null || otherUserFCMToken.isEmpty()) return
+
         val jsonObject = JSONObject()
 
         val notificationObject = JSONObject()
@@ -32,7 +35,7 @@ class MessagingNotification(
         jsonObject.put("data", dataObj)
         jsonObject.put("to", otherUserFCMToken)
 
-        callMessagingAPI(jsonObject)
+        CoroutineScope(Dispatchers.IO).launch { callMessagingAPI(jsonObject) }
     }
 
     private fun getMessageBody(message: Message): String {
@@ -51,22 +54,21 @@ class MessagingNotification(
         }
     }
 
-    private fun callMessagingAPI(jsonObject: JSONObject) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val JSON = "application/json; charset=utf-8".toMediaType()
-            val client = OkHttpClient()
-            val url = "https://fcm.googleapis.com/fcm/send"
-            val body = jsonObject.toString().toRequestBody(JSON)
-            val request = Request.Builder()
-                .url(url)
-                .post(body)
-                .header(
-                    "Authorization",
-                    "Bearer " + BuildConfig.FCM_TOKEN
-                )
-                .build()
+    private suspend fun callMessagingAPI(jsonObject: JSONObject) = coroutineScope {
+        val JSON = "application/json; charset=utf-8".toMediaType()
+        val client = OkHttpClient()
+        val url = "https://fcm.googleapis.com/fcm/send"
+        val body = jsonObject.toString().toRequestBody(JSON)
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .header(
+                "Authorization",
+                "Bearer " + BuildConfig.FCM_TOKEN
+            )
+            .build()
 
-            client.newCall(request).execute()
-        }
+        client.newCall(request).execute()
+
     }
 }

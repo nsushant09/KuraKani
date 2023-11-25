@@ -16,9 +16,11 @@ class ImageDeliverPolicy(
     context: Context,
     workerParameters: WorkerParameters,
 ) : CoroutineWorker(context, workerParameters) {
-    private suspend fun sendMessage(message: String, toId : String): Message {
+
+    private val imagePersistence = DatabaseImagePersistence()
+    private suspend fun getMessageObject(message: String, toId: String): Message {
         val timeStamp = System.currentTimeMillis() / 100;
-        val imageUrl = DatabaseImagePersistence().save(Uri.parse(message))
+        val imageUrl = imagePersistence(Uri.parse(message))
         return Message(
             FirebaseInstance.firebaseAuth.uid,
             toId,
@@ -30,11 +32,15 @@ class ImageDeliverPolicy(
 
     override suspend fun doWork(): Result {
         val message = inputData.getString(WorkerCodes.INPUT_MESSAGE) ?: return Result.failure()
-        val toId = inputData.getString(WorkerCodes.INPUT_MESSAGE_TO_ID) ?: return Result.failure()
-        val result = sendMessage(message, toId)
+        val toId = inputData.getString(WorkerCodes.FRIEND_UID) ?: return Result.failure()
+        val result = getMessageObject(message, toId)
         val resultJson = Gson().toJson(result)
         return Result.success(
-            workDataOf(WorkerCodes.RESULT_MESSAGE to resultJson)
+            workDataOf(
+                WorkerCodes.RESULT_MESSAGE to resultJson,
+                WorkerCodes.FRIEND_UID to inputData.getString(WorkerCodes.FRIEND_UID),
+                WorkerCodes.FRIEND_FCM_TOKEN to inputData.getString(WorkerCodes.FRIEND_FCM_TOKEN)
+            ),
         )
     }
 }

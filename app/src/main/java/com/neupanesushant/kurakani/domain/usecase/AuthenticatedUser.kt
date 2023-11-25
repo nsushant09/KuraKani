@@ -13,6 +13,10 @@ class AuthenticatedUser private constructor() {
         return user
     }
 
+    fun getUID(): String? {
+        return user?.uid
+    }
+
     companion object {
         private val instance = AuthenticatedUser()
         fun getInstance(): AuthenticatedUser {

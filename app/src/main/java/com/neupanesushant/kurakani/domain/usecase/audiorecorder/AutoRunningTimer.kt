@@ -15,7 +15,8 @@ class AutoRunningTimer {
 
     fun resetTime() {
         time = -1;
-        handler.removeCallbacks(runnable)
+        if (this::runnable.isInitialized)
+            handler.removeCallbacks(runnable)
     }
 
     fun getPrettyTime(callback: (String) -> Unit) {

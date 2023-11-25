@@ -12,7 +12,7 @@ class MeViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun updateUserProfileImage(profileImageURI: Uri) = coroutineScope {
         val user = AuthenticatedUser.getInstance().getUser()
-        val image = DatabaseImagePersistence().save(profileImageURI)
+        val image = DatabaseImagePersistence().invoke(profileImageURI)
         if (user != null) {
             user.profileImage = image
             FirebaseInstance.firebaseDatabase.getReference("/users/${FirebaseInstance.firebaseAuth.uid}")
